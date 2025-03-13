@@ -7,17 +7,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional
 public interface UserModelRepository extends JpaRepository<UserModel, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM UserModel u WHERE lower(u.username) = lower(:username)")
-    Optional<UserModel> findByUsername(@Param("username") String username);
+    Optional<UserModel> findByUsername(@Param("username") String username); // Removed @Lock
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     boolean existsByUsernameIgnoreCase(String username);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     boolean existsByEmailIgnoreCase(String email);
 }

@@ -22,6 +22,12 @@ public class DashboardController {
     public DashboardController(UserModelRepository userModelRepository) {
         this.userModelRepository = userModelRepository;
     }
+    @GetMapping("/api/csrf")
+	public ResponseEntity<Void> getCsrfToken(HttpServletRequest request) {
+		return ResponseEntity.ok()
+		    .header("X-CSRF-TOKEN", request.getAttribute("_csrf").toString())
+		    .build();
+	}
 
     @GetMapping("/api/user/dashboard")
     public DashboardResponse getDashboardData() {

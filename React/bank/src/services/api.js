@@ -1,3 +1,5 @@
+import { getJwtToken, storeJwtToken } from '../utils/auth';
+
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 const handleResponse = async (response) => {
@@ -34,21 +36,15 @@ const getCsrfToken = () => {
 };
 
 export const login = async (credentials) => {
-    // First get CSRF token from Spring's cookie
-    const csrfResponse = await fetch(`${API_BASE_URL}/api/csrf`, {
-        credentials: 'include'
-    });
-    const csrfToken = csrfResponse.headers.get('X-CSRF-TOKEN');
-
-    // Then send login request
     const response = await fetch(`${API_BASE_URL}/req/login`, {
         method: 'POST',
         headers: { 
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': csrfToken // Include CSRF token
+            'Content-Type': 'application/json'
         },
-        credentials: 'include',
         body: JSON.stringify(credentials),
     });
-    return handleResponse(response);
+    
+    const data = await handleResponse(response);
+    storeJwtToken(data.jwt);
+    return data;
 };

@@ -1,52 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
+import { getJwtToken, clearJwtToken } from '../../utils/auth';
 
 const Dashboard = () => {
     const [username, setUsername] = useState('');
     const [account, setAccount] = useState(null);
     const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchUserData = async () => {
-		    try {
-		        // First get CSRF token
-		        const csrfResponse = await fetch(`${API_BASE_URL}/api/csrf`, {
-		            credentials: 'include'
-		        });
-		        
-		        // Then fetch dashboard data
-		        const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
-		            credentials: 'include'
-		        });
-
-		        if (!response.ok) throw new Error('Failed to fetch data');
-		        const data = await response.json();
-		        setUsername(data.username);
-		        setAccount(data.account);
-		    } catch (error) {
-		        console.error('Error:', error);
-		        navigate('/login');
-		    }
-		};
-		fetchUserData();
-	}, []);
-    const handleLogout = async () => {
-        try {
-            const response = await fetch('/api/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${getJwtToken()}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch data');
+                const data = await response.json();
+                setUsername(data.username);
+                setAccount(data.account);
+            } catch (error) {
+                console.error('Error:', error);
                 navigate('/login');
-            } else {
-                throw new Error('Logout failed');
             }
-        } catch (error) {
-            console.error('Error during logout:', error);
-            alert('Logout failed. Please try again.');
-        }
+        };
+        fetchData();
+    }, [navigate]);
+
+    const handleLogout = () => {
+        clearJwtToken();
+        navigate('/login');
     };
 
     return (

@@ -14,25 +14,41 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.http.HttpHeaders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.core.annotation.Order;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import QwaBar4.bank.Model.UserModelService;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
     private final UserModelService appUserService;
+    private final JwtUtil jwtUtil;
 
-    public SecurityConfig(UserModelService appUserService) {
+    @Autowired
+    public SecurityConfig(UserModelService appUserService, JwtUtil jwtUtil) {
         this.appUserService = appUserService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Bean
@@ -54,48 +70,57 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http
-		    .csrf(csrf -> csrf
-		        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-		        .ignoringRequestMatchers("/req/signup", "/req/login")
-		    )
-		    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-		    .authorizeHttpRequests(registry -> {
-		        registry.requestMatchers("/req/**", "/error", "/index").permitAll();
-		        registry.requestMatchers("/api/**").authenticated();
-		        registry.anyRequest().authenticated();
-		    })
-		    .sessionManagement(session -> session
-		        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Force session creation
-		    )
-		    .formLogin(form -> form.disable())
-		    .logout(logout -> logout
-		        .logoutUrl("/api/logout")
-		        .logoutSuccessUrl("/req/login")
-		        .invalidateHttpSession(true)
-		        .deleteCookies("JSESSIONID", "XSRF-TOKEN")
-		    )
-		    .build();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/req/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration corsConfig = new CorsConfiguration();
-		corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-		corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		corsConfig.setAllowedHeaders(Arrays.asList("*"));
-		corsConfig.setExposedHeaders(Arrays.asList("X-CSRF-TOKEN", "X-XSRF-TOKEN"));
-		corsConfig.setAllowCredentials(true);
-		corsConfig.setMaxAge(3600L);
+        return http.build();
+    }
+    
+    
+    private CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+            config.setAllowedMethods(Collections.singletonList("*"));
+            config.setAllowCredentials(true);
+            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setExposedHeaders(Arrays.asList(JwtConstants.JWT_HEADER));
+            config.setMaxAge(3600L);
+            return config;
+        };
+    }
 
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", corsConfig);
-		return source;
-	}
+    private static class CookieSameSiteFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        FilterChain filterChain) throws ServletException, IOException {
+
+            Collection<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
+            headers.forEach(header -> {
+                if (header.startsWith("JSESSIONID") || header.startsWith("XSRF-TOKEN")) {
+                    String updatedHeader = header + "; SameSite=Lax";
+                    response.setHeader(HttpHeaders.SET_COOKIE, updatedHeader);
+                }
+            });
+            filterChain.doFilter(request, response);
+        }
+    }
+
 }

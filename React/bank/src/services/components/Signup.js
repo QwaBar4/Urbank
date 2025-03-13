@@ -12,6 +12,7 @@ const Signup = () => {
 
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const getJwtToken = () => localStorage.getItem('jwt');
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

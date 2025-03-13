@@ -9,19 +9,25 @@ const Login = () => {
     });
     const [error, setError] = useState(''); // Add error state
     const navigate = useNavigate();
+    const getJwtToken = () => localStorage.getItem('jwt');
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
     };
+    
 
 	const handleSubmit = async (e) => {
-		e.preventDefault();
-		try {
-		    await login(credentials);
-		    navigate('/dashboard');
-		} catch (error) {
-		    setError(error.message);
-		}
+    e.preventDefault();
+    try {
+        const response = await login(credentials);
+        if (response.message === "Login successful") {
+            navigate('/dashboard');
+        }
+    } catch (error) {
+        setError(error.message.includes("403") 
+            ? "Invalid CSRF token" 
+            : error.message);
+    }
 	};
 
     return (

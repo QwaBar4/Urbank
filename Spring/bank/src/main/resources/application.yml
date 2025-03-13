@@ -2,17 +2,32 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+  servlet:
+    session:
+      timeout: 1800  # Session timeout in seconds (1800s = 30 minutes)
+      cookie:
+        name: JSESSIONID
+        http-only: true
+        secure: false
 
 spring:
+  security:
+    filter:
+      order: 0  # Ensure security filter is first
+      dispatcher-types: REQUEST
   datasource:
     password: 12345
     url: jdbc:postgresql://localhost:5432/bank_db
     username: postgres
+    hikari:
+      auto-commit: false  # Disable auto-commit
   jpa:
-    hibernate:
-      ddl-auto: update
+    open-in-view: false  # Important for transaction boundaries
     properties:
       hibernate:
+        ddl-auto: validate
+        connection.provider_disables_autocommit: true
+        generate_statistics: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
