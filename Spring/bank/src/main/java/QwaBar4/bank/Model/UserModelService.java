@@ -15,21 +15,31 @@ import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 
 @Service
-@AllArgsConstructor
 public class UserModelService implements UserDetailsService {
+    private final UserModelRepository userRepo;
 
-    private final UserModelRepository repository;
+	@Autowired
+	public UserModelService(UserModelRepository userRepo) {
+		this.userRepo = userRepo;
+	}
+
+    public boolean existsByUsernameIgnoreCase(String username) {
+        return userRepo.existsByUsernameIgnoreCase(username);
+    }
+
+    public void deleteByUsername(String username) {
+        userRepo.deleteByUsernameIgnoreCase(username);
+    }
 
     @Override
-    @Transactional // Removed readOnly=true
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserModel user = repository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        UserModel user = userRepo.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         
-        return new User(
+        return new org.springframework.security.core.userdetails.User(
             user.getUsername(),
             user.getPassword(),
-            Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+            Collections.emptyList()
         );
     }
 }

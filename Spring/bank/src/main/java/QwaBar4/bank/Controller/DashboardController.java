@@ -31,26 +31,21 @@ public class DashboardController {
 
     @GetMapping("/api/user/dashboard")
     public DashboardResponse getDashboardData() {
-        // Get the currently authenticated user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        // Fetch the user details from the database
         UserModel user = userModelRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Return the dashboard data
         return new DashboardResponse(user.getUsername(), user.getAccount());
     }
 
     @PostMapping("/api/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        // Invalidate the session
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok().build();
     }
 
-    // Response DTO
     private static class DashboardResponse {
         private final String username;
         private final AccountModel account;

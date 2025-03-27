@@ -17,17 +17,17 @@ const Login = () => {
     
 
 	const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        const response = await login(credentials);
-        if (response.message === "Login successful") {
-            navigate('/dashboard');
-        }
-    } catch (error) {
-        setError(error.message.includes("403") 
-            ? "Invalid CSRF token" 
-            : error.message);
-    }
+		e.preventDefault();
+		try {
+		    const response = await login(credentials);
+		    if (response.jwt) { // Check for JWT presence instead of message
+		        navigate('/dashboard');
+		    }
+		} catch (error) {
+		    setError(error.message.includes("403") 
+		        ? "Invalid credentials" // More accurate error message
+		        : error.message);
+		}
 	};
 
     return (
@@ -41,6 +41,7 @@ const Login = () => {
                 onChange={handleChange}
                 required
             />
+            <p>
             <input
                 type="password"
                 name="password"
@@ -49,6 +50,7 @@ const Login = () => {
                 onChange={handleChange}
                 required
             />
+            </p>
             <button type="submit">Log In</button>
             <p>
                 Don't have an account? <Link to="/signup">Sign Up</Link>

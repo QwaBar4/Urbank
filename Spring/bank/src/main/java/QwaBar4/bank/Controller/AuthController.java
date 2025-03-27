@@ -35,31 +35,29 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody UserModel loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                )
-            );
-            
-            String jwt = jwtUtil.generateToken(authentication);
-            
-            return ResponseEntity.ok(new AuthResponse(
-                jwt,
-                "Login successful",
-                true
-            ));
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponse(null, "Invalid credentials", false));
-        }
-    }
+	@PostMapping("/login")
+	public ResponseEntity<AuthResponse> login(@RequestBody UserModel loginRequest) {
+		try {
+			System.out.println("Login attempt with username: " + loginRequest.getUsername());
+		    Authentication authentication = authenticationManager.authenticate(
+		        new UsernamePasswordAuthenticationToken(
+		            loginRequest.getUsername(),
+		            loginRequest.getPassword()
+		        )
+		    );
+		    
+		    String jwt = jwtUtil.generateToken(authentication);
+		    
+		    return ResponseEntity.ok()
+		        .header("Access-Control-Expose-Headers", "Authorization")
+		        .body(new AuthResponse(jwt, "Login successful", true));
+		} catch (AuthenticationException e) {
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+		        .body(new AuthResponse(null, "Invalid credentials", false));
+		}
+	}
 
     private String createSessionCookie(HttpServletResponse response) {
-        // Session cookie will be managed automatically by Spring Security
         return response.getHeader(HttpHeaders.SET_COOKIE);
     }
 }

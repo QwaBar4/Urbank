@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,8 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserModelRepository extends JpaRepository<UserModel, Long> {
 
     @Query("SELECT u FROM UserModel u WHERE lower(u.username) = lower(:username)")
-    Optional<UserModel> findByUsername(@Param("username") String username); // Removed @Lock
+    Optional<UserModel> findByUsername(@Param("username") String username);
 
-    boolean existsByUsernameIgnoreCase(String username);
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
+          "FROM UserModel u WHERE LOWER(u.username) = LOWER(:username)")
+    boolean existsByUsernameIgnoreCase(@Param("username") String username);
+    
     boolean existsByEmailIgnoreCase(String email);
+
+    @Modifying
+    @Query("DELETE FROM UserModel u WHERE lower(u.username) = lower(:username)")
+    void deleteByUsernameIgnoreCase(@Param("username") String username);
 }
+

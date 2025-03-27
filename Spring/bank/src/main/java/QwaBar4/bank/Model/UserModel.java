@@ -15,9 +15,8 @@ public class UserModel {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private AccountModel account; // Link to the Account
+    private AccountModel account;
 
-    // Getters and setters
     public Long getId() {
         return id;
     }

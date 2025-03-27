@@ -5,18 +5,15 @@ public class AuthResponse {
     private String message;
     private Boolean status;
 
-    // No-args constructor
     public AuthResponse() {
     }
 
-    // All-args constructor
     public AuthResponse(String jwt, String message, Boolean status) {
         this.jwt = jwt;
         this.message = message;
         this.status = status;
     }
 
-    // Getters and setters
     public String getJwt() {
         return jwt;
     }

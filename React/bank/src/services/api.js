@@ -1,4 +1,4 @@
-import { getJwtToken, storeJwtToken } from '../utils/auth';
+import { storeJwtToken } from '../utils/auth';
 
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -20,8 +20,26 @@ export const signup = async (userData) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
+        credentials: 'include', // Add this line
     });
     return handleResponse(response);
+};
+
+export const checkUsername = async (username) => {
+    try {
+        const encodedUsername = encodeURIComponent(username);
+        const response = await fetch(
+            `${API_BASE_URL}/api/check-username?username=${encodedUsername}`
+        );
+        
+        console.log('Username check response status:', response.status);
+        const data = await response.json();
+        console.log('Username exists:', data);
+        return data;
+    } catch (error) {
+        console.error('Username check error:', error);
+        throw error;
+    }
 };
 
 const getCsrfToken = () => {
@@ -35,6 +53,7 @@ const getCsrfToken = () => {
     return '';
 };
 
+
 export const login = async (credentials) => {
     const response = await fetch(`${API_BASE_URL}/req/login`, {
         method: 'POST',
@@ -42,6 +61,7 @@ export const login = async (credentials) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(credentials),
+        credentials: 'include', // Add this line
     });
     
     const data = await handleResponse(response);

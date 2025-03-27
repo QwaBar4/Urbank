@@ -14,7 +14,6 @@ public class ContentController {
 
     private final UserModelRepository userModelRepository;
 
-    // Constructor injection for UserModelRepository
     public ContentController(UserModelRepository userModelRepository) {
         this.userModelRepository = userModelRepository;
     }
@@ -36,18 +35,15 @@ public class ContentController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        // Get the currently authenticated user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        // Fetch the user details from the database
         UserModel user = userModelRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Add user and account details to the model
         model.addAttribute("username", user.getUsername());
         model.addAttribute("account", user.getAccount());
 
-        return "dashboard"; // Return the dashboard.html template
+        return "dashboard";
     }
 }

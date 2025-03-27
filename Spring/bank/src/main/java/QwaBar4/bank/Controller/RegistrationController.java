@@ -44,23 +44,28 @@ public class RegistrationController {
 	@PostMapping("/req/signup")
 	public ResponseEntity<?> createUser(@RequestBody UserModel user) {
 		try {
+			String normalizedUsername = user.getUsername().trim().toLowerCase();
+			
+		    if (userRepo.existsByUsernameIgnoreCase(normalizedUsername)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new AuthResponse(null, "Username already exists", false));
+        	}
+		    
 		    if (user.getPassword().length() < 6) {
 		        return ResponseEntity.badRequest().body("Password must be at least 6 characters");
 		    }
 
-		    // Create account first
 		    AccountModel account = new AccountModel();
 		    account.setAccountNumber("ACC-" + UUID.randomUUID());
 		    account.setBalance(0.0);
 
-		    // Create and save user
 		    UserModel newUser = new UserModel();
+        	newUser.setUsername(normalizedUsername);
 		    newUser.setUsername(user.getUsername().trim());
 		    newUser.setEmail(user.getEmail().trim().toLowerCase());
 		    newUser.setPassword(encoder.encode(user.getPassword()));
 		    newUser.setAccount(account);
 		    
-		    // This will cascade save the account
 		    userRepo.save(newUser); 
 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(

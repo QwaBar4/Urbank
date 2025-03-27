@@ -10,14 +10,13 @@ public class AccountModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String accountNumber; // Unique account number for each user
-    private double balance; // Account balance
+    private String accountNumber;
+    private double balance;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private UserModel user; // Link to the UserModel
+    private UserModel user;
 
-    // Getters and setters
     public Long getId() {
         return id;
     }
