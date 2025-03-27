@@ -30,6 +30,10 @@ public class UserModelService implements UserDetailsService {
     public void deleteByUsername(String username) {
         userRepo.deleteByUsernameIgnoreCase(username);
     }
+    
+    public boolean existsByEmailIgnoreCase(String email) {
+    	return userRepo.existsByEmailIgnoreCase(email);
+	}
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

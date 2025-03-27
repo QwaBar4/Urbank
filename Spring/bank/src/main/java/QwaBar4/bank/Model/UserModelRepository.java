@@ -21,7 +21,9 @@ public interface UserModelRepository extends JpaRepository<UserModel, Long> {
           "FROM UserModel u WHERE LOWER(u.username) = LOWER(:username)")
     boolean existsByUsernameIgnoreCase(@Param("username") String username);
     
-    boolean existsByEmailIgnoreCase(String email);
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
+      "FROM UserModel u WHERE LOWER(u.email) = LOWER(:email)")
+	boolean existsByEmailIgnoreCase(@Param("email") String email);
 
     @Modifying
     @Query("DELETE FROM UserModel u WHERE lower(u.username) = lower(:username)")

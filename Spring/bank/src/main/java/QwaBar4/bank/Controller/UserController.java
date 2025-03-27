@@ -30,4 +30,10 @@ public class UserController {
         userModelService.deleteByUsername(username);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/check-email")
+	public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+		boolean exists = userModelService.existsByEmailIgnoreCase(email);
+		return ResponseEntity.ok(exists);
+}
 }

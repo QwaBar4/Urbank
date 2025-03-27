@@ -11,6 +11,16 @@ server:
         secure: false
 
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: -
+    password: -
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
   security:
     filter:
       order: 0  # Ensure security filter is first

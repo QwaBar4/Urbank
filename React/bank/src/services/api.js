@@ -15,14 +15,42 @@ const handleResponse = async (response) => {
     }
 };
 
+export const sendVerificationCode = async (email) => {
+    const response = await fetch(`${API_BASE_URL}/auth/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+    return handleResponse(response);
+};
+
 export const signup = async (userData) => {
     const response = await fetch(`${API_BASE_URL}/req/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-        credentials: 'include', // Add this line
+        body: JSON.stringify({
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            code: userData.code
+        }),
+        credentials: 'include',
     });
     return handleResponse(response);
+};
+
+export const checkEmail = async (email) => {
+    try {
+        const encodedEmail = encodeURIComponent(email);
+        const response = await fetch(
+            `${API_BASE_URL}/api/check-email?email=${encodedEmail}`
+        );
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Email check error:', error);
+        throw error;
+    }
 };
 
 export const checkUsername = async (username) => {
