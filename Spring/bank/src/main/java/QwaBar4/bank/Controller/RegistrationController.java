@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+
+import java.util.regex.Pattern;
 
 import QwaBar4.bank.Model.AccountModel;
 import QwaBar4.bank.Model.UserModel;
@@ -26,17 +29,24 @@ public class RegistrationController {
     private final PasswordEncoder encoder;
     private final AccountModelRepository accountRepo;
     private final EmailVerificationService verificationService;
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
-    public RegistrationController(UserModelRepository userRepo, PasswordEncoder encoder, 
-                                  AccountModelRepository accountRepo, EmailVerificationService verificationService) {
+    public RegistrationController(UserModelRepository userRepo, PasswordEncoder encoder, AccountModelRepository accountRepo, EmailVerificationService verificationService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.userRepo = userRepo;
         this.encoder = encoder;
         this.accountRepo = accountRepo;
         this.verificationService = verificationService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+    }
+    
+    private boolean isValidEmail(String email) {
+        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return Pattern.compile(regex).matcher(email).matches();
     }
 
     @Transactional
@@ -63,6 +73,10 @@ public class RegistrationController {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new AuthResponse(null, "Email already exists", false));
             }
+            
+            if (!isValidEmail(email)) {
+				return ResponseEntity.badRequest().body("Invalid email format.");
+			}
 
             if (password.length() < 6) {
                 return ResponseEntity.badRequest().body("Password must be at least 6 characters");
@@ -80,9 +94,10 @@ public class RegistrationController {
 
             userRepo.save(newUser );
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(newUser .getUsername(), password);
-
-        	String jwt = jwtUtil.generateToken(authentication); // Pass the Authentication object
+            Authentication authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(normalizedUsername, password)
+			);
+			String jwt = jwtUtil.generateToken(authentication);
             return ResponseEntity.ok(new AuthResponse(jwt, "User  created", true));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)

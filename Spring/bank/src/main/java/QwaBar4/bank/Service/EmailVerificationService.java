@@ -8,12 +8,24 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.security.SecureRandom;
+import java.time.Instant;
 
 @Service
 public class EmailVerificationService {
     
     private final JavaMailSender mailSender;
-    private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
+	private final Map<String, VerificationData> verificationCodes = new ConcurrentHashMap<>();
+
+	private static class VerificationData {
+		String code;
+		long timestamp;
+
+		VerificationData(String code) {
+		    this.code = code;
+		    this.timestamp = System.currentTimeMillis();
+		}
+	}
 
     @Autowired
     public EmailVerificationService(JavaMailSender mailSender) {
@@ -22,7 +34,7 @@ public class EmailVerificationService {
 
     public void sendVerificationCode(String email) {
         String code = generateRandomCode();
-        verificationCodes.put(email, code);
+        verificationCodes.put(email, new VerificationData(code));
         
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
@@ -31,11 +43,21 @@ public class EmailVerificationService {
         mailSender.send(message);
     }
 
-    public boolean verifyCode(String email, String code) {
-        return code.equals(verificationCodes.get(email));
-    }
+	public boolean verifyCode(String email, String code) {
+		VerificationData data = verificationCodes.get(email);
+		if (data == null) return false;
+		
+		boolean isValid = code.equals(data.code) && 
+		    (System.currentTimeMillis() - data.timestamp) <= 300_000;
+		
+		verificationCodes.remove(email);
+		return isValid;
+	}
 
-    private String generateRandomCode() {
-        return String.valueOf(new Random().nextInt(900000) + 100000);
+ 	private String generateRandomCode() {
+        SecureRandom random = new SecureRandom();
+        return String.format("%06d", random.nextInt(900000) + 100000);
     }
+    
+    
 }
