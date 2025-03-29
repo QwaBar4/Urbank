@@ -1,4 +1,5 @@
 import React from 'react';
+import Index from './services/components/Index';
 import Signup from './services/components/Signup';
 import Login from './services/components/Login';
 import Dashboard from './services/components/Dashboard';
@@ -11,7 +12,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Index />} />
       </Routes>
     </BrowserRouter>
   );

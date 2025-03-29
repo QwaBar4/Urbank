@@ -1,4 +1,5 @@
-import { storeJwtToken } from '../utils/auth';
+import { getJwtToken, storeJwtToken } from '../utils/auth';
+
 
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -14,6 +15,36 @@ const handleResponse = async (response) => {
         throw new Error(text || 'Failed to parse response');
     }
 };
+
+const getDefaultHeaders = () => {
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    const token = getJwtToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+};
+
+
+export const getIndexData = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/index`, {
+            headers: {
+                'Authorization': `Bearer ${getJwtToken()}`
+            }
+        });
+        return handleResponse(response);
+    } catch (error) {
+        console.error('Index data error:', error);
+        throw error;
+    }
+};
+
+
 
 export const sendVerificationCode = async (email) => {
     const response = await fetch(`${API_BASE_URL}/auth/send-code`, {

@@ -84,11 +84,18 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/req/**", "/api/check-username", "/api/check-email", "/auth/send-code").permitAll()
+                .requestMatchers("/", "/index", "/index.html", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-            .csrf(csrf -> csrf.disable());
+		    .csrf(csrf -> csrf.disable())
+		    .exceptionHandling(exception -> exception
+            .authenticationEntryPoint((request, response, authException) -> {
+                if (request.getRequestURI().startsWith("/api")) {
+                    response.sendError(HttpStatus.UNAUTHORIZED.value());
+                }
+            })
+        );
 
         return http.build();
     }
