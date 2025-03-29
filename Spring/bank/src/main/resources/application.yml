@@ -4,7 +4,7 @@ server:
     include-binding-errors: always
   servlet:
     session:
-      timeout: 1800  # Session timeout in seconds (1800s = 30 minutes)
+      timeout: 1800
       cookie:
         name: JSESSIONID
         http-only: true
@@ -24,16 +24,16 @@ spring:
             enable: true
   security:
     filter:
-      order: 0  # Ensure security filter is first
+      order: 0
       dispatcher-types: REQUEST
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
-      auto-commit: false  # Disable auto-commit
+      auto-commit: false
   jpa:
-    open-in-view: false  # Important for transaction boundaries
+    open-in-view: false
     properties:
       hibernate:
         ddl-auto: validate

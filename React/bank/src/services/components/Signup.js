@@ -142,6 +142,7 @@ const Signup = () => {
                                 </small>
                             )}
                         </div>
+                        <p></p>
                         <div className="input-group">
                             <input
                                 type="email"
@@ -161,6 +162,7 @@ const Signup = () => {
                                 </small>
                             )}
                         </div>
+                        <p></p>
                         <div className="input-group">
                             <input
                                 type="password"
@@ -171,6 +173,7 @@ const Signup = () => {
                                 required
                             />
                         </div>
+                        <p></p>
                         <div className="input-group">
                             <input
                                 type="password"
@@ -181,7 +184,8 @@ const Signup = () => {
                                 required
                             />
                         </div>
-                        <button type="submit">Send Verification Code</button>
+                        <p></p>
+                        <button type="submit">Sign up</button>
                     </>
                 ) : (
                     <>
