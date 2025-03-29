@@ -12,10 +12,10 @@ server:
 
 spring:
   mail:
-    host: smtp.office365.com
+    host: smtp.gmail.com
     port: 587
-    username: cholevwajana@hotmail.com
-    password: gjjbrjrxenbtqphn
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -27,9 +27,9 @@ spring:
       order: 0  # Ensure security filter is first
       dispatcher-types: REQUEST
   datasource:
-    password: 12345
-    url: jdbc:postgresql://localhost:5432/bank_db
-    username: postgres
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       auto-commit: false  # Disable auto-commit
   jpa:
