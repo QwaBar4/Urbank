@@ -15,6 +15,7 @@ const Signup = () => {
     const [usernameAvailable, setUsernameAvailable] = useState(true);
     const [emailAvailable, setEmailAvailable] = useState(true);
     const [isChecking, setIsChecking] = useState({ username: false, email: false });
+    const [isDisabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -25,6 +26,8 @@ const Signup = () => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
     };
+    
+
 
     // Unified validation handler
     const validateForm = () => {
@@ -84,6 +87,8 @@ const Signup = () => {
 		return () => clearTimeout(debounceTimer);
 	}, [formData.email]);
 	
+	
+	
     const handleSubmit = async (e) => {
         e.preventDefault();
         const errors = validateForm();
@@ -91,6 +96,7 @@ const Signup = () => {
             setError(errors.join(', '));
             return;
         }
+        setIsDisabled(true);
 
         if (!codeSent) {
             try {
@@ -101,6 +107,7 @@ const Signup = () => {
                 setError('Failed to send verification code. Please try again.');
             }
         } else {
+        	setIsDisabled(false);
             try {
                 await signup({
                     username: formData.username.trim(),
@@ -108,9 +115,11 @@ const Signup = () => {
                     password: formData.password,
                     code: verificationCode
                 });
+                setIsDisabled(false);
                 navigate('/login');
             } catch (error) {
                 setError(error.message || "Registration failed");
+                setIsDisabled(false);
             }
         }
     };
@@ -185,7 +194,13 @@ const Signup = () => {
                             />
                         </div>
                         <p></p>
-                        <button type="submit">Sign up</button>
+						<button 
+							type="submit" 
+							disabled={isDisabled}
+							onClick={handleSubmit}
+						>
+							{isDisabled ? 'Processing...' : 'Sign Up'}
+						</button>
                     </>
                 ) : (
                     <>
@@ -197,7 +212,13 @@ const Signup = () => {
                             onChange={(e) => setVerificationCode(e.target.value)}
                             required
                         />
-                        <button type="submit">Create Account</button>
+                        <button 
+							type="submit" 
+							disabled={!isDisabled}
+							onClick={handleSubmit}
+						>
+							{isDisabled ? 'Sign Up' : 'Processing...'}
+						</button>
                     </>
                 )}
             </form>
