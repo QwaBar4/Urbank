@@ -25,6 +25,13 @@ public class VerificationController {
         verificationService.sendVerificationCode(email);
         return ResponseEntity.ok().build();
     }
+    
+    @PostMapping("/send-recovery-code")
+    public ResponseEntity<?> sendRecoveryCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        verificationService.sendRecoveryCode(email);
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {

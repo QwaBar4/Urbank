@@ -42,6 +42,17 @@ public class EmailVerificationService {
         message.setText("Your verification code is: " + code);
         mailSender.send(message);
     }
+    
+    public void sendRecoveryCode(String email) {
+        String code = generateRandomCode();
+        verificationCodes.put(email, new VerificationData(code));
+        
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password recovery");
+        message.setText("Your recovery code is: " + code);
+        mailSender.send(message);
+    }
 
 	public boolean verifyCode(String email, String code) {
 		VerificationData data = verificationCodes.get(email);

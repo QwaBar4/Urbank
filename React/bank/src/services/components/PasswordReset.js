@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PasswordRecovery = () => {
@@ -8,61 +8,135 @@ const PasswordRecovery = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [step, setStep] = useState(1); // 1: request, 2: verify, 3: reset
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isEmailValid, setIsEmailValid] = useState(false);
     const navigate = useNavigate();
 
-    const handleRequestCode = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch('/req/login/recovery/request-password-reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            
-            if (!response.ok) throw new Error(await response.text());
-            setStep(2);
-        } catch (err) {
-            setError(err.message);
-        }
+    const isValidEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
     };
+
+    useEffect(() => {
+        setIsEmailValid(email.length > 0 && isValidEmail(email));
+    }, [email]);
+
+	const handleRequestCode = async (e) => {
+		e.preventDefault();
+		setIsLoading(true);
+		setError('');
+		setSuccess('');
+
+		try {
+		    const response = await fetch('/auth/send-code', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({ email: email.trim().toLowerCase() })
+		    });
+		    
+		    // First check if response exists
+		    if (!response.ok) {
+		        const errorText = await response.text();
+		        throw new Error(errorText || 'Failed to send verification code');
+		    }
+
+		    // Try to parse as JSON only if content exists
+		    let data;
+		    const contentType = response.headers.get('content-type');
+		    if (contentType && contentType.includes('application/json')) {
+		        data = await response.json();
+		    } else {
+		        data = { message: 'Verification code sent' };
+		    }
+		    
+		    setSuccess(data.message || 'Verification code sent');
+		    setStep(2);
+		} catch (err) {
+		    // Handle both JSON and text errors
+		    try {
+		        const errorData = JSON.parse(err.message);
+		        setError(errorData.error || errorData.message || 'Request failed');
+		    } catch {
+		        setError(err.message || 'Request failed');
+		    }
+		} finally {
+		    setIsLoading(false);
+		}
+	};
 
     const handleVerifyCode = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
         try {
-            const response = await fetch('/api/auth/verify-reset-code', {
+            const response = await fetch('/auth/verify-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, code })
+                body: JSON.stringify({ 
+                    email: email.trim().toLowerCase(), 
+                    code: code.trim()
+                })
             });
             
-            if (!response.ok) throw new Error(await response.text());
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Verification failed');
+            }
+            
+            setSuccess('Code verified successfully');
             setStep(3);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
         try {
-            const response = await fetch('/api/auth/reset-password', {
+            const response = await fetch('/login/recovery/reset', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, newPassword, confirmPassword })
+                body: JSON.stringify({ 
+                    email: email.trim().toLowerCase(),
+                    newPassword: newPassword.trim(),
+                    confirmPassword: confirmPassword.trim()
+                })
             });
             
-            if (!response.ok) throw new Error(await response.text());
-            navigate('/login');
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Password reset failed');
+            }
+            
+            setSuccess('Password reset successfully! Redirecting to login...');
+            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div>
+        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
             <h2>Password Recovery</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
             
+            {/* Error and success messages */}
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
+
+            {/* Step 1: Request code */}
             {step === 1 && (
                 <form onSubmit={handleRequestCode}>
                     <input
@@ -72,10 +146,16 @@ const PasswordRecovery = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <button type="submit">Send Verification Code</button>
+                    {!isEmailValid && email.length > 0 && (
+                        <div className="error-message">Invalid email format</div>
+                    )}
+                    <button type="submit" disabled={isLoading || !isEmailValid}>
+                        {isLoading ? 'Sending...' : 'Send Verification Code'}
+                    </button>
                 </form>
             )}
-            
+
+            {/* Step 2: Verify code */}
             {step === 2 && (
                 <form onSubmit={handleVerifyCode}>
                     <input
@@ -85,18 +165,21 @@ const PasswordRecovery = () => {
                         onChange={(e) => setCode(e.target.value)}
                         required
                     />
-                    <button type="submit">Verify Code</button>
+                    <button type="submit" disabled={isLoading}>
+                        {isLoading ? 'Verifying...' : 'Verify Code'}
+                    </button>
+                    <button type="button" onClick={() => setStep(1)}>
+                        Back
+                    </button>
                 </form>
-
             )}
-            <p></p>
-			<button onClick={() => navigate('/login')}>Go back</button>
-            
+
+            {/* Step 3: Reset password */}
             {step === 3 && (
                 <form onSubmit={handleResetPassword}>
                     <input
                         type="password"
-                        placeholder="New Password"
+                        placeholder="New Password (min 6 characters)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
@@ -110,7 +193,12 @@ const PasswordRecovery = () => {
                         required
                         minLength="6"
                     />
-                    <button type="submit">Reset Password</button>
+                    <button 
+                        type="submit" 
+                        disabled={isLoading || newPassword !== confirmPassword || newPassword.length < 6}
+                    >
+                        {isLoading ? 'Processing...' : 'Reset Password'}
+                    </button>
                 </form>
             )}
         </div>

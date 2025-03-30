@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping("/req/login/recovery")
+@RequestMapping("/login/recovery")
 public class PasswordRecoveryController {
 
     private final EmailVerificationService verificationService;
@@ -27,59 +26,94 @@ public class PasswordRecoveryController {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+   
+   
+   
+    @PostMapping("/request-code")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest().body("Email is required");
+            }
+            
+            String normalizedEmail = email.trim().toLowerCase();
+            
+            // Check if email exists in database
+            boolean emailExists = userRepository.existsByEmailIgnoreCase(normalizedEmail);
+            if (!emailExists) {
+                return ResponseEntity.badRequest().body("Email not found in our system");
+            }
 
-	public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> request) {
-		String email = request.get("email");
-		
-		if (email == null || email.isBlank()) {
-		    return ResponseEntity.badRequest().body("Email is required");
-		}
-		
-		if (!userRepository.existsByEmailIgnoreCase(email)) {
-		    return ResponseEntity.badRequest().body("Email not found");
-		}
-
-		try {
-		    verificationService.sendVerificationCode(email);
-		    return ResponseEntity.ok("Verification code sent");
-		} catch (Exception e) {
+            // Send verification code
+            verificationService.sendVerificationCode(normalizedEmail);
+            return ResponseEntity.ok().body(Map.of("message", "Verification code sent"));
+            
+        } catch (Exception e) {
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		        .body("Failed to send verification code");
-		}
-	}
-
-    @PostMapping("/verify-reset-code")
-    public ResponseEntity<?> verifyResetCode(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String code = request.get("code");
-
-        if (!verificationService.verifyCode(email, code)) {
-            return ResponseEntity.badRequest().body("Invalid or expired code");
+		        .body(Map.of("error", "Failed to send verification code"));
         }
-
-        return ResponseEntity.ok("Code verified successfully");
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String newPassword = request.get("newPassword");
-        String confirmPassword = request.get("confirmPassword");
-        
-        if (newPassword.length() < 6) {
-        	return ResponseEntity.badRequest().body("Password must be at least 8 characters");
-		}
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyResetCode(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String code = request.get("code");
 
-        if (!newPassword.equals(confirmPassword)) {
-            return ResponseEntity.badRequest().body("Passwords don't match");
+            if (email == null || code == null) {
+                return ResponseEntity.badRequest().body("Both email and code are required");
+            }
+
+            String normalizedEmail = email.trim().toLowerCase();
+            
+            if (!verificationService.verifyCode(normalizedEmail, code)) {
+                return ResponseEntity.badRequest().body("Invalid or expired verification code");
+            }
+
+            return ResponseEntity.ok().body(Map.of("message", "Code verified successfully"));
+            
+        } catch (Exception e) {
+		    return ResponseEntity.badRequest()
+		        .body(Map.of("error", "Invalid or expired verification code"));
         }
+    }
 
-        return userRepository.findByEmailIgnoreCase(email)
-            .map(user -> {
-                user.setPassword(passwordEncoder.encode(newPassword));
-                userRepository.save(user);
-                return ResponseEntity.ok("Password updated successfully");
-            })
-            .orElse(ResponseEntity.badRequest().body("User not found"));
+    @PostMapping("/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String newPassword = request.get("newPassword");
+            String confirmPassword = request.get("confirmPassword");
+            
+            // Validate inputs
+            if (email == null || newPassword == null || confirmPassword == null) {
+                return ResponseEntity.badRequest().body("All fields are required");
+            }
+            
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body("Password must be at least 6 characters");
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                return ResponseEntity.badRequest().body("Passwords do not match");
+            }
+
+            String normalizedEmail = email.trim().toLowerCase();
+            
+            // Find user and update password
+            return userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .map(user -> {
+                    user.setPassword(passwordEncoder.encode(newPassword));
+                    userRepository.save(user);
+                    return ResponseEntity.ok().body(Map.of("message", "Password reset complete"));
+                })
+                .orElse(ResponseEntity.ok().body(Map.of("message", "Password reset complete")));
+                
+        } catch (Exception e) {
+		    return ResponseEntity.badRequest()
+		        .body(Map.of("error", "Error reseting password"));
+        }
     }
 }
