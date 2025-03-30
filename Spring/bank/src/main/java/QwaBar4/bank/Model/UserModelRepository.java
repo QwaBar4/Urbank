@@ -28,5 +28,8 @@ public interface UserModelRepository extends JpaRepository<UserModel, Long> {
     @Modifying
     @Query("DELETE FROM UserModel u WHERE lower(u.username) = lower(:username)")
     void deleteByUsernameIgnoreCase(@Param("username") String username);
+    
+    @Query("SELECT u FROM UserModel u WHERE LOWER(u.email) = LOWER(:email)")
+    Optional<UserModel> findByEmailIgnoreCase(@Param("email") String email);
 }
 

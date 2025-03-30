@@ -22,6 +22,11 @@ public class ContentController {
     public String login() {
         return "login";
     }
+    
+    @GetMapping("/req/login/recovery")
+    public String recovery() {
+        return "PasswordReset";
+    }
 
     @GetMapping("/req/signup")
     public String signup() {

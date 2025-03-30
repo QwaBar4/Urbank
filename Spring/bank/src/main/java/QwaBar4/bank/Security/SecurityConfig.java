@@ -84,7 +84,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/", "/index", "/index.html", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)

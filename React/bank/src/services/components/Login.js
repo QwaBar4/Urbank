@@ -52,6 +52,7 @@ const Login = () => {
             />
             </p>
             <button type="submit">Log In</button>
+            <p>Forgot password? <Link to="/login/recovery">Recover password</Link></p>
             <p>
                 Don't have an account? <Link to="/signup">Sign Up</Link>
             </p>
