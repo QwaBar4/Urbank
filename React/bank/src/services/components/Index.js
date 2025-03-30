@@ -25,9 +25,8 @@ const Index = () => {
 
     return (
         <div>
-            <h1>It's Urbank, </h1>
-            <button onClick={() => navigate('/login')}>Log in</button>
-            <button onClick={() => navigate('/signup')}>Sign up</button>
+            <h1>It's Urbank{!username ? '' : ', ' + username}</h1>
+            <button onClick={!username ? () => navigate('/login') : () => navigate('/dashboard')}>Account</button>
         </div>
     );
 };

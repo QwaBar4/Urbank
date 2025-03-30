@@ -81,17 +81,18 @@ public class RegistrationController {
             if (password.length() < 6) {
                 return ResponseEntity.badRequest().body("Password must be at least 6 characters");
             }
-
+            
             AccountModel account = new AccountModel();
-            account.setAccountNumber("ACC-" + UUID.randomUUID());
-            account.setBalance(0.0);
-
+       		account.setAccountNumber("ACC-" + UUID.randomUUID());
+        	account.setBalance(0.0);
+        	
             UserModel newUser  = new UserModel();
             newUser .setUsername(normalizedUsername);
             newUser .setEmail(email.trim().toLowerCase());
             newUser .setPassword(encoder.encode(password));
             newUser .setAccount(account);
-
+            
+            account.setUser(newUser);
             userRepo.save(newUser );
 
             Authentication authentication = authenticationManager.authenticate(

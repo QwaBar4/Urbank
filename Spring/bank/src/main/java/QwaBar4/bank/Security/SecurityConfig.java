@@ -91,9 +91,6 @@ public class SecurityConfig {
 		    .csrf(csrf -> csrf.disable())
 		    .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) -> {
-                if (request.getRequestURI().startsWith("/api")) {
-                    response.sendError(HttpStatus.UNAUTHORIZED.value());
-                }
             })
         );
 

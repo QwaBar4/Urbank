@@ -5,7 +5,7 @@ import { getJwtToken, clearJwtToken } from '../../utils/auth';
 
 const Dashboard = () => {
     const [username, setUsername] = useState('');
-    const [account, setAccount] = useState(null);
+    const [account, setAccount] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
