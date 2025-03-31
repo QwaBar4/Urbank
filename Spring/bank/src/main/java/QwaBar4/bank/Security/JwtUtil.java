@@ -58,7 +58,7 @@ public class JwtUtil {
 
 	public boolean validateToken(String token) {
 		try {
-		    JwtParserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+		    Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
 		    return true;
 		} catch (Exception e) {
 		    return false;
@@ -66,7 +66,7 @@ public class JwtUtil {
 	}
 
 	public String getEmailFromToken(String token) {
-		return Jwts.parserBuilder()
+		return Jwts.parser()
 		    .setSigningKey(key)
 		    .build()
 		    .parseClaimsJws(token)

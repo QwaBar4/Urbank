@@ -23,48 +23,48 @@ const PasswordRecovery = () => {
         setIsEmailValid(email.length > 0 && isValidEmail(email));
     }, [email]);
 
-	const handleRequestCode = async (e) => {
-		e.preventDefault();
-		setIsLoading(true);
-		setError('');
-		setSuccess('');
+    const handleRequestCode = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
 
-		try {
-		    const response = await fetch('/auth/send-code', {
-		        method: 'POST',
-		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({ email: email.trim().toLowerCase() })
-		    });
-		    
-		    // First check if response exists
-		    if (!response.ok) {
-		        const errorText = await response.text();
-		        throw new Error(errorText || 'Failed to send verification code');
-		    }
+        try {
+            const response = await fetch('/auth/send-recovery-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim().toLowerCase() })
+            });
 
-		    // Try to parse as JSON only if content exists
-		    let data;
-		    const contentType = response.headers.get('content-type');
-		    if (contentType && contentType.includes('application/json')) {
-		        data = await response.json();
-		    } else {
-		        data = { message: 'Verification code sent' };
-		    }
-		    
-		    setSuccess(data.message || 'Verification code sent');
-		    setStep(2);
-		} catch (err) {
-		    // Handle both JSON and text errors
-		    try {
-		        const errorData = JSON.parse(err.message);
-		        setError(errorData.error || errorData.message || 'Request failed');
-		    } catch {
-		        setError(err.message || 'Request failed');
-		    }
-		} finally {
-		    setIsLoading(false);
-		}
-	};
+            // First check if response exists
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to send verification code');
+            }
+
+            // Try to parse as JSON only if content exists
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                data = { message: 'Verification code sent' };
+            }
+
+            setSuccess(data.message || 'Verification code sent');
+            setStep(2);
+        } catch (err) {
+            // Handle both JSON and text errors
+            try {
+                const errorData = JSON.parse(err.message);
+                setError(errorData.error || errorData.message || 'Request failed');
+            } catch {
+                setError(err.message || 'Request failed');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleVerifyCode = async (e) => {
         e.preventDefault();
@@ -73,17 +73,17 @@ const PasswordRecovery = () => {
         setSuccess('');
 
         try {
-            const response = await fetch('/login/recovery/verify-code', {
+            const response = await fetch('/auth/verify-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    email: email.trim().toLowerCase(), 
+                body: JSON.stringify({
+                    email: email.trim().toLowerCase(),
                     code: code.trim()
                 })
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || 'Verification failed');
             }
@@ -98,7 +98,6 @@ const PasswordRecovery = () => {
         }
     };
 
-    // Modified handleResetPassword
     const handleResetPassword = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -109,7 +108,7 @@ const PasswordRecovery = () => {
         const errors = [];
         if (newPassword.length < 6) errors.push('Password must be at least 6 characters');
         if (newPassword !== confirmPassword) errors.push('Passwords do not match');
-        
+
         if (errors.length > 0) {
             setError(errors.join(', '));
             setIsLoading(false);
@@ -120,7 +119,7 @@ const PasswordRecovery = () => {
             const response = await fetch('/login/recovery/reset', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     token: resetToken,
                     newPassword: newPassword.trim(),
                     confirmPassword: confirmPassword.trim()
@@ -128,7 +127,7 @@ const PasswordRecovery = () => {
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || 'Password reset failed');
             }
@@ -145,7 +144,7 @@ const PasswordRecovery = () => {
     return (
         <div style={{ maxWidth: '400px', margin: '0 auto' }}>
             <h2>Password Recovery</h2>
-            
+
             {/* Error and success messages */}
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
@@ -191,7 +190,7 @@ const PasswordRecovery = () => {
             {/* Step 3: Reset password */}
             {step === 3 && (
                 <form onSubmit={handleResetPassword}>
-               		<input type="hidden" value={resetToken} />
+                    <input type="hidden" value={resetToken} />
                     <input
                         type="password"
                         placeholder="New Password (min 6 characters)"
@@ -208,8 +207,8 @@ const PasswordRecovery = () => {
                         required
                         minLength="6"
                     />
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={isLoading || newPassword !== confirmPassword || newPassword.length < 6}
                     >
                         {isLoading ? 'Processing...' : 'Reset Password'}
