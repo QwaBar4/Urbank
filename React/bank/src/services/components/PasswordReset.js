@@ -6,6 +6,7 @@ const PasswordRecovery = () => {
     const [code, setCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [resetToken, setResetToken] = useState('');
     const [step, setStep] = useState(1); // 1: request, 2: verify, 3: reset
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -72,7 +73,7 @@ const PasswordRecovery = () => {
         setSuccess('');
 
         try {
-            const response = await fetch('/auth/verify-code', {
+            const response = await fetch('/login/recovery/verify-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -80,13 +81,14 @@ const PasswordRecovery = () => {
                     code: code.trim()
                 })
             });
-            
+
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'Verification failed');
+                throw new Error(data.error || 'Verification failed');
             }
-            
+
+            setResetToken(data.token); // Store the reset token
             setSuccess('Code verified successfully');
             setStep(3);
         } catch (err) {
@@ -96,30 +98,42 @@ const PasswordRecovery = () => {
         }
     };
 
+    // Modified handleResetPassword
     const handleResetPassword = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
         setSuccess('');
 
+        // Client-side validation
+        const errors = [];
+        if (newPassword.length < 6) errors.push('Password must be at least 6 characters');
+        if (newPassword !== confirmPassword) errors.push('Passwords do not match');
+        
+        if (errors.length > 0) {
+            setError(errors.join(', '));
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const response = await fetch('/login/recovery/reset', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    email: email.trim().toLowerCase(),
+                    token: resetToken,
                     newPassword: newPassword.trim(),
                     confirmPassword: confirmPassword.trim()
                 })
             });
-            
+
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'Password reset failed');
+                throw new Error(data.error || 'Password reset failed');
             }
-            
-            setSuccess('Password reset successfully! Redirecting to login...');
+
+            setSuccess('Password reset successfully! Redirecting...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
             setError(err.message);
@@ -177,6 +191,7 @@ const PasswordRecovery = () => {
             {/* Step 3: Reset password */}
             {step === 3 && (
                 <form onSubmit={handleResetPassword}>
+               		<input type="hidden" value={resetToken} />
                     <input
                         type="password"
                         placeholder="New Password (min 6 characters)"

@@ -1,9 +1,11 @@
 package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Table(name = "users")
+@DynamicUpdate
 public class UserModel {
 
     @Id
@@ -12,6 +14,9 @@ public class UserModel {
 
     private String username;
     private String email;
+    
+    
+    @Column(name = "password", nullable = false)
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

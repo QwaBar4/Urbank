@@ -10,6 +10,11 @@ server:
         http-only: true
         secure: false
 
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
 spring:
   mail:
     host: smtp.gmail.com

@@ -1,12 +1,16 @@
 package QwaBar4.bank.Controller;
 
 import QwaBar4.bank.Service.EmailVerificationService;
+import QwaBar4.bank.Model.UserModel; 
+import QwaBar4.bank.Security.JwtUtil; 
 import QwaBar4.bank.Model.UserModelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import java.util.Optional; 
 
 import java.util.Map;
 
@@ -17,14 +21,16 @@ public class PasswordRecoveryController {
     private final EmailVerificationService verificationService;
     private final UserModelRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public PasswordRecoveryController(EmailVerificationService verificationService,
                                     UserModelRepository userRepository,
-                                    PasswordEncoder passwordEncoder) {
+                                    PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.verificationService = verificationService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
    
    
@@ -34,25 +40,29 @@ public class PasswordRecoveryController {
         try {
             String email = request.get("email");
             
+            // Validate email format
             if (email == null || email.isBlank()) {
-                return ResponseEntity.badRequest().body("Email is required");
+                return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
             }
             
             String normalizedEmail = email.trim().toLowerCase();
             
-            // Check if email exists in database
-            boolean emailExists = userRepository.existsByEmailIgnoreCase(normalizedEmail);
-            if (!emailExists) {
-                return ResponseEntity.badRequest().body("Email not found in our system");
+            // Validate email existence (mirror registration check)
+            if (!userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email not found"));
             }
 
-            // Send verification code
+            // Validate email format
+            if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
+            }
+
             verificationService.sendVerificationCode(normalizedEmail);
             return ResponseEntity.ok().body(Map.of("message", "Verification code sent"));
             
         } catch (Exception e) {
-		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		        .body(Map.of("error", "Failed to send verification code"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to send verification code: " + e.getMessage()));
         }
     }
 
@@ -62,58 +72,67 @@ public class PasswordRecoveryController {
             String email = request.get("email");
             String code = request.get("code");
 
-            if (email == null || code == null) {
-                return ResponseEntity.badRequest().body("Both email and code are required");
+            // Validate inputs
+            if (email == null || email.isBlank() || code == null || code.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Both email and code are required"));
             }
 
             String normalizedEmail = email.trim().toLowerCase();
             
+            // Verify code with service (case-sensitive code check)
             if (!verificationService.verifyCode(normalizedEmail, code)) {
-                return ResponseEntity.badRequest().body("Invalid or expired verification code");
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired verification code"));
             }
 
-            return ResponseEntity.ok().body(Map.of("message", "Code verified successfully"));
+            // Generate time-limited reset token (1 hour)
+            String resetToken = jwtUtil.generatePasswordResetToken(normalizedEmail);
+            return ResponseEntity.ok().body(Map.of("token", resetToken));
             
         } catch (Exception e) {
-		    return ResponseEntity.badRequest()
-		        .body(Map.of("error", "Invalid or expired verification code"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Verification failed: " + e.getMessage()));
         }
     }
 
+	
+    @Transactional
     @PostMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         try {
-            String email = request.get("email");
+            // Validate reset token
+            String token = request.get("token");
+            if (token == null || !jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid or expired reset token"));
+            }
+
+            // Get email from token
+            String normalizedEmail = jwtUtil.getEmailFromToken(token);
+            
+            // Validate password
             String newPassword = request.get("newPassword");
             String confirmPassword = request.get("confirmPassword");
             
-            // Validate inputs
-            if (email == null || newPassword == null || confirmPassword == null) {
-                return ResponseEntity.badRequest().body("All fields are required");
+            if (newPassword == null || newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Password must be at least 6 characters"));
             }
             
-            if (newPassword.length() < 6) {
-                return ResponseEntity.badRequest().body("Password must be at least 6 characters");
-            }
-
             if (!newPassword.equals(confirmPassword)) {
-                return ResponseEntity.badRequest().body("Passwords do not match");
+                return ResponseEntity.badRequest().body(Map.of("error", "Passwords do not match"));
             }
 
-            String normalizedEmail = email.trim().toLowerCase();
+            // Update password
+            UserModel user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.saveAndFlush(user);
+
+            return ResponseEntity.ok().body(Map.of("message", "Password reset successfully"));
             
-            // Find user and update password
-            return userRepository.findByEmailIgnoreCase(normalizedEmail)
-                .map(user -> {
-                    user.setPassword(passwordEncoder.encode(newPassword));
-                    userRepository.save(user);
-                    return ResponseEntity.ok().body(Map.of("message", "Password reset complete"));
-                })
-                .orElse(ResponseEntity.ok().body(Map.of("message", "Password reset complete")));
-                
         } catch (Exception e) {
-		    return ResponseEntity.badRequest()
-		        .body(Map.of("error", "Error reseting password"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Password reset failed: " + e.getMessage()));
         }
     }
 }

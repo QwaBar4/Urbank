@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
@@ -46,4 +47,30 @@ public class JwtUtil {
                 .getPayload()
                 .getSubject();
     }
+    public String generatePasswordResetToken(String email) {
+		return Jwts.builder()
+		    .setSubject(email)
+		    .setIssuedAt(new Date())
+		    .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
+		    .signWith(SignatureAlgorithm.HS512, key)
+		    .compact();
+	}
+
+	public boolean validateToken(String token) {
+		try {
+		    JwtParserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+		    return true;
+		} catch (Exception e) {
+		    return false;
+		}
+	}
+
+	public String getEmailFromToken(String token) {
+		return Jwts.parserBuilder()
+		    .setSigningKey(key)
+		    .build()
+		    .parseClaimsJws(token)
+		    .getBody()
+		    .getSubject();
+	}
 }
