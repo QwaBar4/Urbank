@@ -84,11 +84,22 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-		    .csrf(csrf -> csrf.disable())
+		    .csrf(csrf -> csrf
+		        .ignoringRequestMatchers(
+		        	"/auth/send-code",
+		        	"/auth/send-recovery-code",
+		        	"/auth/verify-code",
+		        	"/auth/verify-recovery-code",
+		            "/req/login",
+		            "/req/signup",
+		            "/login/recovery/reset",
+		            "/login/recovery/**"
+		        )
+		    )
 		    .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) -> {
             })

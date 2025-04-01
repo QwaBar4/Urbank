@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL, handleResponse } from '../api';
 
 const PasswordRecovery = () => {
     const [email, setEmail] = useState('');
@@ -71,75 +72,72 @@ const PasswordRecovery = () => {
         setIsLoading(true);
         setError('');
         setSuccess('');
+        
+        if (!code.trim()) {
+        	setError("Verification code is required");
+        	return;
+    	}
 
-        try {
-            const response = await fetch('/auth/verify-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email.trim().toLowerCase(),
-                    code: code.trim()
-                })
-            });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Verification failed');
-            }
-
-            setResetToken(data.token); // Store the reset token
-            setSuccess('Code verified successfully');
-            setStep(3);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
+		try {
+		    const response = await fetch(`${API_BASE_URL}/auth/verify-recovery-code`, {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({
+		            email: email.trim().toLowerCase(),
+		            code: code.trim()
+		        })
+		    });
+		    
+		    const data = await handleResponse(response);
+		    if (!data.token) { // Проверка наличия токена в ответе
+		        throw new Error("Failed to get reset token");
+		    }
+		    setResetToken(data.token);
+		    setStep(3);
+		} catch (err) {
+		    setError(err.message);
+		}
     };
 
-    const handleResetPassword = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
+	const handleResetPassword = async (e) => {
+		e.preventDefault();
+		if (!resetToken) {
+		    setError("Missing reset token");
+		    return;
+		}
+		if (newPassword.length < 6) {
+		    setError("Password must be 6+ characters");
+		    return;
+		}
+		if (newPassword !== confirmPassword) {
+		    setError("Passwords don't match");
+		    return;
+		}
 
-        // Client-side validation
-        const errors = [];
-        if (newPassword.length < 6) errors.push('Password must be at least 6 characters');
-        if (newPassword !== confirmPassword) errors.push('Passwords do not match');
-
-        if (errors.length > 0) {
-            setError(errors.join(', '));
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            const response = await fetch('/login/recovery/reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    token: resetToken,
-                    newPassword: newPassword.trim(),
-                    confirmPassword: confirmPassword.trim()
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Password reset failed');
-            }
-
-            setSuccess('Password reset successfully! Redirecting...');
-            setTimeout(() => navigate('/login'), 2000);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+		try {
+		    const response = await fetch(`${API_BASE_URL}/login/recovery/reset`, {
+		        method: 'POST',
+		        headers: { 
+		            'Content-Type': 'application/json',
+		            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+		        },
+		        body: JSON.stringify({ 
+		            token: resetToken, 
+		            newPassword, confirmPassword 
+		        })
+		    });
+		    
+		    const data = await response.json();
+		    if (!response.ok) throw new Error(data.error || "Reset failed");
+		    
+		    localStorage.removeItem('jwt');
+		    setSuccess("Password changed!");
+		    setTimeout(() => navigate('/login'), 2000);
+		} catch (err) {
+		    setError(err.message);
+		}
+	};
 
     return (
         <div style={{ maxWidth: '400px', margin: '0 auto' }}>
@@ -209,9 +207,7 @@ const PasswordRecovery = () => {
                     />
                     <button
                         type="submit"
-                        disabled={isLoading || newPassword !== confirmPassword || newPassword.length < 6}
-                    >
-                        {isLoading ? 'Processing...' : 'Reset Password'}
+                    >aaaa
                     </button>
                 </form>
             )}

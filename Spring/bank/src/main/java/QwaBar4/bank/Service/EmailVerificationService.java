@@ -59,7 +59,7 @@ public class EmailVerificationService {
 		if (data == null) return false;
 		
 		boolean isValid = code.equals(data.code) && 
-		    (System.currentTimeMillis() - data.timestamp) <= 300_000;
+		    (System.currentTimeMillis() - data.timestamp) <= 300000;
 		
 		verificationCodes.remove(email);
 		return isValid;

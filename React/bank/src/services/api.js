@@ -3,7 +3,7 @@ import { getJwtToken, storeJwtToken } from '../utils/auth';
 
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-const handleResponse = async (response) => {
+export const handleResponse = async (response) => {
     const text = await response.text();
     try {
         const json = text ? JSON.parse(text) : {};
@@ -27,6 +27,14 @@ const getDefaultHeaders = () => {
     }
     
     return headers;
+};
+
+export const resetPassword = (token, newPassword, confirmPassword) => {
+    return fetch(`${API_BASE_URL}/login/recovery/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword, confirmPassword })
+    });
 };
 
 
