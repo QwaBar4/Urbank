@@ -2,6 +2,7 @@ package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -20,6 +21,7 @@ public class UserModel {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore 
     private AccountModel account;
 
     public Long getId() {
@@ -59,13 +61,6 @@ public class UserModel {
     }
 
     public void setAccount(AccountModel account) {
-        if (account == null) {
-            if (this.account != null) {
-                this.account.setUser(null);
-            }
-        } else {
-            account.setUser(this);
-        }
         this.account = account;
     }
 }

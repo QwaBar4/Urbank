@@ -65,18 +65,4 @@ public class DashboardController {
         }
     }
     
-	@DeleteMapping("/api/user/delete")
-	public ResponseEntity<?> deleteUserAccount() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String username = authentication.getName();
-		
-		userModelRepository.findByUsername(username).ifPresent(user -> {
-		    if (user.getAccount() != null) {
-		        user.setAccount(null);
-		    }
-		    userModelRepository.delete(user);
-		});
-
-		return ResponseEntity.noContent().build();
-	}
 }

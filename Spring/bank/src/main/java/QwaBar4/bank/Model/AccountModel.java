@@ -49,8 +49,5 @@ public class AccountModel {
 
     public void setUser(UserModel user) {
         this.user = user;
-        if (user != null) {
-            user.setAccount(this);
-        }
     }
 }

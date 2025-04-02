@@ -8,11 +8,15 @@ export const handleResponse = async (response) => {
     try {
         const json = text ? JSON.parse(text) : {};
         if (!response.ok) {
-            throw new Error(json.message || json.error || 'Request failed');
+            const error = new Error(json.message || json.error || 'Request failed');
+            error.status = response.status;
+            throw error;
         }
         return json;
     } catch (err) {
-        throw new Error(text || 'Failed to parse response');
+        const error = new Error(text || 'Failed to parse response');
+        error.status = response.status;
+        throw error;
     }
 };
 
@@ -64,18 +68,33 @@ export const sendVerificationCode = async (email) => {
 };
 
 export const signup = async (userData) => {
-    const response = await fetch(`${API_BASE_URL}/req/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userData.username,
-            email: userData.email,
-            password: userData.password,
-            code: userData.code
-        }),
-        credentials: 'include',
-    });
-    return handleResponse(response);
+    try {
+        const response = await fetch(`${API_BASE_URL}/req/signup`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify({
+                username: userData.username,
+                email: userData.email,
+                password: userData.password,
+                code: userData.code
+            }),
+            credentials: 'include',
+        });
+
+        const data = await handleResponse(response);
+        
+        if (data.jwt) {
+            storeJwtToken(data.jwt);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Signup error:', error);
+        throw error;
+    }
 };
 
 export const checkEmail = async (email) => {

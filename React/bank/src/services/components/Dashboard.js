@@ -51,7 +51,7 @@ const Dashboard = () => {
 		    }
 		    
 		    clearJwtToken();
-		    navigate('/login');
+		    navigate('/index');
 		} catch (error) {
 		    console.error('Deletion error:', error);
 		    alert('Failed to delete account: ' + error.message);
