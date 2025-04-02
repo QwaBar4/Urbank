@@ -85,6 +85,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
@@ -96,6 +97,7 @@ public class SecurityConfig {
 		        	"/auth/verify-recovery-code",
 		            "/req/login",
 		            "/req/signup",
+		            "/api/delete-user",
 		            "/login/recovery/reset",
 		            "/login/recovery/**"
 		        )

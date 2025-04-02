@@ -19,7 +19,7 @@ public class UserModel {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private AccountModel account;
 
     public Long getId() {
@@ -59,6 +59,13 @@ public class UserModel {
     }
 
     public void setAccount(AccountModel account) {
+        if (account == null) {
+            if (this.account != null) {
+                this.account.setUser(null);
+            }
+        } else {
+            account.setUser(this);
+        }
         this.account = account;
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import QwaBar4.bank.Model.UserModel;
@@ -63,4 +64,19 @@ public class DashboardController {
             return account;
         }
     }
+    
+	@DeleteMapping("/api/user/delete")
+	public ResponseEntity<?> deleteUserAccount() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication.getName();
+		
+		userModelRepository.findByUsername(username).ifPresent(user -> {
+		    if (user.getAccount() != null) {
+		        user.setAccount(null);
+		    }
+		    userModelRepository.delete(user);
+		});
+
+		return ResponseEntity.noContent().build();
+	}
 }

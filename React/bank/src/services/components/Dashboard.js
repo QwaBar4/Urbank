@@ -6,6 +6,7 @@ import { getJwtToken, clearJwtToken } from '../../utils/auth';
 const Dashboard = () => {
     const [username, setUsername] = useState('');
     const [account, setAccount] = useState('');
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -33,7 +34,32 @@ const Dashboard = () => {
         clearJwtToken();
         navigate('/login');
     };
+    
+	const handleDeleteAccount = async () => {
+		try {
+		    const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(username)}`, {
+		        method: 'DELETE',
+		        headers: {
+		            'Authorization': `Bearer ${getJwtToken()}`,
+		            'Content-Type': 'application/json'
+		        }
+		    });
 
+		    if (!response.ok) {
+		        const errorData = await response.json();
+		        throw new Error(errorData.message || 'Account deletion failed');
+		    }
+		    
+		    clearJwtToken();
+		    navigate('/login');
+		} catch (error) {
+		    console.error('Deletion error:', error);
+		    alert('Failed to delete account: ' + error.message);
+		} finally {
+		    setShowDeleteConfirmation(false);
+		}
+	};
+	
     return (
         <div>
             <h1>Welcome to Your Dashboard, {username}!</h1>
@@ -44,9 +70,20 @@ const Dashboard = () => {
                     <p><strong>Balance:</strong> ${account.balance}</p>
                 </div>
             )}
-            <button onClick={handleLogout}>Logout</button>
-            <p></p>
             <button onClick={() => navigate('/')}>Go home</button>
+                        <button onClick={handleLogout}>Logout</button>
+                        <button 
+                onClick={() => setShowDeleteConfirmation(true)}
+            >
+                Delete Account
+            </button>
+            {showDeleteConfirmation && (
+                <div className="confirmation-modal">
+                    <p>Are you sure you want to delete your account? This cannot be undone.</p>
+                    <button onClick={handleDeleteAccount}>Confirm Delete</button>
+                    <button onClick={() => setShowDeleteConfirmation(false)}>Cancel</button>
+                </div>
+            )}
         </div>
     );
 };

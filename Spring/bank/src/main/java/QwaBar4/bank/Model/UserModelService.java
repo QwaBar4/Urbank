@@ -11,24 +11,34 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import QwaBar4.bank.Model.AccountModelRepository;
 
 import lombok.AllArgsConstructor;
 
 @Service
 public class UserModelService implements UserDetailsService {
+
     private final UserModelRepository userRepo;
+    private final AccountModelRepository accountRepo;
 
 	@Autowired
-	public UserModelService(UserModelRepository userRepo) {
+	public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo) {
 		this.userRepo = userRepo;
+		this.accountRepo = accountRepo;
 	}
 
     public boolean existsByUsernameIgnoreCase(String username) {
         return userRepo.existsByUsernameIgnoreCase(username);
     }
 
+    @Transactional
     public void deleteByUsername(String username) {
-        userRepo.deleteByUsernameIgnoreCase(username);
+        UserModel user = userRepo.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        user.setAccount(null);
+        userRepo.save(user);
+        userRepo.delete(user);
     }
     
     public boolean existsByEmailIgnoreCase(String email) {
@@ -46,4 +56,5 @@ public class UserModelService implements UserDetailsService {
             Collections.emptyList()
         );
     }
+    
 }
