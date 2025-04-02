@@ -94,6 +94,7 @@ const PasswordRecovery = () => {
 		        throw new Error("Failed to get reset token");
 		    }
 		    setResetToken(data.token);
+		    setIsLoading(false);
 		    setStep(3);
 		} catch (err) {
 		    setError(err.message);
@@ -101,6 +102,7 @@ const PasswordRecovery = () => {
     };
 
 	const handleResetPassword = async (e) => {
+		setIsLoading(false);
 		e.preventDefault();
 		if (!resetToken) {
 		    setError("Missing reset token");
@@ -116,6 +118,7 @@ const PasswordRecovery = () => {
 		}
 
 		try {
+			setIsLoading(true);
 		    const response = await fetch(`${API_BASE_URL}/login/recovery/reset`, {
 		        method: 'POST',
 		        headers: { 
@@ -204,9 +207,8 @@ const PasswordRecovery = () => {
                         required
                         minLength="6"
                     />
-                    <button
-                        type="submit"
-                    >aaaa
+					<button type="submit" disabled={isLoading}>
+                        {isLoading ? 'Reseting...' : 'Reset password'}
                     </button>
                 </form>
             )}
