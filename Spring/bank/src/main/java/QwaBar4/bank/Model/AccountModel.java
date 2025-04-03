@@ -1,7 +1,8 @@
 package QwaBar4.bank.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "accounts")
@@ -16,8 +17,15 @@ public class AccountModel {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonIgnore
     private UserModel user;
+    
+    @OneToMany(mappedBy = "sourceAccount")
+    @JsonIgnore
+    private List<TransactionModel> outgoingTransactions;
+    
+    @OneToMany(mappedBy = "targetAccount")
+    @JsonIgnore
+    private List<TransactionModel> incomingTransactions;
 
     public Long getId() {
         return id;

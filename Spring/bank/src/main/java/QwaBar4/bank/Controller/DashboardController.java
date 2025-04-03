@@ -1,16 +1,20 @@
 package QwaBar4.bank.Controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
+import QwaBar4.bank.DTO.AccountSummaryDTO;
+import QwaBar4.bank.DTO.DashboardDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,26 +23,39 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DashboardController {
 
     private final UserModelRepository userModelRepository;
+    private final ModelMapper modelMapper;
 
-    public DashboardController(UserModelRepository userModelRepository) {
+    @Autowired
+    public DashboardController(UserModelRepository userModelRepository, 
+                             ModelMapper modelMapper) {
         this.userModelRepository = userModelRepository;
+        this.modelMapper = modelMapper;
     }
+
     @GetMapping("/api/csrf")
-	public ResponseEntity<Void> getCsrfToken(HttpServletRequest request) {
-		return ResponseEntity.ok()
-		    .header("X-CSRF-TOKEN", request.getAttribute("_csrf").toString())
-		    .build();
-	}
+    public ResponseEntity<Void> getCsrfToken(HttpServletRequest request) {
+        return ResponseEntity.ok()
+            .header("X-CSRF-TOKEN", request.getAttribute("_csrf").toString())
+            .build();
+    }
 
-    @GetMapping("/api/user/dashboard")
-    public DashboardResponse getDashboardData() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    @GetMapping(value = "/api/user/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DashboardDTO> getDashboardData() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-        UserModel user = userModelRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            UserModel user = userModelRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new DashboardResponse(user.getUsername(), user.getAccount());
+            AccountSummaryDTO accountDTO = modelMapper.map(user.getAccount(), AccountSummaryDTO.class);
+            DashboardDTO response = new DashboardDTO(user.getUsername(), accountDTO);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new DashboardDTO());
+        }
     }
 
     @PostMapping("/api/logout")
@@ -47,7 +64,7 @@ public class DashboardController {
         return ResponseEntity.ok().build();
     }
 
-    private static class DashboardResponse {
+    public static class DashboardResponse {
         private final String username;
         private final AccountModel account;
 
@@ -56,6 +73,7 @@ public class DashboardController {
             this.account = account;
         }
 
+        // Add getters
         public String getUsername() {
             return username;
         }
@@ -64,5 +82,4 @@ public class DashboardController {
             return account;
         }
     }
-    
 }

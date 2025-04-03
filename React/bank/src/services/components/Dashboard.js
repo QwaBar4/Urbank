@@ -2,88 +2,98 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
+import Transfer from './Transfer';
+import TransactionHistory from './TransactionHistory';
 
 const Dashboard = () => {
-    const [username, setUsername] = useState('');
-    const [account, setAccount] = useState('');
-    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [account, setAccount] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${getJwtToken()}`
-                    }
-                });
-                
-                if (!response.ok) throw new Error('Failed to fetch data');
-                const data = await response.json();
-                setUsername(data.username);
-                setAccount(data.account);
-            } catch (error) {
-                console.error('Error:', error);
-                navigate('/login');
-            }
-        };
-        fetchData();
-    }, [navigate]);
+	useEffect(() => {
+		const fetchAccountData = async () => {
+		    try {
+		        const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
+		            headers: {
+		                'Authorization': `Bearer ${getJwtToken()}`,
+		                'Accept': 'application/json'
+		            }
+		        });
 
-    const handleLogout = () => {
-        clearJwtToken();
-        navigate('/login');
-    };
-    
-	const handleDeleteAccount = async () => {
-		try {
-		    const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(username)}`, {
-		        method: 'DELETE',
-		        headers: {
-		            'Authorization': `Bearer ${getJwtToken()}`,
-		            'Content-Type': 'application/json'
+		        const data = await response.json();
+		        
+		        if (!response.ok) {
+		            throw new Error(data.message || 'Failed to fetch account data');
 		        }
-		    });
 
-		    if (!response.ok) {
-		        const errorData = await response.json();
-		        throw new Error(errorData.message || 'Account deletion failed');
+		        // Handle the simplified response
+		        setAccount({
+		            username: data.username,
+		            accountNumber: data.account.accountNumber,
+		            balance: data.account.balance
+		        });
+		        
+		    } catch (err) {
+		        console.error("Error:", err);
+		        setError(err.message);
+		        if (err.message.includes('401')) {
+		            clearJwtToken();
+		            navigate('/login');
+		        }
+		    } finally {
+		        setLoading(false);
 		    }
-		    
-		    clearJwtToken();
-		    navigate('/index');
-		} catch (error) {
-		    console.error('Deletion error:', error);
-		    alert('Failed to delete account: ' + error.message);
-		} finally {
-		    setShowDeleteConfirmation(false);
-		}
-	};
-	
+		};
+		
+		fetchAccountData();
+	}, [navigate]);
+
+    const handleLogout = async () => {
+        try {
+            await fetch(`${API_BASE_URL}/api/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}`
+                },
+                credentials: 'include'
+            });
+            clearJwtToken();
+            navigate('/login');
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
+    };
+
+    if (loading) return <div className="loading">Loading account information...</div>;
+    if (error) return <div className="error">Error: {error}</div>;
+
     return (
-        <div>
-            <h1>Welcome to Your Dashboard, {username}!</h1>
-            {account && (
-                <div>
-                    <h2>Account Details</h2>
-                    <p><strong>Account Number:</strong> {account.accountNumber}</p>
-                    <p><strong>Balance:</strong> ${account.balance}</p>
+        <div className="dashboard-container">
+            <div className="account-summary">
+                <h2>Account Summary</h2>
+                <div className="card">
+                    <div className="card-body">
+                        <h5 className="card-title">Welcome, {account?.username}</h5>
+                        <p className="card-text">
+                            <strong>Account Number:</strong> {account?.accountNumber}<br />
+                            <strong>Balance:</strong> ${account?.balance?.toFixed(2)}
+                        </p>
+                        <button onClick={handleLogout} className="btn btn-secondary">
+                            Logout
+                        </button>
+                    </div>
                 </div>
-            )}
-            <button onClick={() => navigate('/')}>Go home</button>
-                        <button onClick={handleLogout}>Logout</button>
-                        <button 
-                onClick={() => setShowDeleteConfirmation(true)}
-            >
-                Delete Account
-            </button>
-            {showDeleteConfirmation && (
-                <div className="confirmation-modal">
-                    <p>Are you sure you want to delete your account? This cannot be undone.</p>
-                    <button onClick={handleDeleteAccount}>Confirm Delete</button>
-                    <button onClick={() => setShowDeleteConfirmation(false)}>Cancel</button>
+            </div>
+
+            <div className="dashboard-content">
+                <div className="transfer-section">
+                    <Transfer userAccount={account} />
                 </div>
-            )}
+                <div className="transaction-section">
+                    <TransactionHistory userAccount={account} />
+                </div>
+            </div>
         </div>
     );
 };
