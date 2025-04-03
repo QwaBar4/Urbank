@@ -21,6 +21,7 @@ public class UserModel {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private AccountModel account;
 
     public Long getId() {

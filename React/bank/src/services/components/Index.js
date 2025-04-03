@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getIndexData, API_BASE_URL } from '../api';
-import { getJwtToken, clearJwtToken } from '../../utils/auth';
+import { getIndexData } from '../api';
+import { getJwtToken } from '../../utils/auth';
 
 const Index = () => {
     const [username, setUsername] = useState('');
-    const [account, setAccount] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -14,7 +13,6 @@ const Index = () => {
                 if (getJwtToken()) {
                     const data = await getIndexData();
                     setUsername(data.username || "");
-                    setAccount(data.account || null);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -24,9 +22,14 @@ const Index = () => {
     }, [navigate]);
 
     return (
-        <div>
+        <div className="index-container">
             <h1>It's Urbank{!username ? '' : ', ' + username}</h1>
-            <button onClick={!username ? () => navigate('/login') : () => navigate('/dashboard')}>Account</button>
+            <button 
+                onClick={!username ? () => navigate('/login') : () => navigate('/dashboard')}
+                className="btn btn-primary"
+            >
+                Account
+            </button>
         </div>
     );
 };

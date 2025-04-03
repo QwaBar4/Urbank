@@ -1,20 +1,19 @@
 package QwaBar4.bank.Controller;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
-import QwaBar4.bank.DTO.AccountSummaryDTO;
-import QwaBar4.bank.DTO.DashboardDTO;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,13 +22,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DashboardController {
 
     private final UserModelRepository userModelRepository;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public DashboardController(UserModelRepository userModelRepository, 
-                             ModelMapper modelMapper) {
+    public DashboardController(UserModelRepository userModelRepository) {
         this.userModelRepository = userModelRepository;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/api/csrf")
@@ -39,8 +35,8 @@ public class DashboardController {
             .build();
     }
 
-    @GetMapping(value = "/api/user/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DashboardDTO> getDashboardData() {
+    @GetMapping(value = {"/api/index", "/api/user/dashboard"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> getDashboardData() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -48,13 +44,21 @@ public class DashboardController {
             UserModel user = userModelRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            AccountSummaryDTO accountDTO = modelMapper.map(user.getAccount(), AccountSummaryDTO.class);
-            DashboardDTO response = new DashboardDTO(user.getUsername(), accountDTO);
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", user.getUsername());
+            
+            Map<String, Object> accountInfo = new HashMap<>();
+            accountInfo.put("accountNumber", user.getAccount().getAccountNumber());
+            accountInfo.put("balance", user.getAccount().getBalance());
+            
+            response.put("account", accountInfo);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new DashboardDTO());
+                    .body(errorResponse);
         }
     }
 
@@ -62,24 +66,5 @@ public class DashboardController {
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok().build();
-    }
-
-    public static class DashboardResponse {
-        private final String username;
-        private final AccountModel account;
-
-        public DashboardResponse(String username, AccountModel account) {
-            this.username = username;
-            this.account = account;
-        }
-
-        // Add getters
-        public String getUsername() {
-            return username;
-        }
-
-        public AccountModel getAccount() {
-            return account;
-        }
     }
 }

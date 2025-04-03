@@ -17,6 +17,7 @@ public class AccountModel {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore 
     private UserModel user;
     
     @OneToMany(mappedBy = "sourceAccount")

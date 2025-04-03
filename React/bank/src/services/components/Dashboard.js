@@ -6,62 +6,69 @@ import Transfer from './Transfer';
 import TransactionHistory from './TransactionHistory';
 
 const Dashboard = () => {
+    const [username, setUsername] = useState('');
     const [account, setAccount] = useState(null);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchAccountData = async () => {
-		    try {
-		        const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
-		            headers: {
-		                'Authorization': `Bearer ${getJwtToken()}`,
-		                'Accept': 'application/json'
-		            }
-		        });
+    useEffect(() => {
+        const fetchAccountData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${getJwtToken()}`
+                    }
+                });
 
-		        const data = await response.json();
-		        
-		        if (!response.ok) {
-		            throw new Error(data.message || 'Failed to fetch account data');
-		        }
+                if (!response.ok) throw new Error('Failed to fetch account data');
+                
+                const data = await response.json();
+                setUsername(data.username);
+                setAccount(data.account);
+            } catch (err) {
+                console.error("Error:", err);
+                setError(err.message);
+                if (err.message.includes('401')) {
+                    clearJwtToken();
+                    navigate('/login');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchAccountData();
+    }, [navigate]);
 
-		        // Handle the simplified response
-		        setAccount({
-		            username: data.username,
-		            accountNumber: data.account.accountNumber,
-		            balance: data.account.balance
-		        });
-		        
-		    } catch (err) {
-		        console.error("Error:", err);
-		        setError(err.message);
-		        if (err.message.includes('401')) {
-		            clearJwtToken();
-		            navigate('/login');
-		        }
-		    } finally {
-		        setLoading(false);
-		    }
-		};
-		
-		fetchAccountData();
-	}, [navigate]);
+    const handleLogout = () => {
+        clearJwtToken();
+        navigate('/login');
+    };
 
-    const handleLogout = async () => {
+    const handleDeleteAccount = async () => {
         try {
-            await fetch(`${API_BASE_URL}/api/logout`, {
-                method: 'POST',
+            const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(username)}`, {
+                method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${getJwtToken()}`
-                },
-                credentials: 'include'
+                    'Authorization': `Bearer ${getJwtToken()}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Account deletion failed');
+            }
+            
             clearJwtToken();
-            navigate('/login');
-        } catch (err) {
-            console.error('Logout error:', err);
+            navigate('/index');
+        } catch (error) {
+            console.error('Deletion error:', error);
+            alert('Failed to delete account: ' + error.message);
+        } finally {
+            setShowDeleteConfirmation(false);
         }
     };
 
@@ -70,21 +77,35 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
-            <div className="account-summary">
-                <h2>Account Summary</h2>
-                <div className="card">
-                    <div className="card-body">
-                        <h5 className="card-title">Welcome, {account?.username}</h5>
-                        <p className="card-text">
-                            <strong>Account Number:</strong> {account?.accountNumber}<br />
-                            <strong>Balance:</strong> ${account?.balance?.toFixed(2)}
-                        </p>
-                        <button onClick={handleLogout} className="btn btn-secondary">
-                            Logout
-                        </button>
-                    </div>
+            <div className="dashboard-header">
+                <h1>Welcome to Your Dashboard, {username}!</h1>
+                <div className="dashboard-actions">
+                    <button onClick={() => navigate('/')} className="btn btn-home">
+                        Go Home
+                    </button>
+                    <button onClick={handleLogout} className="btn btn-logout">
+                        Logout
+                    </button>
+                    <button 
+                        onClick={() => setShowDeleteConfirmation(true)}
+                        className="btn btn-danger"
+                    >
+                        Delete Account
+                    </button>
                 </div>
             </div>
+
+            {account && (
+                <div className="account-summary">
+                    <h2>Account Details</h2>
+                    <div className="card">
+                        <div className="card-body">
+                            <p><strong>Account Number:</strong> {account.accountNumber}</p>
+                            <p><strong>Balance:</strong> ${account.balance?.toFixed(2)}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="dashboard-content">
                 <div className="transfer-section">
@@ -94,6 +115,25 @@ const Dashboard = () => {
                     <TransactionHistory userAccount={account} />
                 </div>
             </div>
+
+            {showDeleteConfirmation && (
+                <div className="confirmation-modal">
+                    <div className="modal-content">
+                        <p>Are you sure you want to delete your account? This cannot be undone.</p>
+                        <div className="modal-actions">
+                            <button onClick={handleDeleteAccount} className="btn btn-confirm">
+                                Confirm Delete
+                            </button>
+                            <button 
+                                onClick={() => setShowDeleteConfirmation(false)} 
+                                className="btn btn-cancel"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
