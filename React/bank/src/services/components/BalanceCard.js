@@ -1,79 +1,71 @@
-import React from 'react';
-import { API_BASE_URL } from '../api';
-import { getJwtToken } from '../../utils/auth';
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
-    const [currentBalance, setCurrentBalance] = useState(balance);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const navigate = useNavigate();
 
-    // Sync with parent component's balance
-    useEffect(() => {
-        setCurrentBalance(balance);
-    }, [balance]);
-
-    const handleRefresh = async () => {
+    const handleRefresh = async (e) => {
+        e.preventDefault(); // Prevent any default navigation
+        e.stopPropagation(); // Stop event bubbling
         setIsRefreshing(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/transactions/balance`, {
-                headers: {
-                    'Authorization': `Bearer ${getJwtToken()}`
-                }
-            });
-            
-            if (!response.ok) throw new Error('Failed to refresh balance');
-            
-            const newBalance = await response.json();
-            setCurrentBalance(newBalance);
-            
-            // Notify parent component if refreshBalance prop is provided
-            if (refreshBalance) {
-                refreshBalance(newBalance);
-            }
-        } catch (error) {
-            console.error("Balance refresh error:", error);
+            await refreshBalance();
         } finally {
             setIsRefreshing(false);
         }
     };
 
+    const handleDeposit = () => {
+        navigate('/deposit');
+    };
+
+    const handleWithdraw = () => {
+        navigate('/withdraw');
+    };
+
     return (
         <div className="card mb-4">
             <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between align-items-center mb-3">
                     <h5 className="card-title mb-0">Account Balance</h5>
                     <button 
                         onClick={handleRefresh}
                         className="btn btn-sm btn-outline-secondary"
                         disabled={isRefreshing}
+                        aria-label="Refresh balance"
                     >
                         {isRefreshing ? (
                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         ) : (
-                            <i className="bi bi-arrow-clockwise"></i>
+                            <span>↻Refresh↻</span> 
                         )}
                     </button>
                 </div>
                 
-                <hr />
-                
-                <div className="mb-2">
+                <div className="mb-3">
                     <small className="text-muted">Account Number</small>
-                    <p className="mb-0">{accountNumber || 'Loading...'}</p>
+                    <p className="mb-0 font-monospace">{accountNumber || 'Loading...'}</p>
                 </div>
                 
-                <div>
+                <div className="mb-4">
                     <small className="text-muted">Available Balance</small>
                     <h3 className="mb-0">
-                        ${currentBalance !== undefined ? currentBalance.toFixed(2) : '0.00'}
+                        ${balance !== undefined ? balance.toFixed(2) : '0.00'}
                     </h3>
                 </div>
                 
-                <div className="mt-3">
-                    <button className="btn btn-outline-primary btn-sm me-2">
+                <div className="d-grid gap-2">
+                    <button 
+                        onClick={handleDeposit}
+                        className="btn btn-primary"
+                    >
                         Deposit
                     </button>
-                    <button className="btn btn-outline-success btn-sm">
+                    <button 
+                        onClick={handleWithdraw}
+                        className="btn btn-success"
+                    >
                         Withdraw
                     </button>
                 </div>

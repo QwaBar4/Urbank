@@ -7,7 +7,13 @@ import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
-    const [userData, setUserData] = useState({ username: '', account: null });
+    const [userData, setUserData] = useState({ 
+        username: '', 
+        account: { 
+            accountNumber: '', 
+            balance: 0
+        } 
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -70,7 +76,7 @@ const Dashboard = () => {
             }
             
             clearJwtToken();
-            navigate('/'); // Redirect to home page after deletion
+            navigate('/');
         } catch (error) {
             console.error('Deletion error:', error);
             alert('Failed to delete account: ' + error.message);
@@ -130,8 +136,8 @@ const Dashboard = () => {
             <div className="row">
                 <div className="col-md-4">
                     <BalanceCard 
-                        accountNumber={userData.account?.accountNumber} 
-                        balance={userData.account?.balance} 
+                        accountNumber={userData.account.accountNumber} 
+                        balance={userData.account.balance} 
                         refreshBalance={refreshBalance}
                     />
                     <Transfer 
@@ -144,6 +150,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {/* Delete Confirmation Modal */}
             {showDeleteConfirmation && (
                 <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog">
