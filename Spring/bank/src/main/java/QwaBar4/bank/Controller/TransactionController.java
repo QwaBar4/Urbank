@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import QwaBar4.bank.Model.*;
 import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Service.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,23 +31,23 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PostMapping("/transfer")
-    public ResponseEntity<?> transferMoney(
-        @RequestBody TransferRequest request,
-        Authentication authentication
-    ) {
-        try {
-            TransactionDTO transaction = transactionService.processTransfer(
-                request.sourceAccount(),
-                request.targetAccount(),
-                request.amount(),
-                authentication.getName()
-            );
-            return ResponseEntity.ok(transaction);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+	@PostMapping("/transfer")
+	public ResponseEntity<?> transferMoney(
+		@RequestBody TransferRequestDTO request,
+		Authentication authentication
+	) {
+		try {
+		    TransactionDTO transaction = transactionService.processTransfer(
+		        request.getSourceAccount(),
+		        request.getTargetAccount(),
+		        request.getAmount(),
+		        authentication.getName()
+		    );
+		    return ResponseEntity.ok(transaction);
+		} catch (RuntimeException e) {
+		    return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
     
     @GetMapping("/history")
     public ResponseEntity<List<TransactionDTO>> getTransactionHistory(Authentication authentication) {
