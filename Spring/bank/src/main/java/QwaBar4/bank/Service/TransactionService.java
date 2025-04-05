@@ -100,4 +100,71 @@ public class TransactionService {
         
         return dto;
     }
+    
+    public TransactionDTO processDeposit(String accountNumber, double amount, String description, String username) {
+		// Validate amount
+		if (amount <= 0) {
+		    throw new RuntimeException("Deposit amount must be positive");
+		}
+
+		// Get account
+		AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+		    .orElseThrow(() -> new RuntimeException("Account not found"));
+
+		// Verify ownership
+		if (!account.getUser().getUsername().equals(username)) {
+		    throw new RuntimeException("Unauthorized deposit attempt");
+		}
+
+		// Update balance
+		account.setBalance(account.getBalance() + amount);
+		accountRepo.save(account);
+
+		// Create transaction record
+		TransactionModel transaction = new TransactionModel();
+		transaction.setType("DEPOSIT");
+		transaction.setAmount(amount);
+		transaction.setDescription(description);
+		transaction.setTimestamp(LocalDateTime.now());
+		transaction.setTargetAccount(account);
+		transactionRepo.save(transaction);
+
+		return convertToDTO(transaction);
+	}
+
+	public TransactionDTO processWithdrawal(String accountNumber, double amount, String description, String username) {
+		// Validate amount
+		if (amount <= 0) {
+		    throw new RuntimeException("Withdrawal amount must be positive");
+		}
+
+		// Get account
+		AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+		    .orElseThrow(() -> new RuntimeException("Account not found"));
+
+		// Verify ownership
+		if (!account.getUser().getUsername().equals(username)) {
+		    throw new RuntimeException("Unauthorized withdrawal attempt");
+		}
+
+		// Check sufficient funds
+		if (account.getBalance() < amount) {
+		    throw new RuntimeException("Insufficient funds for withdrawal");
+		}
+
+		// Update balance
+		account.setBalance(account.getBalance() - amount);
+		accountRepo.save(account);
+
+		// Create transaction record
+		TransactionModel transaction = new TransactionModel();
+		transaction.setType("WITHDRAWAL");
+		transaction.setAmount(amount);
+		transaction.setDescription(description);
+		transaction.setTimestamp(LocalDateTime.now());
+		transaction.setSourceAccount(account);
+		transactionRepo.save(transaction);
+
+		return convertToDTO(transaction);
+	}
 }

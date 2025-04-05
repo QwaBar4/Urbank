@@ -60,4 +60,40 @@ public class TransactionController {
         Double balance = transactionService.getAccountBalance(authentication.getName());
         return ResponseEntity.ok(balance);
     }
+    
+    @PostMapping("/deposit")
+	public ResponseEntity<?> depositFunds(
+		@RequestBody DepositWithdrawRequestDTO request,
+		Authentication authentication
+	) {
+		try {
+		    TransactionDTO transaction = transactionService.processDeposit(
+		        request.getAccountNumber(),
+		        request.getAmount(),
+		        request.getDescription(),
+		        authentication.getName()
+		    );
+		    return ResponseEntity.ok(transaction);
+		} catch (RuntimeException e) {
+		    return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
+	@PostMapping("/withdraw")
+	public ResponseEntity<?> withdrawFunds(
+		@RequestBody DepositWithdrawRequestDTO request,
+		Authentication authentication
+	) {
+		try {
+		    TransactionDTO transaction = transactionService.processWithdrawal(
+		        request.getAccountNumber(),
+		        request.getAmount(),
+		        request.getDescription(),
+		        authentication.getName()
+		    );
+		    return ResponseEntity.ok(transaction);
+		} catch (RuntimeException e) {
+		    return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 }
