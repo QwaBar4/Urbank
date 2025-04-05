@@ -135,7 +135,7 @@ const Withdraw = () => {
                                     <button 
                                         type="submit" 
                                         className="btn btn-success"
-                                        disabled={isLoading}
+                                        disabled={isLoading || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > accountInfo.balance}
                                     >
                                         {isLoading ? (
                                             <>

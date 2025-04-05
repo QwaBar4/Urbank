@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class TransactionService {
@@ -132,7 +134,7 @@ public class TransactionService {
 		return convertToDTO(transaction);
 	}
 
-	public TransactionDTO processWithdrawal(String accountNumber, double amount, String description, String username) {
+	public Map<String, Object> processWithdrawal(String accountNumber, double amount, String description, String username) {
 		// Validate amount
 		if (amount <= 0) {
 		    throw new RuntimeException("Withdrawal amount must be positive");
@@ -154,7 +156,7 @@ public class TransactionService {
 
 		// Update balance
 		account.setBalance(account.getBalance() - amount);
-		accountRepo.save(account);
+		AccountModel updatedAccount = accountRepo.save(account);
 
 		// Create transaction record
 		TransactionModel transaction = new TransactionModel();
@@ -165,6 +167,11 @@ public class TransactionService {
 		transaction.setSourceAccount(account);
 		transactionRepo.save(transaction);
 
-		return convertToDTO(transaction);
+		// Prepare response
+		Map<String, Object> response = new HashMap<>();
+		response.put("transaction", convertToDTO(transaction));
+		response.put("newBalance", updatedAccount.getBalance());
+		
+		return response;
 	}
 }

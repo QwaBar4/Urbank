@@ -61,9 +61,9 @@ const Deposit = () => {
                 throw new Error(errorData.message || 'Deposit failed');
             }
 
-            const data = await response.json();
-            setSuccess(`Deposit successful! New balance: $${data.newBalance.toFixed(2)}`);
-            setAccountInfo(prev => ({ ...prev, balance: data.newBalance }));
+		const data = await response.json();
+		setSuccess(`Deposit successful! New balance: $${data.newBalance.toFixed(2)}`);
+		setAccountInfo(prev => ({ ...prev, balance: data.newBalance }));
             setAmount('');
             setDescription('');
             

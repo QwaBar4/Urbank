@@ -9,6 +9,8 @@ import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -61,7 +63,7 @@ public class TransactionController {
         return ResponseEntity.ok(balance);
     }
     
-    @PostMapping("/deposit")
+	@PostMapping("/deposit")
 	public ResponseEntity<?> depositFunds(
 		@RequestBody DepositWithdrawRequestDTO request,
 		Authentication authentication
@@ -73,7 +75,15 @@ public class TransactionController {
 		        request.getDescription(),
 		        authentication.getName()
 		    );
-		    return ResponseEntity.ok(transaction);
+		    
+		    double newBalance = accountRepo.findByAccountNumber(request.getAccountNumber())
+		        .orElseThrow().getBalance();
+		    
+		    Map<String, Object> response = new HashMap<>();
+		    response.put("transaction", transaction);
+		    response.put("newBalance", newBalance);
+		    
+		    return ResponseEntity.ok(response);
 		} catch (RuntimeException e) {
 		    return ResponseEntity.badRequest().body(e.getMessage());
 		}
@@ -85,13 +95,14 @@ public class TransactionController {
 		Authentication authentication
 	) {
 		try {
-		    TransactionDTO transaction = transactionService.processWithdrawal(
+		    Map<String, Object> result = transactionService.processWithdrawal(
 		        request.getAccountNumber(),
 		        request.getAmount(),
 		        request.getDescription(),
 		        authentication.getName()
 		    );
-		    return ResponseEntity.ok(transaction);
+		    
+		    return ResponseEntity.ok(result);
 		} catch (RuntimeException e) {
 		    return ResponseEntity.badRequest().body(e.getMessage());
 		}
