@@ -7,6 +7,21 @@ const TransactionHistory = ({ userAccount }) => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    
+    const getAmountClass = (transaction) => {
+        if (transaction.type === 'DEPOSIT') return 'text-success';
+        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-danger';
+        return 'text-success';
+    };
+
+    const formatAmount = (transaction) => {
+        const amount = transaction.amount.toFixed(2);
+        if (transaction.sourceAccountNumber === userAccount.accountNumber) {
+            return `-$${amount}`;
+        }
+        return `+$${amount}`;
+    };
+
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -38,31 +53,55 @@ const TransactionHistory = ({ userAccount }) => {
     if (loading) return <div>Loading transactions...</div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
 
+
     return (
         <div className="transaction-history">
             <h3>Transaction History</h3>
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {transactions.map((transaction) => (
-                        <tr key={transaction.id}>
-                            <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-                            <td>{transaction.type}</td>
-                            <td>{transaction.sourceAccountNumber || '-'}</td>
-                            <td>{transaction.targetAccountNumber || '-'}</td>
-                            <td>${transaction.amount.toFixed(2)}</td>
+            <div className="table-responsive">
+                <table className="table table-hover">
+                    <thead className="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th className="text-end">Amount</th>
+                            <th>Status</th>
+                            <th>Reference</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {transactions.map((transaction) => (
+                            <tr key={transaction.id}>
+                                <td>{new Date(transaction.timestamp).toLocaleString()}</td>
+                                <td>{transaction.type}</td>
+                                <td>
+                                    {transaction.type === 'TRANSFER' ? (
+                                        <>
+                                            <div>From: {transaction.sourceAccountNumber || '-'}</div>
+                                            <div>To: {transaction.targetAccountNumber || '-'}</div>
+                                            {transaction.description && <div className="text-muted">{transaction.description}</div>}
+                                        </>
+                                    ) : (
+                                        transaction.description || '-'
+                                    )}
+                                </td>
+                                <td className={`text-end ${getAmountClass(transaction)}`}>
+                                    {formatAmount(transaction)}
+                                </td>
+                                <td>
+                                    <span className={`badge ${
+                                        transaction.status === 'COMPLETED' ? 'bg-success' : 
+                                        transaction.status === 'PENDING' ? 'bg-warning' : 'bg-danger'
+                                    }`}>
+                                        {transaction.status}
+                                    </span>
+                                </td>
+                                <td className="text-muted small">{transaction.reference}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

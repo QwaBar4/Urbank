@@ -32,7 +32,7 @@ public class TransactionController {
         this.userRepo = userRepo;
         this.transactionService = transactionService;
     }
-
+    
 	@PostMapping("/transfer")
 	public ResponseEntity<?> transferMoney(
 		@RequestBody TransferRequestDTO request,
@@ -43,6 +43,7 @@ public class TransactionController {
 		        request.getSourceAccount(),
 		        request.getTargetAccount(),
 		        request.getAmount(),
+		        request.getDescription(), // Add this
 		        authentication.getName()
 		    );
 		    return ResponseEntity.ok(transaction);

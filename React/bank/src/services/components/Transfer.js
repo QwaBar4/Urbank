@@ -31,25 +31,26 @@ const Transfer = ({ userAccount, refreshBalance }) => {
         });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setIsLoading(true);
+		setError('');
+		setSuccess('');
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getJwtToken()}`
-                },
-                body: JSON.stringify({
-                    sourceAccount: formData.sourceAccount,
-                    targetAccount: formData.targetAccount,
-                    amount: parseFloat(formData.amount)
-                })
-            });
+		try {
+		    const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/json',
+		            'Authorization': `Bearer ${getJwtToken()}`
+		        },
+		        body: JSON.stringify({
+		            sourceAccount: formData.sourceAccount,
+		            targetAccount: formData.targetAccount,
+		            amount: parseFloat(formData.amount),
+		            description: formData.description // Add this
+		        })
+		    });
             
             if (!response.ok) {
                 const errorData = await response.json();

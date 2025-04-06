@@ -27,7 +27,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionDTO processTransfer(String sourceAccount, String targetAccount, 
-                                        double amount, String username) {
+                                        double amount, String description, String username) {
         // Validate accounts
         AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
             .orElseThrow(() -> new RuntimeException("Source account not found"));
@@ -58,6 +58,7 @@ public class TransactionService {
         transaction.setAmount(amount);
         transaction.setSourceAccount(source);
         transaction.setTargetAccount(target);
+        transaction.setDescription(description);
         transaction.setTimestamp(LocalDateTime.now());
         transaction = transactionRepo.save(transaction);
         

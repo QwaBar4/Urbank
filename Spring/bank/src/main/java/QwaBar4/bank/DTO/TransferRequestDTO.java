@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class TransferRequestDTO {
     private String sourceAccount;
     private String targetAccount;
+    private String description;
     private double amount;
 
     public TransferRequestDTO() {}
@@ -38,5 +39,13 @@ public class TransferRequestDTO {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
