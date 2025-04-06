@@ -1,21 +1,10 @@
 package QwaBar4.bank.DTO;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransferRequestDTO {
     private String sourceAccount;
     private String targetAccount;
-    private String description;
     private double amount;
-
-    public TransferRequestDTO() {}
-
-    public TransferRequestDTO(String sourceAccount, String targetAccount, double amount) {
-        this.sourceAccount = sourceAccount;
-        this.targetAccount = targetAccount;
-        this.amount = amount;
-    }
+    private String description;
 
     public String getSourceAccount() {
         return sourceAccount;
@@ -40,7 +29,7 @@ public class TransferRequestDTO {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-    
+
     public String getDescription() {
         return description;
     }

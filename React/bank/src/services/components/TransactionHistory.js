@@ -74,17 +74,19 @@ const TransactionHistory = ({ userAccount }) => {
                             <tr key={transaction.id}>
                                 <td>{new Date(transaction.timestamp).toLocaleString()}</td>
                                 <td>{transaction.type}</td>
-                                <td>
-                                    {transaction.type === 'TRANSFER' ? (
-                                        <>
-                                            <div>From: {transaction.sourceAccountNumber || '-'}</div>
-                                            <div>To: {transaction.targetAccountNumber || '-'}</div>
-                                            {transaction.description && <div className="text-muted">{transaction.description}</div>}
-                                        </>
-                                    ) : (
-                                        transaction.description || '-'
-                                    )}
-                                </td>
+								<td>
+									{transaction.description || '-'}
+									{transaction.type === 'TRANSFER' && (
+										<>
+											<div className="small text-muted">
+												From: {transaction.sourceAccountNumber || '-'}
+											</div>
+											<div className="small text-muted">
+												To: {transaction.targetAccountNumber || '-'}
+											</div>
+										</>
+									)}
+								</td>
                                 <td className={`text-end ${getAmountClass(transaction)}`}>
                                     {formatAmount(transaction)}
                                 </td>
