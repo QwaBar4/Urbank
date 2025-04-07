@@ -20,17 +20,6 @@ export const handleResponse = async (response) => {
     }
 };
 
-export const storeJwtToken = (token) => {
-    try {
-        const encryptedToken = CryptoJS.AES.encrypt(
-            token, 
-            process.env.REACT_APP_CRYPTO_SECRET
-        ).toString();
-        localStorage.setItem('jwt', encryptedToken);
-    } catch (error) {
-        console.error('Token encryption failed:', error);
-    }
-};
 
 const getDefaultHeaders = () => {
     const headers = {
