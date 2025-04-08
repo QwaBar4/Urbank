@@ -79,9 +79,14 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+			.sessionManagement(session -> session
+				.maximumSessions(1)
+			)
+			.headers(headers -> headers
+            	.contentSecurityPolicy(csp -> csp
+            	    .policyDirectives("default-src 'self'")
+            	)
+       		)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset", "/api/transactions/transfer", "/api/transactions/deposit", "/api/transactions/withdraw").permitAll()

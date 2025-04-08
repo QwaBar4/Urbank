@@ -22,8 +22,6 @@ public class TransactionService {
     private final TransactionModelRepository transactionRepo;
     private final UserModelRepository userRepo;
 
-    @Autowired
-    private AuditService auditService;
 
     public TransactionService(AccountModelRepository accountRepo,
                               TransactionModelRepository transactionRepo,
@@ -75,12 +73,6 @@ public class TransactionService {
         transaction = transactionRepo.save(transaction);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        auditService.logTransactionAttempt(
-            sourceAccount,
-            TransactionType.TRANSFER,
-            amount,
-            authentication.getName()
-        );
 
         return convertToDTO(transaction);
     }
