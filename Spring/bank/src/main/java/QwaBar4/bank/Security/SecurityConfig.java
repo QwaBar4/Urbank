@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
@@ -27,10 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.core.annotation.Order;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.security.config.Customizer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +34,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import QwaBar4.bank.Model.UserModelService;
-import QwaBar4.bank.Filter.RateLimitingFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -53,13 +46,11 @@ public class SecurityConfig {
 
     private final UserModelService appUserService;
     private final JwtUtil jwtUtil;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public SecurityConfig(UserModelService appUserService, JwtUtil jwtUtil, RedisTemplate<String, String> redisTemplate) {
+    public SecurityConfig(UserModelService appUserService, JwtUtil jwtUtil) {
         this.appUserService = appUserService;
         this.jwtUtil = jwtUtil;
-        this.redisTemplate = redisTemplate;
     }
 
     @Bean
@@ -85,62 +76,44 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(jwtUtil.getPublicKey()).build();
-    }
-
-    @Bean
+	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .addFilterBefore(new RateLimitingFilter(
-                redisTemplate,
-                100,
-                3600
-            ), UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset", "/api/transactions/transfer", "/api/transactions/deposit", "/api/transactions/withdraw").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers(
-                    "/auth/send-code",
-                    "/auth/send-recovery-code",
-                    "/auth/verify-code",
-                    "/auth/verify-recovery-code",
-                    "/req/login",
-                    "/req/signup",
-                    "/api/delete-user",
-                    "/api/transactions/transfer",
-                    "/api/transactions/deposit",
-                    "/api/transactions/withdraw",
-                    "/login/recovery/reset",
-                    "/login/recovery/**"
-                )
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-            .sessionManagement(session -> session
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(true))
-            .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                .httpStrictTransportSecurity(hsts -> hsts
-                    .includeSubDomains(true)
-                    .preload(true)
-                    .maxAgeInSeconds(31536000)))
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint((request, response, authException) -> {
-                })
-            );
+		    .csrf(csrf -> csrf
+		        .ignoringRequestMatchers(
+		        	"/auth/send-code",
+		        	"/auth/send-recovery-code",
+		        	"/auth/verify-code",
+		        	"/auth/verify-recovery-code",
+		            "/req/login",
+		            "/req/signup",
+		            "/api/delete-user",
+		            "/api/transactions/transfer",
+		            "/api/transactions/deposit", 
+		            "/api/transactions/withdraw",
+		            "/login/recovery/reset",
+		            "/login/recovery/**"
+		        )
+		    )
+		    .exceptionHandling(exception -> exception
+            .authenticationEntryPoint((request, response, authException) -> {
+            })
+        );
 
         return http.build();
     }
+    
+    
 
     private static class CookieSameSiteFilter extends OncePerRequestFilter {
         @Override
@@ -158,4 +131,5 @@ public class SecurityConfig {
             filterChain.doFilter(request, response);
         }
     }
+
 }
