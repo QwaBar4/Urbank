@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -27,13 +28,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.core.annotation.Order;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import java.time.LocalDateTime;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import QwaBar4.bank.Model.UserModelService;
+import QwaBar4.bank.Service.UserModelService;
+import QwaBar4.bank.Filter.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,6 +49,9 @@ public class SecurityConfig {
 
     private final UserModelService appUserService;
     private final JwtUtil jwtUtil;
+    
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
     public SecurityConfig(UserModelService appUserService, JwtUtil jwtUtil) {
@@ -91,23 +97,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset", "/api/transactions/transfer", "/api/transactions/deposit", "/api/transactions/withdraw").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new RateLimitingFilter(redisTemplate, 10, 60), UsernamePasswordAuthenticationFilter.class)
 		    .csrf(csrf -> csrf
 		        .ignoringRequestMatchers(
 		        	"/auth/send-code",
 		        	"/auth/send-recovery-code",
 		        	"/auth/verify-code",
-		        	"/auth/verify-recovery-code",
-		            "/req/login",
-		            "/req/signup",
-		            "/api/delete-user",
-		            "/api/transactions/transfer",
-		            "/api/transactions/deposit", 
-		            "/api/transactions/withdraw",
-		            "/login/recovery/reset",
-		            "/login/recovery/**"
+		        	"/auth/verify-recovery-code"
 		        )
 		    )
 		    .exceptionHandling(exception -> exception

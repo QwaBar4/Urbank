@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import QwaBar4.bank.Model.UserModelService;
+import QwaBar4.bank.Service.UserModelService;
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModelRepository;

@@ -17,7 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import jakarta.servlet.http.HttpServletResponse;
 
 import QwaBar4.bank.Model.UserModel;
-import QwaBar4.bank.Model.UserModelService;
+import QwaBar4.bank.Service.UserModelService;
 
 import QwaBar4.bank.Security.AuthResponse;
 import QwaBar4.bank.Security.JwtUtil;
