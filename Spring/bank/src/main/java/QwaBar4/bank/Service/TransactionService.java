@@ -104,6 +104,10 @@ public class TransactionService {
         dto.setType(transaction.getType());
         dto.setAmount(transaction.getAmount());
         dto.setTimestamp(transaction.getTimestamp());
+        dto.setDescription(transaction.getDescription());
+        
+        System.out.println("Converting transaction with description: " + 
+                          transaction.getDescription()); // Debug log
 
         if (transaction.getSourceAccount() != null) {
             dto.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());

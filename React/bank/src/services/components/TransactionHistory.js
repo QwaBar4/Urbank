@@ -75,7 +75,7 @@ const TransactionHistory = ({ userAccount }) => {
                                 <td>{new Date(transaction.timestamp).toLocaleString()}</td>
                                 <td>{transaction.type}</td>
 								<td>
-									{transaction.description || '-'}
+									{"Message: " + transaction.description || '-'}
 									{transaction.type === 'TRANSFER' && (
 										<>
 											<div className="small text-muted">
