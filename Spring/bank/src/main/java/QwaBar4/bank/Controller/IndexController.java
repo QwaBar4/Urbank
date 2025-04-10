@@ -9,13 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.http.HttpStatus;
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
-
+import java.util.Collections;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -28,14 +31,23 @@ public class IndexController {
     }
     
     @GetMapping("/api/index")
-    public IndexResponse index() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    public ResponseEntity<Map<String, Object>> getInitialData() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-        UserModel user = userModelRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            UserModel user = userModelRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new IndexResponse(user.getUsername(),  user.getAccount());
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", user.getUsername());
+            response.put("accountNumber", user.getAccount().getAccountNumber());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", e.getMessage()));
+        }
     }
     
 

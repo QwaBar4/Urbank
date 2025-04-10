@@ -6,9 +6,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
+import java.util.Collections;
 import org.springframework.web.bind.annotation.*;
 
 import QwaBar4.bank.Model.UserModel;
+import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
 
@@ -35,7 +37,9 @@ public class DashboardController {
             .build();
     }
 
-    @GetMapping(value = {"/api/index", "/api/user/dashboard"}, produces = MediaType.APPLICATION_JSON_VALUE)
+
+
+    @GetMapping("/api/user/dashboard")
     public ResponseEntity<Map<String, Object>> getDashboardData() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,21 +48,23 @@ public class DashboardController {
             UserModel user = userModelRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            AccountModel account = user.getAccount();
+            AccountDTO accountDTO = new AccountDTO(
+                account.getId(),
+                account.getAccountNumber(),
+                account.getBalance(),
+                account.getDailyTransferLimit(),
+                account.getDailyWithdrawalLimit()
+            );
+
             Map<String, Object> response = new HashMap<>();
             response.put("username", user.getUsername());
-            
-            Map<String, Object> accountInfo = new HashMap<>();
-            accountInfo.put("accountNumber", user.getAccount().getAccountNumber());
-            accountInfo.put("balance", user.getAccount().getBalance());
-            
-            response.put("account", accountInfo);
+            response.put("account", accountDTO);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse);
+                    .body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 

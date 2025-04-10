@@ -4,7 +4,7 @@ import {
   storeJwtToken,
   clearJwtToken
 } from '../../utils/auth';
-import { login as apiLogin, getIndexData } from '../api';
+import { login as apiLogin, getIndexData, getDashboardData } from '../api';
 
 const AuthContext = createContext();
 
@@ -19,6 +19,15 @@ export function AuthProvider({ children }) {
     } catch (error) {
       clearJwtToken();
       return null;
+    }
+  };
+  
+  const loadDashboardData = async () => {
+    try {
+      const dashboardData = await getDashboardData();
+      return dashboardData;
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -58,7 +67,8 @@ export function AuthProvider({ children }) {
     user,
     loading,
     login,
-    logout
+    logout,
+    loadDashboardData
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

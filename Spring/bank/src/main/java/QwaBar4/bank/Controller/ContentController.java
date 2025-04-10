@@ -33,22 +33,8 @@ public class ContentController {
         return "signup";
     }
 
-    @GetMapping(value = {"/", "/index"})
+    @GetMapping("/")
     public String home() {
         return "index";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        UserModel user = userModelRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        model.addAttribute("username", user.getUsername());
-        model.addAttribute("account", user.getAccount());
-
-        return "dashboard";
     }
 }

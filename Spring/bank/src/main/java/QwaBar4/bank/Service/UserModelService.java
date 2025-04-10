@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import QwaBar4.bank.Model.AccountModelRepository;
 import QwaBar4.bank.Model.UserModel;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.DisabledException;
+import java.util.Collection;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.DTO.UserDTO;
 
@@ -23,6 +27,8 @@ public class UserModelService implements UserDetailsService {
 
     private final UserModelRepository userRepo;
     private final AccountModelRepository accountRepo;
+    
+       
 
     @Autowired
     public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo) {
@@ -75,12 +81,25 @@ public class UserModelService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserModel user = userRepo.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        if (!user.isActive()) {
+            throw new DisabledException("Account is disabled");
+        }
 
         return new org.springframework.security.core.userdetails.User(
             user.getUsername(),
             user.getPassword(),
-            Collections.emptyList()
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) 
         );
+    }
+
+
+    @Transactional
+    public void activateUser(Long userId) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(true);
+        userRepo.save(user);
     }
 }

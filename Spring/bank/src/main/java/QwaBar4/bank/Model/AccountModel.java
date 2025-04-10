@@ -30,13 +30,13 @@ public class AccountModel {
     @JsonIgnore 
     private UserModel user;
     
-    @OneToMany(mappedBy = "sourceAccount")
-    @JsonIgnore
-    private List<TransactionModel> outgoingTransactions;
-    
-    @OneToMany(mappedBy = "targetAccount")
-    @JsonIgnore
-    private List<TransactionModel> incomingTransactions;
+	@OneToMany(mappedBy = "sourceAccount", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<TransactionModel> outgoingTransactions;
+
+	@OneToMany(mappedBy = "targetAccount", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<TransactionModel> incomingTransactions;
 
     // Business methods
     public void deposit(Double amount) { // Change to Double

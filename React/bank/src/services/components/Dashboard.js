@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
+import { useAuth } from './AuthContext';
 import Transfer from './Transfer';
 import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
+	const { loadDashboardData } = useAuth(); 
     console.log('Dashboard component rendering');
     
     const [userData, setUserData] = useState({ 
@@ -21,50 +23,29 @@ const Dashboard = () => {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
-    const fetchAccountData = async () => {
+    const fetchAccountData = useCallback(async () => {
         try {
-            console.log('Fetching dashboard data...');
-            const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
-                headers: {
-                    'Authorization': `Bearer ${getJwtToken()}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to fetch account data');
-            }
-            
-            const data = await response.json();
-            console.log('API Response:', data);
-            
-            // Validate response structure
-            if (!data.username || !data.account || !data.account.accountNumber) {
-                throw new Error('Invalid data structure from server');
-            }
-
+            const data = await loadDashboardData();
             setUserData({
                 username: data.username,
                 account: {
                     accountNumber: data.account.accountNumber,
-                    balance: data.account.balance || 0
+                    balance: data.account.balance,
+                    dailyTransferLimit: data.account.dailyTransferLimit,
+                    dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
                 }
             });
         } catch (err) {
             console.error('Fetch error:', err);
             setError(err.message);
-            if (err.message.includes('401') || err.message.includes('token')) {
-                clearJwtToken();
-                navigate('/login');
-            }
         } finally {
             setLoading(false);
         }
-    };
+    }, [loadDashboardData, navigate]);
 
     useEffect(() => {
         fetchAccountData();
-    }, []);
+    }, [fetchAccountData]);
 
     const handleLogout = () => {
         console.log('Logging out...');

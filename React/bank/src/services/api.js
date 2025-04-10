@@ -20,19 +20,35 @@ export const handleResponse = async (response) => {
     }
 };
 
-
-const getDefaultHeaders = () => {
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-    
-    const token = getJwtToken();
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    return headers;
+export const getIndexData = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/index`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Index data error:', error);
+    throw error;
+  }
 };
+
+export const getDashboardData = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Dashboard data error:', error);
+    throw error;
+  }
+};
+
+
 
 export const resetPassword = (token, newPassword, confirmPassword) => {
     return fetch(`${API_BASE_URL}/login/recovery/reset`, {
@@ -43,19 +59,6 @@ export const resetPassword = (token, newPassword, confirmPassword) => {
 };
 
 
-export const getIndexData = async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/index`, {
-            headers: {
-                'Authorization': `Bearer ${getJwtToken()}`
-            }
-        });
-        return handleResponse(response);
-    } catch (error) {
-        console.error('Index data error:', error);
-        throw error;
-    }
-};
 
 
 

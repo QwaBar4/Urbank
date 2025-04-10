@@ -22,6 +22,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.core.annotation.Order;
@@ -46,13 +48,16 @@ public class SecurityConfig {
 
     private final UserModelService appUserService;
     private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public SecurityConfig(UserModelService appUserService, JwtUtil jwtUtil) {
+    public SecurityConfig(UserModelService appUserService, 
+                         JwtUtil jwtUtil,
+                         UserDetailsService userDetailsService) {
         this.appUserService = appUserService;
         this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
-
     @Bean
     public UserDetailsService userDetailsService() {
         return appUserService;
@@ -93,7 +98,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService),UsernamePasswordAuthenticationFilter.class)
 		    .csrf(csrf -> csrf
 		        .ignoringRequestMatchers(
 		        	"/auth/send-code",
