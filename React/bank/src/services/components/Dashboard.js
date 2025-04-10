@@ -7,6 +7,8 @@ import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
+    console.log('Dashboard component rendering');
+    
     const [userData, setUserData] = useState({ 
         username: '', 
         account: { 
@@ -21,25 +23,37 @@ const Dashboard = () => {
 
     const fetchAccountData = async () => {
         try {
+            console.log('Fetching dashboard data...');
             const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
                 headers: {
                     'Authorization': `Bearer ${getJwtToken()}`
                 }
             });
 
-            if (!response.ok) throw new Error('Failed to fetch account data');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to fetch account data');
+            }
             
             const data = await response.json();
+            console.log('API Response:', data);
+            
+            // Validate response structure
+            if (!data.username || !data.account || !data.account.accountNumber) {
+                throw new Error('Invalid data structure from server');
+            }
+
             setUserData({
                 username: data.username,
                 account: {
                     accountNumber: data.account.accountNumber,
-                    balance: data.account.balance
+                    balance: data.account.balance || 0
                 }
             });
         } catch (err) {
+            console.error('Fetch error:', err);
             setError(err.message);
-            if (err.message.includes('401')) {
+            if (err.message.includes('401') || err.message.includes('token')) {
                 clearJwtToken();
                 navigate('/login');
             }
@@ -53,12 +67,14 @@ const Dashboard = () => {
     }, []);
 
     const handleLogout = () => {
+        console.log('Logging out...');
         clearJwtToken();
         navigate('/login');
     };
 
     const handleDeleteAccount = async () => {
         try {
+            console.log('Deleting account...');
             const response = await fetch(`${API_BASE_URL}/api/user/delete`, {
                 method: 'DELETE',
                 headers: {
@@ -87,6 +103,7 @@ const Dashboard = () => {
 
     const refreshBalance = async () => {
         try {
+            console.log('Refreshing balance...');
             const response = await fetch(`${API_BASE_URL}/api/transactions/balance`, {
                 headers: {
                     'Authorization': `Bearer ${getJwtToken()}`
@@ -108,8 +125,10 @@ const Dashboard = () => {
         }
     };
 
+    console.log('Rendering with:', { userData, loading, error });
+
     if (loading) return <div className="loading">Loading account information...</div>;
-    if (error) return <div className="error">Error: {error}</div>;
+    if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
     return (
         <div className="dashboard-container container mt-4">
