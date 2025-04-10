@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const data = await apiLogin(credentials);
       storeJwtToken(data.jwt);
-      const userData = await loadUserData();
+      const userData = await loadDashboardData();
       setUser(userData);
       return data;
     } catch (error) {

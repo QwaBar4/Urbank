@@ -22,7 +22,7 @@ export const handleResponse = async (response) => {
 
 export const getIndexData = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/index`, {
+    const response = await fetch(`${API_BASE_URL}/api/user`, {
       headers: {
         'Authorization': `Bearer ${getJwtToken()}`
       }

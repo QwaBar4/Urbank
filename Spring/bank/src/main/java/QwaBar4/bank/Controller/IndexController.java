@@ -30,7 +30,7 @@ public class IndexController {
         this.userModelRepository = userModelRepository;
     }
     
-    @GetMapping("/api/index")
+    @GetMapping("/api/user")
     public ResponseEntity<Map<String, Object>> getInitialData() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

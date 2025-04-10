@@ -2,50 +2,42 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
-import { useAuth } from './AuthContext';
+import { getDashboardData } from '../api';
 import Transfer from './Transfer';
 import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
-	const { loadDashboardData } = useAuth(); 
-    console.log('Dashboard component rendering');
     
-    const [userData, setUserData] = useState({ 
-        username: '', 
-        account: { 
-            accountNumber: '', 
-            balance: 0
-        } 
-    });
+	const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
-    const fetchAccountData = useCallback(async () => {
-        try {
-            const data = await loadDashboardData();
-            setUserData({
-                username: data.username,
-                account: {
-                    accountNumber: data.account.accountNumber,
-                    balance: data.account.balance,
-                    dailyTransferLimit: data.account.dailyTransferLimit,
-                    dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-                }
-            });
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    }, [loadDashboardData, navigate]);
+	const fetchAccountData = useCallback(async () => {
+		try {
+		    const data = await getDashboardData();
+		    
+		    setUserData({
+		        username: data.username,
+		        account: {
+		            accountNumber: data.account.accountNumber,
+		            balance: data.account.balance,
+		            dailyTransferLimit: data.account.dailyTransferLimit,
+		            dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+		        }
+		    });
+		} catch (err) {
+		    setError(err.message);
+		} finally {
+		    setLoading(false);
+		}
+	}, []);
 
-    useEffect(() => {
-        fetchAccountData();
-    }, [fetchAccountData]);
+useEffect(() => {
+    fetchAccountData();
+}, [fetchAccountData]); 
 
     const handleLogout = () => {
         console.log('Logging out...');
@@ -106,12 +98,12 @@ const Dashboard = () => {
         }
     };
 
-    console.log('Rendering with:', { userData, loading, error });
 
     if (loading) return <div className="loading">Loading account information...</div>;
     if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
     return (
+     userData && (
         <div className="dashboard-container container mt-4">
             <div className="dashboard-header row mb-4">
                 <div className="col-md-8">
@@ -188,6 +180,7 @@ const Dashboard = () => {
                 </div>
             )}
         </div>
+        )
     );
 };
 
