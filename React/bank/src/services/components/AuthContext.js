@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getJwtToken, storeJwtToken, clearJwtToken } from '../../utils/auth';
 import { login as apiLogin, getIndexData } from '../api';
-import { getDashboardData } from '../api'; // Import the getDashboardData function
+import { getDashboardData, getAdminDashboardData } from '../api'; // Import the new function
 
 const AuthContext = createContext();
 
@@ -12,7 +12,15 @@ export function AuthProvider({ children }) {
   const loadUserData = async () => {
     try {
       const userData = await getIndexData();
-      return userData;
+      const dashboardData = await getDashboardData();
+      
+      const mergedUser = {
+        ...userData,
+        ...dashboardData,
+        roles: userData.roles || []
+      };
+      
+      return mergedUser;
     } catch (error) {
       clearJwtToken();
       return null;
@@ -28,12 +36,25 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const loadAdminDashboardData = async () => {
+    try {
+      const adminData = await getAdminDashboardData(); // Call the new admin data function
+      return adminData;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const initializeAuth = async () => {
       const token = getJwtToken();
       if (token) {
-        const userData = await loadUserData();
-        setUser(userData);
+        try {
+          const userData = await loadUserData();
+          setUser(userData);
+        } catch (error) {
+          clearJwtToken();
+        }
       }
       setLoading(false);
     };
@@ -45,8 +66,8 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const data = await apiLogin(credentials);
       storeJwtToken(data.jwt);
-      const userData = await loadDashboardData();
-      setUser(userData);
+      const userData = await loadUserData(); // Load user data after login
+      setUser (userData);
       return data;
     } catch (error) {
       throw error;
@@ -57,7 +78,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     clearJwtToken();
-    setUser(null);
+    setUser (null);
   };
 
   const value = {
@@ -65,7 +86,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
-    loadDashboardData
+    loadAdminDashboardData, // Expose the new function
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -77,4 +98,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}

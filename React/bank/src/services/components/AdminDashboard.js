@@ -1,32 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
-import api from './apiService';
-import UserTable from './UserTable';
+import React, { useEffect, useState } from 'react'; // Ensure React and hooks are imported
+import { useAuth } from './AuthContext'; // Adjust the path if necessary
+import { getAdminDashboardData } from '../api'; // Adjust the path if necessary
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
+  const [adminData, setAdminData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchAdminData = async () => {
       try {
-        const response = await api.get('/admin/users');
-        setUsers(response.data);
-      } finally {
-        setLoading(false);
+        const data = await getAdminDashboardData();
+        setAdminData(data);
+      } catch (error) {
+        setError(error.message);
       }
     };
-    fetchUsers();
-  }, []);
 
-  if (!user?.roles?.includes('ADMIN')) return <div>Access denied</div>;
+    if (user?.roles?.some(r => r.toUpperCase() === 'ADMIN')) {
+      fetchAdminData();
+    }
+  }, [user]);
+
   if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
       <h1>Admin Dashboard</h1>
-      <UserTable users={users} />
+      {adminData && (
+        <div>
+          <h2>System Statistics</h2>
+          <p>Total Users: {adminData.totalUsers}</p>
+          <h3>User List</h3>
+          <ul>
+            {adminData.users.map(user => (
+              <li key={user.id}>
+                {user.username} - {user.email}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -16,6 +16,7 @@ import QwaBar4.bank.Model.AccountModel;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,8 +38,6 @@ public class DashboardController {
             .build();
     }
 
-
-
     @GetMapping("/api/user/dashboard")
     public ResponseEntity<Map<String, Object>> getDashboardData() {
         try {
@@ -46,7 +45,7 @@ public class DashboardController {
             String username = authentication.getName();
 
             UserModel user = userModelRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("User  not found"));
 
             AccountModel account = user.getAccount();
             AccountDTO accountDTO = new AccountDTO(
@@ -68,6 +67,37 @@ public class DashboardController {
                     .body(Collections.singletonMap("error", e.getMessage()));
         }
     }
+
+	@GetMapping("/api/admin/dashboard")
+	public ResponseEntity<Map<String, Object>> getAdminDashboardData() {
+		try {
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		    if (authentication == null) {
+		        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		                .body(Collections.singletonMap("error", "User  not authenticated"));
+		    }
+
+		    // Log user roles for debugging
+		    System.out.println("User  Roles: " + authentication.getAuthorities());
+
+		    if (!authentication.getAuthorities().stream()
+		            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+		        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		                .body(Collections.singletonMap("error", "Access denied: Admin role required"));
+		    }
+
+		    // Fetch all users or relevant admin data
+		    List<UserModel> users = userModelRepository.findAll();
+		    Map<String, Object> response = new HashMap<>();
+		    response.put("users", users);
+		    response.put("totalUsers", users.size());
+
+		    return ResponseEntity.ok(response);
+		} catch (Exception e) {
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Collections.singletonMap("error", e.getMessage()));
+		}
+	}
 
     @PostMapping("/api/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {

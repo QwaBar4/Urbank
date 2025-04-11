@@ -4,21 +4,25 @@ import { getJwtToken, storeJwtToken } from '../utils/auth';
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 export const handleResponse = async (response) => {
-    const text = await response.text();
+    const text = await response.text(); // Get the response as text
     try {
-        const json = text ? JSON.parse(text) : {};
+        const json = text ? JSON.parse(text) : {}; // Attempt to parse JSON
         if (!response.ok) {
             const error = new Error(json.message || json.error || 'Request failed');
             error.status = response.status;
-            throw error;
+            throw error; // Throw an error with the message
         }
-        return json;
+        return json; // Return the parsed JSON data
     } catch (err) {
+        // Log the raw response text for debugging
+        console.error('Failed to parse response:', text);
         const error = new Error(text || 'Failed to parse response');
         error.status = response.status;
-        throw error;
+        throw error; // Throw the error
     }
 };
+
+
 
 export const getIndexData = async () => {
   try {
@@ -48,6 +52,19 @@ export const getDashboardData = async () => {
   }
 };
 
+export const getAdminDashboardData = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+            headers: {
+                'Authorization': `Bearer ${getJwtToken()}`
+            }
+        });
+        return handleResponse(response);
+    } catch (error) {
+        console.error('Admin dashboard data error:', error);
+        throw error;
+    }
+};
 
 
 export const resetPassword = (token, newPassword, confirmPassword) => {
@@ -158,3 +175,17 @@ export const login = async (credentials) => {
     storeJwtToken(data.jwt);
     return data;
 };
+
+const api = {
+    API_BASE_URL,
+    checkEmail,
+    checkUsername,
+    getDashboardData,
+    getIndexData,
+    handleResponse,
+    login,
+    resetPassword,
+    sendVerificationCode,
+    signup,
+};
+export default api;

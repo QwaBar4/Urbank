@@ -1,3 +1,5 @@
+import React from 'react';
+
 const UserTable = ({ users, assignRole, removeRole }) => (
   <table>
     <thead>
@@ -25,3 +27,5 @@ const UserTable = ({ users, assignRole, removeRole }) => (
     </tbody>
   </table>
 );
+
+export default UserTable;

@@ -94,7 +94,7 @@ public class SecurityConfig {
        		)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset", "/api/transactions/transfer", "/api/transactions/deposit", "/api/transactions/withdraw").permitAll()
+                .requestMatchers("/", "/index", "/login", "/signup", "/req/**", "/api/**", "/auth/**", "/static/**", "/favicon.ico", "/auth/send-code", "/req/signup", "/auth/send-recovery-code","/auth/verify-recovery-code", "/auth/verify-code", "/login/recovery/reset", "/api/transactions/transfer", "/api/transactions/deposit", "/api/transactions/withdraw", "/admin/**", "/api/admin/dashboard" ).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .requestMatchers("/api/user/**").authenticated()
     			.requestMatchers("/api/**").permitAll() 
