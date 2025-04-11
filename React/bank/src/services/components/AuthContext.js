@@ -1,10 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  getJwtToken,
-  storeJwtToken,
-  clearJwtToken
-} from '../../utils/auth';
-import { login as apiLogin, getIndexData, getDashboardData } from '../api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getJwtToken, storeJwtToken, clearJwtToken } from '../../utils/auth';
+import { login as apiLogin, getIndexData } from '../api';
+import { getDashboardData } from '../api'; // Import the getDashboardData function
 
 const AuthContext = createContext();
 
@@ -21,7 +18,7 @@ export function AuthProvider({ children }) {
       return null;
     }
   };
-  
+
   const loadDashboardData = async () => {
     try {
       const dashboardData = await getDashboardData();

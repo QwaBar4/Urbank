@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/admin")
@@ -16,23 +18,19 @@ import QwaBar4.bank.Service.*;
 public class AdminController {
 
     @Autowired
-    private AuditLogService auditLogService;
+    private UserModelService userModelService;
 
-    @Autowired
-    private UserModelService userModelService; // Assuming you have a service to fetch users
-
-    @GetMapping("/users")
-    public List<UserDTO> getAllUsers() {
-        auditLogService.logAction("GET_USERS", "admin", "Fetched all users");
-        // Return a list of all users
-        return userModelService.getAllUsers(); // Implement this method in UserModelService
+    @PostMapping("/users/{userId}/assignRole")
+    public ResponseEntity<?> assignRoleToUser(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        String role = request.get("role");
+        userModelService.assignRoleToUser(userId, role);
+        return ResponseEntity.ok("Role assigned successfully");
     }
 
-    @PostMapping("/users/{userId}/lock")
-    public ResponseEntity<?> lockUser(@PathVariable Long userId) {
-        auditLogService.logAction("LOCK_USER", "admin", "Locked user with ID: " + userId);
-        // Perform the lock user logic here
-        userModelService.lockUser(userId); // Implement this method in UserModelService
-        return ResponseEntity.ok("User locked successfully");
+    @PostMapping("/users/{userId}/removeRole")
+    public ResponseEntity<?> removeRoleFromUser(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        String role = request.get("role");
+        userModelService.removeRoleFromUser(userId, role);
+        return ResponseEntity.ok("Role removed successfully");
     }
 }

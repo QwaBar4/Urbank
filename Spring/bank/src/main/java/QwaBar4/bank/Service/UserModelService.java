@@ -90,7 +90,11 @@ public class UserModelService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
             user.getUsername(),
             user.getPassword(),
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) 
+            user.isActive(),
+            true,
+            true,
+            true,
+            user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
         );
     }
 
@@ -100,6 +104,20 @@ public class UserModelService implements UserDetailsService {
         UserModel user = userRepo.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         user.setActive(true);
+        userRepo.save(user);
+    }
+    
+    public void assignRoleToUser(Long userId, String role) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.getRoles().add(role);
+        userRepo.save(user);
+    }
+
+    public void removeRoleFromUser(Long userId, String role) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.getRoles().remove(role);
         userRepo.save(user);
     }
 }

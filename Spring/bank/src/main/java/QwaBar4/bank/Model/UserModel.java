@@ -33,6 +33,7 @@ public class UserModel {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -55,6 +56,14 @@ public class UserModel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
     public String getPassword() {

@@ -42,6 +42,7 @@ public class IndexController {
             Map<String, Object> response = new HashMap<>();
             response.put("username", user.getUsername());
             response.put("accountNumber", user.getAccount().getAccountNumber());
+            response.put("roles", user.getRoles());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

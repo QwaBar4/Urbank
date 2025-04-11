@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/req")
 public class RegistrationController {
     private final UserModelRepository userRepo;
     private final PasswordEncoder encoder;
@@ -50,14 +51,13 @@ public class RegistrationController {
     }
 
     @Transactional
-    @PostMapping("/req/signup")
-    public ResponseEntity<?> createUser (@RequestBody Map<String, String> request) {
+    @PostMapping("/signup")
+    public ResponseEntity<?> createUser(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String email = request.get("email");
         String password = request.get("password");
         String code = request.get("code");
 
-        // Verify the code before creating the user
         if (!verificationService.verifyCode(email, code)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid verification code.");
         }
@@ -73,33 +73,35 @@ public class RegistrationController {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new AuthResponse(null, "Email already exists", false));
             }
-            
+
             if (!isValidEmail(email)) {
-				return ResponseEntity.badRequest().body("Invalid email format.");
-			}
+                return ResponseEntity.badRequest().body("Invalid email format.");
+            }
 
             if (password.length() < 6) {
                 return ResponseEntity.badRequest().body("Password must be at least 6 characters");
             }
-            
+
             AccountModel account = new AccountModel();
-       		account.setAccountNumber("ACC-" + UUID.randomUUID());
-        	account.setBalance(0.0);
-        	
-            UserModel newUser  = new UserModel();
-            newUser .setUsername(normalizedUsername);
-            newUser .setEmail(email.trim().toLowerCase());
-            newUser .setPassword(encoder.encode(password));
-            newUser .setAccount(account);
-            
+            account.setAccountNumber("ACC-" + UUID.randomUUID());
+            account.setBalance(0.0);
+
+            UserModel newUser = new UserModel();
+            newUser.setUsername(normalizedUsername);
+            newUser.setEmail(email.trim().toLowerCase());
+            newUser.setPassword(encoder.encode(password));
+            newUser.setAccount(account);
+			newUser.setActive(true);
+            newUser.getRoles().add("USER");
+
             account.setUser(newUser);
-            userRepo.save(newUser );
+            userRepo.save(newUser);
 
             Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(normalizedUsername, password)
-			);
-			String jwt = jwtUtil.generateToken(authentication);
-            return ResponseEntity.ok(new AuthResponse(jwt, "User  created", true));
+                new UsernamePasswordAuthenticationToken(normalizedUsername, password)
+            );
+            String jwt = jwtUtil.generateToken(authentication);
+            return ResponseEntity.ok(new AuthResponse(jwt, "User created", true));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new AuthResponse(null, "Error creating user", false));

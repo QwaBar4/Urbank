@@ -98,6 +98,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .requestMatchers("/api/user/**").authenticated()
     			.requestMatchers("/api/**").permitAll() 
+    			.requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService),UsernamePasswordAuthenticationFilter.class)

@@ -1,6 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { useEffect, useState } from 'react';
 import api from './apiService';
+import UserTable from './UserTable';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  if (!user?.isAdmin) return <div>Access denied</div>;
+  if (!user?.roles?.includes('ADMIN')) return <div>Access denied</div>;
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -29,3 +30,5 @@ const AdminDashboard = () => {
     </div>
   );
 };
+
+export default AdminDashboard;
