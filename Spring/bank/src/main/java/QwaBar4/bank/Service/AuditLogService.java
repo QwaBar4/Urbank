@@ -11,7 +11,7 @@ public class AuditLogService {
 
     @Autowired
     private AuditLogRepository auditLogRepository;
-
+    
     public void logAction(String action, String username, String details) {
         AuditLog auditLog = new AuditLog(action, username, LocalDateTime.now(), details);
         auditLogRepository.save(auditLog);

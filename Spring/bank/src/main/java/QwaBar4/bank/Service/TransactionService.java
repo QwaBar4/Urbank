@@ -34,7 +34,6 @@ public class TransactionService {
     @Transactional
     public TransactionDTO processTransfer(String sourceAccount, String targetAccount,
                                           double amount, String description, String username) {
-        // Validate accounts
         AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
             .orElseThrow(() -> new RuntimeException("Source account not found"));
 
@@ -45,7 +44,6 @@ public class TransactionService {
         AccountModel target = accountRepo.findByAccountNumber(targetAccount)
             .orElseThrow(() -> new RuntimeException("Target account not found"));
 
-        // Validate balance
         if (source.getBalance() < amount) {
             throw new RuntimeException("Insufficient funds");
         }
@@ -54,15 +52,12 @@ public class TransactionService {
             throw new TransactionLimitException("Exceeds daily transfer limit");
         }
 
-        // Update balances
         source.setBalance(source.getBalance() - amount);
         target.setBalance(target.getBalance() + amount);
 
-        // Save accounts
         accountRepo.save(source);
         accountRepo.save(target);
 
-        // Create transaction record
         TransactionModel transaction = new TransactionModel();
         transaction.setType("TRANSFER");
         transaction.setAmount(amount);
@@ -121,25 +116,20 @@ public class TransactionService {
     }
 
     public TransactionDTO processDeposit(String accountNumber, double amount, String description, String username) {
-        // Validate amount
         if (amount <= 0) {
             throw new RuntimeException("Deposit amount must be positive");
         }
 
-        // Get account
         AccountModel account = accountRepo.findByAccountNumber(accountNumber)
             .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        // Verify ownership
         if (!account.getUser().getUsername().equals(username)) {
             throw new RuntimeException("Unauthorized deposit attempt");
         }
 
-        // Update balance
         account.setBalance(account.getBalance() + amount);
         accountRepo.save(account);
 
-        // Create transaction record
         TransactionModel transaction = new TransactionModel();
         transaction.setType("DEPOSIT");
         transaction.setAmount(amount);
@@ -152,30 +142,24 @@ public class TransactionService {
     }
 
     public Map<String, Object> processWithdrawal(String accountNumber, double amount, String description, String username) {
-        // Validate amount
         if (amount <= 0) {
             throw new RuntimeException("Withdrawal amount must be positive");
         }
 
-        // Get account
         AccountModel account = accountRepo.findByAccountNumber(accountNumber)
             .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        // Verify ownership
         if (!account.getUser().getUsername().equals(username)) {
             throw new RuntimeException("Unauthorized withdrawal attempt");
         }
 
-        // Check sufficient funds
         if (account.getBalance() < amount) {
             throw new RuntimeException("Insufficient funds for withdrawal");
         }
 
-        // Update balance
         account.setBalance(account.getBalance() - amount);
         AccountModel updatedAccount = accountRepo.save(account);
 
-        // Create transaction record
         TransactionModel transaction = new TransactionModel();
         transaction.setType("WITHDRAWAL");
         transaction.setAmount(amount);
@@ -184,7 +168,6 @@ public class TransactionService {
         transaction.setSourceAccount(account);
         transactionRepo.save(transaction);
 
-        // Prepare response
         Map<String, Object> response = new HashMap<>();
         response.put("transaction", convertToDTO(transaction));
         response.put("newBalance", updatedAccount.getBalance());
