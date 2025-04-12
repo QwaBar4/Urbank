@@ -77,7 +77,6 @@ public class DashboardController {
 		                .body(Collections.singletonMap("error", "User  not authenticated"));
 		    }
 
-		    // Log user roles for debugging
 		    System.out.println("User  Roles: " + authentication.getAuthorities());
 
 		    if (!authentication.getAuthorities().stream()
@@ -86,7 +85,6 @@ public class DashboardController {
 		                .body(Collections.singletonMap("error", "Access denied: Admin role required"));
 		    }
 
-		    // Fetch all users or relevant admin data
 		    List<UserModel> users = userModelRepository.findAll();
 		    Map<String, Object> response = new HashMap<>();
 		    response.put("users", users);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
+import { useAuth } from './AuthContext';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
 import { getDashboardData } from '../api';
 import Transfer from './Transfer';
@@ -8,36 +9,35 @@ import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
-    
-	const [userData, setUserData] = useState(null);
+	const { user } = useAuth();
+    const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
-	const fetchAccountData = useCallback(async () => {
-		try {
-		    const data = await getDashboardData();
-		    
-		    setUserData({
-		        username: data.username,
-		        account: {
-		            accountNumber: data.account.accountNumber,
-		            balance: data.account.balance,
-		            dailyTransferLimit: data.account.dailyTransferLimit,
-		            dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-		        }
-		    });
-		} catch (err) {
-		    setError(err.message);
-		} finally {
-		    setLoading(false);
-		}
-	}, []);
+    const fetchAccountData = useCallback(async () => {
+        try {
+            const data = await getDashboardData();
+            setUserData({
+                username: data.username,
+                account: {
+                    accountNumber: data.account.accountNumber,
+                    balance: data.account.balance,
+                    dailyTransferLimit: data.account.dailyTransferLimit,
+                    dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+                }
+            });
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-useEffect(() => {
-    fetchAccountData();
-}, [fetchAccountData]); 
+    useEffect(() => {
+        fetchAccountData();
+    }, [fetchAccountData]); 
 
     const handleLogout = () => {
         console.log('Logging out...');
@@ -98,88 +98,97 @@ useEffect(() => {
         }
     };
 
-
     if (loading) return <div className="loading">Loading account information...</div>;
     if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
+    const isAdmin = user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN');
+
     return (
-     userData && (
-        <div className="dashboard-container container mt-4">
-            <div className="dashboard-header row mb-4">
-                <div className="col-md-8">
-                    <h1>Welcome, {userData.username}!</h1>
+        userData && (
+            <div className="dashboard-container container mt-4">
+                <div className="dashboard-header row mb-4">
+                    <div className="col-md-8">
+                        <h1>Welcome, {userData.username}!</h1>
+                    </div>
+                    <div className="col-md-4 text-end">
+                        <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">
+                            Go Home
+                        </button>
+                        <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
+                            Logout
+                        </button>
+                        <button 
+                            onClick={() => setShowDeleteConfirmation(true)}
+                            className="btn btn-outline-danger"
+                        >
+                            Delete Account
+                        </button>
+                        {isAdmin && (
+                            <button 
+                                onClick={() => navigate('/admin')}
+                                className="btn btn-outline-warning me-2"
+                            >
+                                Admin Dashboard
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <div className="col-md-4 text-end">
-                    <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">
-                        Go Home
-                    </button>
-                    <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
-                        Logout
-                    </button>
-                    <button 
-                        onClick={() => setShowDeleteConfirmation(true)}
-                        className="btn btn-outline-danger"
-                    >
-                        Delete Account
-                    </button>
-                </div>
-            </div>
 
-            <div className="row">
-                <div className="col-md-4">
-                    <BalanceCard 
-                        accountNumber={userData.account.accountNumber} 
-                        balance={userData.account.balance} 
-                        refreshBalance={refreshBalance}
-                    />
-                    <Transfer 
-                        userAccount={userData.account} 
-                        refreshBalance={refreshBalance} 
-                    />
+                <div className="row">
+                    <div className="col-md-4">
+                        <BalanceCard 
+                            accountNumber ={userData.account.accountNumber} 
+                            balance={userData.account.balance} 
+                            refreshBalance={refreshBalance}
+                        />
+                        <Transfer 
+                            userAccount={userData.account} 
+                            refreshBalance={refreshBalance} 
+                        />
+                    </div>
+                    <div className="col-md-8">
+                        <TransactionHistory userAccount={userData.account} />
+                    </div>
                 </div>
-                <div className="col-md-8">
-                    <TransactionHistory userAccount={userData.account} />
-                </div>
-            </div>
 
-            {/* Delete Confirmation Modal */}
-            {showDeleteConfirmation && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Confirm Account Deletion</h5>
-                                <button 
-                                    type="button" 
-                                    className="btn-close" 
-                                    onClick={() => setShowDeleteConfirmation(false)}
-                                ></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
-                                <p>All your account data and transaction history will be permanently erased.</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button 
-                                    type="button" 
-                                    className="btn btn-secondary" 
-                                    onClick={() => setShowDeleteConfirmation(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="btn btn-danger" 
-                                    onClick={handleDeleteAccount}
-                                >
-                                    Confirm Delete
-                                </button>
+                {/* Delete Confirmation Modal */}
+                {showDeleteConfirmation && (
+                    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Confirm Account Deletion</h5>
+                                    <button 
+                                        type="button" 
+                                        className="btn-close" 
+                                        onClick={() => setShowDeleteConfirmation(false)}
+                                    ></button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+                                    <p>All your account data and transaction history will be permanently erased.</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        onClick={() => setShowDeleteConfirmation(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-danger" 
+                                        onClick={handleDeleteAccount}
+                                    >
+                                        Confirm Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
         )
     );
 };

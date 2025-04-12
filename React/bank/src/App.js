@@ -24,16 +24,16 @@ const PrivateRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  // Check for ROLE_ADMIN in all role formats
+  const isAdmin = user.roles?.some(role => 
+    role === 'ADMIN' || 
+    role === 'ROLE_ADMIN' ||
+    role.authority === 'ROLE_ADMIN'
+  );
 
-  const isAdmin = user.roles?.some(role => role.toUpperCase() === 'ADMIN');
-  
   if (!isAdmin) {
     return <Navigate to="/" replace />;
   }

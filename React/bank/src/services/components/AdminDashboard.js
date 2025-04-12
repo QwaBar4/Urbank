@@ -17,7 +17,7 @@ const AdminDashboard = () => {
       }
     };
 
-    if (user?.roles?.some(r => r.toUpperCase() === 'ADMIN')) {
+    if (user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
       fetchAdminData();
     }
   }, [user]);
