@@ -22,10 +22,6 @@ export const handleResponse = async (response) => {
     }
 };
 
-export const activateUser = (userId, active) => api.put(`/admin/users/${userId}/status`, { active });
-export const deleteUser = (userId) => api.delete(`/admin/users/${userId}`);
-export const getUserTransactions = (userId) => api.get(`/admin/users/${userId}/transactions`);
-
 
 export const getIndexData = async () => {
   try {
@@ -179,8 +175,57 @@ export const login = async (credentials) => {
     return data;
 };
 
+export const activateUser = async (userId, active) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getJwtToken()}`
+      },
+      body: JSON.stringify({ active })
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Activation error:', error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Deletion error:', error);
+    throw error;
+  }
+};
+
+export const getUserTransactions = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/transactions`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Transactions error:', error);
+    throw error;
+  }
+};
+
 const api = {
     API_BASE_URL,
+    activateUser,
+    deleteUser,
+    getUserTransactions,
     checkEmail,
     checkUsername,
     getDashboardData,

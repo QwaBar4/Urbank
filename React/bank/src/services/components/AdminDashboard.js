@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { getAdminDashboardData, activateUser, deleteUser, getUserTransactions } from '../api';
+import { activateUser } from '../api';
+import { getAdminDashboardData, deleteUser, getUserTransactions } from '../api';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
