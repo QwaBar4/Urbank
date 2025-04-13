@@ -22,6 +22,9 @@ export const handleResponse = async (response) => {
     }
 };
 
+export const activateUser = (userId, active) => api.put(`/admin/users/${userId}/status`, { active });
+export const deleteUser = (userId) => api.delete(`/admin/users/${userId}`);
+export const getUserTransactions = (userId) => api.get(`/admin/users/${userId}/transactions`);
 
 
 export const getIndexData = async () => {
