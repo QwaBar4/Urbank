@@ -7,9 +7,8 @@ const Login = () => {
         username: '',
         password: '',
     });
-    const [error, setError] = useState(''); // Add error state
+    const [setError] = useState(''); // Add error state
     const navigate = useNavigate();
-    const getJwtToken = () => localStorage.getItem('jwt');
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -20,7 +19,7 @@ const Login = () => {
 		e.preventDefault();
 		try {
 		    const response = await login(credentials);
-		    if (response.jwt) { // Check for JWT presence instead of message
+		    if (response.jwt) {
 		        navigate('/dashboard');
 		    }
 		} catch (error) {

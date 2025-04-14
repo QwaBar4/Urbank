@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { activateUser } from '../api';
-import { getAdminDashboardData, deleteUser, getUserTransactions } from '../api';
+import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser } from '../api';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
@@ -15,30 +14,39 @@ const AdminDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const data = await getAdminDashboardData();
-        setAdminData(data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
+	useEffect(() => {
+	  if (user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
+		const fetchData = async () => {
+		  try {
+		    const data = await getAdminDashboardData();
+		    setAdminData(data);
+		    setError(null);
+		  } catch (error) {
+		    setError(error.message);
+		  }
+		};
+		fetchData();
+	  }
+	}, [user, navigate]);
 
-    if (user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
-      fetchAdminData();
-    }
-  }, [user]);
-
-  const handleStatusChange = async (userId, currentStatus) => {
-    try {
-      await activateUser(userId, !currentStatus);
-      const updatedData = await getAdminDashboardData();
-      setAdminData(updatedData);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+	const handleStatusChange = async (userId, currentStatus) => {
+	  try {
+		await activateUser(userId, !currentStatus);
+		setAdminData(prev => ({
+		  ...prev,
+		  users: prev.users.map(u => 
+		    u.id === userId ? { ...u, active: !currentStatus } : u
+		  )
+		}));
+	  } catch (error) {
+		console.error('Full error:', error);
+		setError(
+		  error.message.includes('403') 
+		    ? "Admin privileges required"
+		    : error.message || "Failed to update status"
+		);
+	  }
+	};
 
   const handleDelete = async () => {
     try {
@@ -60,6 +68,9 @@ const AdminDashboard = () => {
     }
   };
 
+  if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
+  	return <div className="alert alert-danger">Unauthorized access</div>;
+  }
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="alert alert-danger">Error: {error}</div>;
 

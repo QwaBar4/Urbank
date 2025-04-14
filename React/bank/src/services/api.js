@@ -175,17 +175,34 @@ export const login = async (credentials) => {
     return data;
 };
 
+export const getUserDetails = async (userId) => {
+  const response = await api.get(`/admin/users/${userId}`);
+  return response.data;
+};
+
+export const updateUser = async (userId, userData) => {
+  const response = await api.put(`/admin/users/${userId}`, userData);
+  return response.data;
+};
+
 export const activateUser = async (userId, active) => {
   try {
     const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
       method: 'PUT',
       headers: {
+        'Authorization': `Bearer ${getJwtToken()}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getJwtToken()}`
       },
-      body: JSON.stringify({ active })
+      body: JSON.stringify({ active }),
+      credentials: 'include'
     });
-    return handleResponse(response);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Activation failed');
+    }
+
+    return await response.json();
   } catch (error) {
     console.error('Activation error:', error);
     throw error;
@@ -223,7 +240,6 @@ export const getUserTransactions = async (userId) => {
 
 const api = {
     API_BASE_URL,
-    activateUser,
     deleteUser,
     getUserTransactions,
     checkEmail,

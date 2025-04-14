@@ -8,6 +8,7 @@ import PasswordReset from './services/components/PasswordReset';
 import Dashboard from './services/components/Dashboard';
 import Deposit from './services/components/Deposit';
 import Withdraw from './services/components/Withdraw';
+import EditUser from './services/components/EditUser';
 import AdminDashboard from './services/components/AdminDashboard'; // Import AdminDashboard
 
 // Proper private route component
@@ -65,6 +66,12 @@ function App() {
               <AdminDashboard />
             </AdminRoute>
           } />
+          
+          <Route path="/edit-user/:userId" element={
+		    <PrivateRoute>
+			  <EditUser />
+		    </PrivateRoute>
+		  } />
 
           {/* Transaction routes */}
           <Route path="/deposit" element={
