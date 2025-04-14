@@ -27,8 +27,6 @@ public class UserModelService implements UserDetailsService {
 
     private final UserModelRepository userRepo;
     private final AccountModelRepository accountRepo;
-    
-       
 
     @Autowired
     public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo) {
@@ -98,7 +96,6 @@ public class UserModelService implements UserDetailsService {
         );
     }
 
-
     @Transactional
     public void activateUser(Long userId) {
         UserModel user = userRepo.findById(userId)
@@ -106,7 +103,15 @@ public class UserModelService implements UserDetailsService {
         user.setActive(true);
         userRepo.save(user);
     }
-    
+
+    @Transactional
+    public void updateUserStatus(Long userId, Boolean active) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(active);
+        userRepo.save(user);
+    }
+
     public void assignRoleToUser(Long userId, String role) {
         UserModel user = userRepo.findById(userId)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));

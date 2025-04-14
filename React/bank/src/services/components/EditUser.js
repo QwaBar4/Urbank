@@ -33,7 +33,7 @@ const EditUser = () => {
     e.preventDefault();
     try {
       await updateUser(userId, formState);
-      navigate('/admin-dashboard');
+      navigate('/dashboard');
     } catch (error) {
       setError('Failed to update user');
     }

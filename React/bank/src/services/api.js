@@ -192,19 +192,26 @@ export const activateUser = async (userId, active) => {
       headers: {
         'Authorization': `Bearer ${getJwtToken()}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json' // Explicitly request JSON
       },
-      body: JSON.stringify({ active }),
-      credentials: 'include'
+      body: JSON.stringify({ active })
     });
 
+    const contentType = response.headers.get('content-type');
+    
+    const data = await handleResponse(response);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Activation failed');
+      throw new Error(data.message || 'Activation failed');
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
-    console.error('Activation error:', error);
+    console.error('API Error:', {
+      url: `${API_BASE_URL}/admin/users/${userId}/status`,
+      status: error.status,
+      message: error.message
+    });
     throw error;
   }
 };

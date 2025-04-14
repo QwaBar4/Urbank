@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser } from '../api';
+import { getJwtToken } from '../../utils/auth';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 const AdminDashboard = () => {
   const { user, loading } = useAuth();
+  const { user: admin } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [error, setError] = useState(null);
   const [showTransactions, setShowTransactions] = useState(null);
@@ -15,7 +17,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
 	useEffect(() => {
-	  if (user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
+	  if (admin?.roles?.includes('ROLE_ADMIN')) {
 		const fetchData = async () => {
 		  try {
 		    const data = await getAdminDashboardData();
@@ -31,7 +33,9 @@ const AdminDashboard = () => {
 
 	const handleStatusChange = async (userId, currentStatus) => {
 	  try {
-		await activateUser(userId, !currentStatus);
+		const result = await activateUser(userId, !currentStatus);
+		console.log('Activation success:', result);
+		
 		setAdminData(prev => ({
 		  ...prev,
 		  users: prev.users.map(u => 
@@ -39,12 +43,16 @@ const AdminDashboard = () => {
 		  )
 		}));
 	  } catch (error) {
-		console.error('Full error:', error);
-		setError(
-		  error.message.includes('403') 
-		    ? "Admin privileges required"
-		    : error.message || "Failed to update status"
-		);
+		let errorMessage = error.message;
+		
+		// Handle specific error cases
+		if (error.message.includes('Failed to parse')) {
+		  errorMessage = "Server returned invalid response. Check backend logs.";
+		} else if (error.message.includes('Non-JSON')) {
+		  errorMessage = "Server error occurred. Please try again.";
+		}
+		
+		setError(errorMessage);
 	  }
 	};
 
@@ -72,7 +80,6 @@ const AdminDashboard = () => {
   	return <div className="alert alert-danger">Unauthorized access</div>;
   }
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="alert alert-danger">Error: {error}</div>;
 
   return (
     <div className="container mt-4">

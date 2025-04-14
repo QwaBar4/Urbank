@@ -11,7 +11,6 @@ import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
@@ -32,5 +31,17 @@ public class AdminController {
         String role = request.get("role");
         userModelService.removeRoleFromUser(userId, role);
         return ResponseEntity.ok("Role removed successfully");
+    }
+
+    @PutMapping("/users/{userId}/status")
+    public ResponseEntity<?> updateUserStatus(@PathVariable Long userId, @RequestBody Map<String, Boolean> request) {
+        Boolean active = request.get("active");
+        if (active == null) {
+            return ResponseEntity.badRequest().body("Active status is required");
+        }
+
+        userModelService.updateUserStatus(userId, active);
+
+        return ResponseEntity.ok("");
     }
 }

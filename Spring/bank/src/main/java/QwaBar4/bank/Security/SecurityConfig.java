@@ -85,7 +85,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
 			.sessionManagement(session -> session
-				.maximumSessions(1)
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			)
 			.headers(headers -> headers
             	.contentSecurityPolicy(csp -> csp
@@ -98,26 +98,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/delete-user").authenticated() 
                 .requestMatchers("/api/user/**").authenticated()
     			.requestMatchers("/api/**").permitAll() 
+    			.requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
     			.requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService),UsernamePasswordAuthenticationFilter.class)
-		    .csrf(csrf -> csrf
-		        .ignoringRequestMatchers(
-		        	"/auth/send-code",
-		        	"/auth/send-recovery-code",
-		        	"/auth/verify-code",
-		        	"/auth/verify-recovery-code",
-		            "/req/login",
-		            "/req/signup",
-		            "/api/delete-user",
-		            "/api/transactions/transfer",
-		            "/api/transactions/deposit", 
-		            "/api/transactions/withdraw",
-		            "/login/recovery/reset",
-		            "/login/recovery/**"
-		        )
-		    )
+		    .csrf(csrf -> csrf.disable())
 		    .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) -> {
             })
