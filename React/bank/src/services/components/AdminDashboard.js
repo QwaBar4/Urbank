@@ -17,7 +17,6 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
 	useEffect(() => {
-	  if (admin?.roles?.includes('ROLE_ADMIN')) {
 		const fetchData = async () => {
 		  try {
 		    const data = await getAdminDashboardData();
@@ -28,7 +27,6 @@ const AdminDashboard = () => {
 		  }
 		};
 		fetchData();
-	  }
 	}, [user, navigate]);
 
 	const handleStatusChange = async (userId, currentStatus) => {
