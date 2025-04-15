@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'; 
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { useAuth } from './AuthContext';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
 import { getDashboardData } from '../api';
+import { getIndexData } from '../api';
 import Transfer from './Transfer';
 import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
-	const { user } = useAuth();
+    const { user } = useAuth();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -26,7 +27,8 @@ const Dashboard = () => {
                     balance: data.account.balance,
                     dailyTransferLimit: data.account.dailyTransferLimit,
                     dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-                }
+                },
+                role: data.roles
             });
         } catch (err) {
             setError(err.message);
@@ -37,7 +39,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchAccountData();
-    }, [fetchAccountData]); 
+    }, [fetchAccountData]);
 
     const handleLogout = () => {
         console.log('Logging out...');
@@ -63,7 +65,7 @@ const Dashboard = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Account deletion failed');
             }
-            
+
             clearJwtToken();
             navigate('/');
         } catch (error) {
@@ -82,9 +84,9 @@ const Dashboard = () => {
                     'Authorization': `Bearer ${getJwtToken()}`
                 }
             });
-            
+
             if (!response.ok) throw new Error('Failed to refresh balance');
-            
+
             const balance = await response.json();
             setUserData(prev => ({
                 ...prev,
@@ -97,12 +99,11 @@ const Dashboard = () => {
             console.error("Balance refresh error:", err);
         }
     };
-
     if (loading) return <div className="loading">Loading account information...</div>;
     if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
-    const isAdmin = user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN');
-
+    const isAdmin = userData.role.includes("ROLE_ADMIN");
+	console.log(userData.role);
     return (
         userData && (
             <div className="dashboard-container container mt-4">
@@ -117,14 +118,14 @@ const Dashboard = () => {
                         <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
                             Logout
                         </button>
-                        <button 
+                        <button
                             onClick={() => setShowDeleteConfirmation(true)}
                             className="btn btn-outline-danger"
                         >
                             Delete Account
                         </button>
                         {isAdmin && (
-                            <button 
+                            <button
                                 onClick={() => navigate('/admin')}
                                 className="btn btn-outline-warning me-2"
                             >
@@ -136,14 +137,14 @@ const Dashboard = () => {
 
                 <div className="row">
                     <div className="col-md-4">
-                        <BalanceCard 
-                            accountNumber ={userData.account.accountNumber} 
-                            balance={userData.account.balance} 
+                        <BalanceCard
+                            accountNumber={userData.account.accountNumber}
+                            balance={userData.account.balance}
                             refreshBalance={refreshBalance}
                         />
-                        <Transfer 
-                            userAccount={userData.account} 
-                            refreshBalance={refreshBalance} 
+                        <Transfer
+                            userAccount={userData.account}
+                            refreshBalance={refreshBalance}
                         />
                     </div>
                     <div className="col-md-8">
@@ -158,9 +159,9 @@ const Dashboard = () => {
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">Confirm Account Deletion</h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
+                                    <button
+                                        type="button"
+                                        className="btn-close"
                                         onClick={() => setShowDeleteConfirmation(false)}
                                     ></button>
                                 </div>
@@ -169,16 +170,16 @@ const Dashboard = () => {
                                     <p>All your account data and transaction history will be permanently erased.</p>
                                 </div>
                                 <div className="modal-footer">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-secondary" 
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
                                         onClick={() => setShowDeleteConfirmation(false)}
                                     >
                                         Cancel
                                     </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger" 
+                                    <button
+                                        type="button"
+                                        className="btn btn-danger"
                                         onClick={handleDeleteAccount}
                                     >
                                         Confirm Delete
