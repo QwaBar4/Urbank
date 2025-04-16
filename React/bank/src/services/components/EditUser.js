@@ -14,11 +14,16 @@ const EditUser = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    roles: []
+    roles: new Set() // Initialize as Set for consistent handling
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Helper function to check if role exists
+  const hasRole = (role) => {
+    return formData.roles.has(role);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,7 +34,7 @@ const EditUser = () => {
         setFormData({
           username: data.username,
           email: data.email,
-          roles: data.roles || []
+          roles: new Set(data.roles || []) // Convert array to Set
         });
         setError(null);
       } catch (error) {
@@ -47,9 +52,12 @@ const EditUser = () => {
     
     if (type === 'checkbox') {
       setFormData(prev => {
-        const newRoles = checked 
-          ? [...prev.roles, value]
-          : prev.roles.filter(role => role !== value);
+        const newRoles = new Set(prev.roles);
+        if (checked) {
+          newRoles.add(value);
+        } else {
+          newRoles.delete(value);
+        }
         return { ...prev, roles: newRoles };
       });
     } else {
@@ -57,33 +65,33 @@ const EditUser = () => {
     }
   };
 
-	const handleSubmit = async (e) => {
-	  e.preventDefault();
-	  try {
-		setError(null);
-		setSuccess(null);
-		
-		const updateData = {
-		  username: formData.username,
-		  email: formData.email,
-		  roles: Array.from(formData.roles) // Convert Set to Array if needed
-		};
-		
-		await updateUser(userId, updateData);
-		setSuccess('User updated successfully!');
-		
-		// Refresh user data
-		const data = await getUserDetails(userId);
-		setUserData(data);
-		setFormData({
-		  username: data.username,
-		  email: data.email,
-		  roles: new Set(data.roles) // Convert array to Set if needed
-		});
-	  } catch (error) {
-		setError(error.message);
-	  }
-	};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      setSuccess(null);
+      
+      const updateData = {
+        username: formData.username,
+        email: formData.email,
+        roles: Array.from(formData.roles) // Convert Set to array for API
+      };
+      
+      await updateUser(userId, updateData);
+      setSuccess('User updated successfully!');
+      
+      // Refresh user data
+      const data = await getUserDetails(userId);
+      setUserData(data);
+      setFormData({
+        username: data.username,
+        email: data.email,
+        roles: new Set(data.roles) // Keep as Set in state
+      });
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   if (!currentUser?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
     return <div className="alert alert-danger">Unauthorized access</div>;
@@ -143,7 +151,7 @@ const EditUser = () => {
               id="role-user"
               label="USER"
               value="ROLE_USER"
-              checked={formData.roles.includes('ROLE_USER')}
+              checked={hasRole('ROLE_USER')}
               onChange={handleChange}
             />
             <Form.Check
@@ -151,7 +159,7 @@ const EditUser = () => {
               id="role-admin"
               label="ADMIN"
               value="ROLE_ADMIN"
-              checked={formData.roles.includes('ROLE_ADMIN')}
+              checked={hasRole('ROLE_ADMIN')}
               onChange={handleChange}
             />
           </div>
