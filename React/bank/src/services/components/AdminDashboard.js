@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser } from '../api';
-import { getJwtToken } from '../../utils/auth';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
+
 const AdminDashboard = () => {
-  const { user, loading } = useAuth();
-  const { user: admin } = useAuth();
+  const { user } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [error, setError] = useState(null);
   const [showTransactions, setShowTransactions] = useState(null);
@@ -77,7 +76,6 @@ const AdminDashboard = () => {
   if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
   	return <div className="alert alert-danger">Unauthorized access</div>;
   }
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="container mt-4">

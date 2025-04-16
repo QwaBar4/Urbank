@@ -2,91 +2,168 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getUserDetails, updateUser } from '../api';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 
 const EditUser = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: admin } = useAuth();
+  const { user: currentUser } = useAuth();
   const [userData, setUserData] = useState(null);
-  const [formState, setFormState] = useState({});
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    roles: []
+  });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       try {
+        setLoading(true);
         const data = await getUserDetails(userId);
         setUserData(data);
-        setFormState({
+        setFormData({
           username: data.username,
           email: data.email,
-          active: data.active
+          roles: data.roles || []
         });
+        setError(null);
       } catch (error) {
-        setError('Failed to fetch user data');
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (admin?.roles?.includes('ROLE_ADMIN')) fetchUser();
-  }, [userId, admin]);
+    fetchUserData();
+  }, [userId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await updateUser(userId, formState);
-      navigate('/dashboard');
-    } catch (error) {
-      setError('Failed to update user');
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData(prev => {
+        const newRoles = checked 
+          ? [...prev.roles, value]
+          : prev.roles.filter(role => role !== value);
+        return { ...prev, roles: newRoles };
+      });
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  if (!userData) return <div>Loading...</div>;
+	const handleSubmit = async (e) => {
+	  e.preventDefault();
+	  try {
+		setError(null);
+		setSuccess(null);
+		
+		const updateData = {
+		  username: formData.username,
+		  email: formData.email,
+		  roles: Array.from(formData.roles) // Convert Set to Array if needed
+		};
+		
+		await updateUser(userId, updateData);
+		setSuccess('User updated successfully!');
+		
+		// Refresh user data
+		const data = await getUserDetails(userId);
+		setUserData(data);
+		setFormData({
+		  username: data.username,
+		  email: data.email,
+		  roles: new Set(data.roles) // Convert array to Set if needed
+		});
+	  } catch (error) {
+		setError(error.message);
+	  }
+	};
+
+  if (!currentUser?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
+    return <div className="alert alert-danger">Unauthorized access</div>;
+  }
+
+  if (loading) {
+    return <div className="text-center mt-4">Loading user data...</div>;
+  }
+
+  if (!userData) {
+    return <div className="alert alert-danger">User not found</div>;
+  }
 
   return (
     <div className="container mt-4">
-      <h2>Edit User: {userData.username}</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Username</label>
-          <input
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit User: {userData.username}</h1>
+        <button 
+          onClick={() => navigate('/admin')}
+          className="btn btn-outline-secondary"
+        >
+          Back to Admin Dashboard
+        </button>
+      </div>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">{success}</Alert>}
+
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Username</Form.Label>
+          <Form.Control
             type="text"
-            className="form-control"
-            value={formState.username}
-            onChange={(e) => setFormState({...formState, username: e.target.value})}
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
           />
-        </div>
-        
-        <div className="mb-3">
-          <label>Email</label>
-          <input
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
             type="email"
-            className="form-control"
-            value={formState.email}
-            onChange={(e) => setFormState({...formState, email: e.target.value})}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
           />
-        </div>
-        
-        <div className="mb-3 form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            checked={formState.active}
-            onChange={(e) => setFormState({...formState, active: e.target.checked})}
-            id="activeCheck"
-          />
-          <label className="form-check-label" htmlFor="activeCheck">
-            Active
-          </label>
-        </div>
-        
-        <div className="d-flex gap-2">
-          <button type="submit" className="btn btn-primary">Save Changes</button>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
-            Cancel
-          </button>
-        </div>
-      </form>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Roles</Form.Label>
+          <div>
+            <Form.Check
+              type="checkbox"
+              id="role-user"
+              label="USER"
+              value="ROLE_USER"
+              checked={formData.roles.includes('ROLE_USER')}
+              onChange={handleChange}
+            />
+            <Form.Check
+              type="checkbox"
+              id="role-admin"
+              label="ADMIN"
+              value="ROLE_ADMIN"
+              checked={formData.roles.includes('ROLE_ADMIN')}
+              onChange={handleChange}
+            />
+          </div>
+        </Form.Group>
+
+        <Button variant="primary" type="submit" className="me-2">
+          Save Changes
+        </Button>
+        <Button variant="secondary" onClick={() => navigate('/admin')}>
+          Cancel
+        </Button>
+      </Form>
     </div>
   );
 };

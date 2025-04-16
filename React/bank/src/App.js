@@ -67,11 +67,11 @@ function App() {
             </AdminRoute>
           } />
           
-          <Route path="/edit-user/:userId" element={
-		    <PrivateRoute>
-			  <EditUser />
-		    </PrivateRoute>
-		  } />
+			<Route path="/edit-user/:userId" element={
+			  <PrivateRoute>
+				<EditUser />
+			  </PrivateRoute>
+			} />
 
           {/* Transaction routes */}
           <Route path="/deposit" element={

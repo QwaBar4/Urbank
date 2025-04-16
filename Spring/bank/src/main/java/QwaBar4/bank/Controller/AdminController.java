@@ -1,14 +1,13 @@
 package QwaBar4.bank.Controller;
 
-import QwaBar4.bank.Service.AuditLogService;
+import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Service.UserModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import QwaBar4.bank.DTO.*;
-import QwaBar4.bank.Service.*;
 import java.util.Map;
 
 @RestController
@@ -19,6 +18,21 @@ public class AdminController {
     @Autowired
     private UserModelService userModelService;
 
+	@GetMapping("/users/{userId}")
+	public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
+		UserDetailsDTO userDetails = userModelService.getUserDetails(userId);
+		return ResponseEntity.ok(userDetails);
+	}
+
+	@PutMapping("/users/{userId}")
+	public ResponseEntity<UserDetailsDTO> updateUserDetails(
+		    @PathVariable Long userId,
+		    @RequestBody UserUpdateDTO userUpdateDTO) {
+		UserDetailsDTO updatedUser = userModelService.updateUserDetails(userId, userUpdateDTO);
+		return ResponseEntity.ok(updatedUser);
+	}
+
+    // Your existing endpoints
     @PostMapping("/users/{userId}/assignRole")
     public ResponseEntity<?> assignRoleToUser(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         String role = request.get("role");
@@ -39,9 +53,7 @@ public class AdminController {
         if (active == null) {
             return ResponseEntity.badRequest().body("Active status is required");
         }
-
         userModelService.updateUserStatus(userId, active);
-
         return ResponseEntity.ok("");
     }
 }

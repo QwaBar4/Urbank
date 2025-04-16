@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
-import { useAuth } from './AuthContext';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
 import { getDashboardData } from '../api';
-import { getIndexData } from '../api';
 import Transfer from './Transfer';
 import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
 const Dashboard = () => {
-    const { user } = useAuth();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -103,7 +100,6 @@ const Dashboard = () => {
     if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
     const isAdmin = userData.role.includes("ROLE_ADMIN");
-	console.log(userData.role);
     return (
         userData && (
             <div className="dashboard-container container mt-4">

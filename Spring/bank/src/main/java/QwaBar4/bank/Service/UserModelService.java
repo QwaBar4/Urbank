@@ -18,7 +18,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.DisabledException;
 import java.util.Collection;
 import QwaBar4.bank.Model.UserModelRepository;
-import QwaBar4.bank.DTO.UserDTO;
+import QwaBar4.bank.DTO.*;
+
 
 import java.util.Collections;
 
@@ -64,6 +65,56 @@ public class UserModelService implements UserDetailsService {
         user.setActive(false);
         userRepo.save(user);
     }
+
+	public UserDetailsDTO getUserDetails(Long userId) {
+		UserModel user = userRepo.findById(userId)
+		        .orElseThrow(() -> new RuntimeException("User not found"));
+		
+		return new UserDetailsDTO(
+		        user.getId(),
+		        user.getUsername(),
+		        user.getEmail(),
+		        user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
+		        user.getAccount() != null ? user.getAccount().getBalance() : null,
+		        user.isActive(),
+		        user.getRoles()
+		);
+	}
+	
+	@Transactional
+	public UserDetailsDTO updateUserDetails(Long userId, UserUpdateDTO userUpdateDTO) {
+		UserModel user = userRepo.findById(userId)
+		        .orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Update basic info
+		if (userUpdateDTO.getUsername() != null) {
+		    user.setUsername(userUpdateDTO.getUsername());
+		}
+		if (userUpdateDTO.getEmail() != null) {
+		    user.setEmail(userUpdateDTO.getEmail());
+		}
+		
+		// Update roles if provided
+		if (userUpdateDTO.getRoles() != null) {
+		    user.getRoles().clear();
+		    user.getRoles().addAll(userUpdateDTO.getRoles());
+		}
+		
+		UserModel updatedUser = userRepo.save(user);
+		return convertToDetailsDTO(updatedUser);
+	}
+
+	private UserDetailsDTO convertToDetailsDTO(UserModel user) {
+		return new UserDetailsDTO(
+		        user.getId(),
+		        user.getUsername(),
+		        user.getEmail(),
+		        user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
+		        user.getAccount() != null ? user.getAccount().getBalance() : null,
+		        user.isActive(),
+		        user.getRoles()
+		);
+	}
 
     public UserDTO convertToDTO(UserModel user) {
         return new UserDTO(

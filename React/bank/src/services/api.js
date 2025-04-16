@@ -175,14 +175,40 @@ export const login = async (credentials) => {
     return data;
 };
 
+
 export const getUserDetails = async (userId) => {
-  const response = await api.get(`/admin/users/${userId}`);
-  return response.data;
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    throw error;
+  }
 };
 
 export const updateUser = async (userId, userData) => {
-  const response = await api.put(`/admin/users/${userId}`, userData);
-  return response.data;
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: userData.username,
+        email: userData.email,
+        roles: userData.roles
+      })
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
 };
 
 export const activateUser = async (userId, active) => {
