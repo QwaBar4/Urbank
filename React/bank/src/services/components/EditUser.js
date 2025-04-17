@@ -14,16 +14,11 @@ const EditUser = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    roles: new Set() // Initialize as Set for consistent handling
+    role: '' // Use a single role instead of a Set
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Helper function to check if role exists
-  const hasRole = (role) => {
-    return formData.roles.has(role);
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,7 +29,7 @@ const EditUser = () => {
         setFormData({
           username: data.username,
           email: data.email,
-          roles: new Set(data.roles || []) // Convert array to Set
+          role: data.roles?.includes('ROLE_ADMIN') ? 'ROLE_ADMIN' : 'ROLE_USER' // Set the initial role
         });
         setError(null);
       } catch (error) {
@@ -48,21 +43,8 @@ const EditUser = () => {
   }, [userId]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
-      setFormData(prev => {
-        const newRoles = new Set(prev.roles);
-        if (checked) {
-          newRoles.add(value);
-        } else {
-          newRoles.delete(value);
-        }
-        return { ...prev, roles: newRoles };
-      });
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -74,7 +56,7 @@ const EditUser = () => {
       const updateData = {
         username: formData.username,
         email: formData.email,
-        roles: Array.from(formData.roles) // Convert Set to array for API
+        roles: [formData.role] // Send the selected role as an array
       };
       
       await updateUser(userId, updateData);
@@ -86,7 +68,7 @@ const EditUser = () => {
       setFormData({
         username: data.username,
         email: data.email,
-        roles: new Set(data.roles) // Keep as Set in state
+        role: data.roles?.includes('ROLE_ADMIN') ? 'ROLE_ADMIN' : 'ROLE_USER' // Update the role
       });
     } catch (error) {
       setError(error.message);
@@ -144,22 +126,24 @@ const EditUser = () => {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Roles</Form.Label>
+          <Form.Label>Role</Form.Label>
           <div>
             <Form.Check
-              type="checkbox"
+              type="radio"
               id="role-user"
               label="USER"
-              value="ROLE_USER"
-              checked={hasRole('ROLE_USER')}
+              name="role"
+ value="ROLE_USER"
+              checked={formData.role === 'ROLE_USER'}
               onChange={handleChange}
             />
             <Form.Check
-              type="checkbox"
+              type="radio"
               id="role-admin"
               label="ADMIN"
+              name="role"
               value="ROLE_ADMIN"
-              checked={hasRole('ROLE_ADMIN')}
+              checked={formData.role === 'ROLE_ADMIN'}
               onChange={handleChange}
             />
           </div>
@@ -176,4 +160,4 @@ const EditUser = () => {
   );
 };
 
-export default EditUser;
+export default EditUser ;
