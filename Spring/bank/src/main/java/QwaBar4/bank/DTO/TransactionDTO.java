@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public class TransactionDTO {
     private Long id;
     private String type;
+    private String user;
     private Double amount;
     private String description;
     private LocalDateTime timestamp;
@@ -67,5 +68,13 @@ public class TransactionDTO {
 
     public void setTargetAccountNumber(String targetAccountNumber) {
         this.targetAccountNumber = targetAccountNumber;
+    }
+    
+    public String getUser() { 
+    	return user; 
+    }
+    
+    public void setUser(String user) { 
+    	this.user = user; 
     }
 }

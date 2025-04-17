@@ -56,4 +56,10 @@ public class AdminController {
         userModelService.updateUserStatus(userId, active);
         return ResponseEntity.ok("");
     }
+
+	@GetMapping("/users/{userId}/transactions")
+	public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
+        List<TransactionDTO> transactions = userModelService.getUserTransactions(userId);
+        return ResponseEntity.ok(transactions);
+    }
 }

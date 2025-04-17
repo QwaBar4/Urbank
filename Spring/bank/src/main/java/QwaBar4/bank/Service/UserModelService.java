@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.DisabledException;
 import java.util.Collection;
 import QwaBar4.bank.Model.UserModelRepository;
+import QwaBar4.bank.Model.TransactionModelRepository;
 import QwaBar4.bank.DTO.*;
 
 
@@ -28,11 +29,13 @@ public class UserModelService implements UserDetailsService {
 
     private final UserModelRepository userRepo;
     private final AccountModelRepository accountRepo;
+    private final TransactionModelRepository transactionRepo;
 
     @Autowired
-    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo) {
+    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo, TransactionModelRepository transactionRepo) {
         this.userRepo = userRepo;
         this.accountRepo = accountRepo;
+        this.transactionRepo = transactionRepo;
     }
 
     public boolean existsByUsernameIgnoreCase(String username) {
@@ -43,7 +46,8 @@ public class UserModelService implements UserDetailsService {
     public void deleteByUsername(String username) {
         UserModel user = userRepo.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+		
+		transactionRepo.deleteAll(user.getTransactions());
         user.setAccount(null);
         userRepo.save(user);
         userRepo.delete(user);
@@ -175,5 +179,24 @@ public class UserModelService implements UserDetailsService {
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.getRoles().remove(role);
         userRepo.save(user);
+    }
+    
+	public List<TransactionDTO> getUserTransactions(Long userId) {
+        return transactionRepo.findByUserId(userId).stream()
+            .map(transaction -> {
+                TransactionDTO dto = new TransactionDTO();
+                dto.setId(transaction.getId());
+                dto.setType(transaction.getType());
+                dto.setAmount(transaction.getAmount());
+                dto.setDescription(transaction.getDescription());
+                dto.setTimestamp(transaction.getTimestamp());
+                dto.setUser(transaction.getUser().getUsername());
+                dto.setSourceAccountNumber(transaction.getSourceAccount() != null ? 
+                    transaction.getSourceAccount().getAccountNumber() : null);
+                dto.setTargetAccountNumber(transaction.getTargetAccount() != null ? 
+                    transaction.getTargetAccount().getAccountNumber() : null);
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 }

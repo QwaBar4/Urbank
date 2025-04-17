@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const [showTransactions, setShowTransactions] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
   const navigate = useNavigate();
 
 	useEffect(() => {
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
 		setError(errorMessage);
 	  }
 	};
-
+	
   const handleDelete = async () => {
     try {
       await deleteUser(selectedUser.id);
@@ -64,14 +65,18 @@ const AdminDashboard = () => {
     }
   };
 
-  const viewTransactions = async (userId) => {
-    try {
-      const transactions = await getUserTransactions(userId);
-      setShowTransactions(transactions);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+	const viewTransactions = async (userId) => {
+	  try {
+		setTransactionsLoading(true);
+		setError(null);
+		const transactions = await getUserTransactions(userId);
+		setShowTransactions(transactions);
+	  } catch (error) {
+		setError(error.message || 'Failed to load transactions');
+	  } finally {
+		setTransactionsLoading(false);
+	  }
+	};
 
   if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
   	return <div className="alert alert-danger">Unauthorized access</div>;
@@ -145,26 +150,42 @@ const AdminDashboard = () => {
       )}
 
       {/* Transactions Modal */}
-      <Modal show={!!showTransactions} onHide={() => setShowTransactions(null)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Transactions for {showTransactions?.userName}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ul className="list-group">
-            {showTransactions?.map((txn, index) => (
-              <li key={index} className="list-group-item">
-                <div className="d-flex justify-content-between">
-                  <span>{txn.description}</span>
-                  <span className={`badge ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
-                    ${Math.abs(txn.amount).toFixed(2)}
-                  </span>
-                </div>
-                <small className="text-muted">{new Date(txn.timestamp).toLocaleString()}</small>
-              </li>
-            ))}
-          </ul>
-        </Modal.Body>
-      </Modal>
+	<Modal.Body>
+	  {transactionsLoading ? (
+		<div className="text-center">
+		  <div className="spinner-border text-primary" role="status">
+		    <span className="visually-hidden">Loading...</span>
+		  </div>
+		</div>
+	  ) : (
+		<ul className="list-group">
+		  {showTransactions?.length > 0 ? (
+		    showTransactions.map((txn, index) => (
+		      <li key={index} className="list-group-item transaction-item">
+		        <div className="d-flex justify-content-between align-items-start">
+		          <div>
+		            <div className="fw-bold">{txn.type}</div>
+		            <div>{txn.description}</div>
+		            <div className="text-muted small">
+		              {txn.sourceAccountNumber && `From: ${txn.sourceAccountNumber}`}
+		              {txn.targetAccountNumber && `To: ${txn.targetAccountNumber}`}
+		            </div>
+		            <small className="text-muted">
+		              {new Date(txn.timestamp).toLocaleString()}
+		            </small>
+		          </div>
+		          <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
+		            ${Math.abs(txn.amount).toFixed(2)}
+		          </span>
+		        </div>
+		      </li>
+		    ))
+		  ) : (
+		    <div className="alert alert-info">No transactions found</div>
+		  )}
+		</ul>
+	  )}
+	</Modal.Body>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>

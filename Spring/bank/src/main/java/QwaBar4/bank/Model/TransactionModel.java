@@ -23,6 +23,10 @@ public class TransactionModel {
     @JoinColumn(name = "target_account_id")
     private AccountModel targetAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id") 
+    private UserModel user;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -78,5 +82,13 @@ public class TransactionModel {
 
     public void setTargetAccount(AccountModel targetAccount) {
         this.targetAccount = targetAccount;
+    }
+
+    public UserModel getUser () {
+        return user;
+    }
+
+    public void setUser (UserModel user) {
+        this.user = user;
     }
 }

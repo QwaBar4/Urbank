@@ -32,6 +32,10 @@ public class UserModel {
 
     @Column(name = "active", nullable = false)
     private boolean active;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<TransactionModel> transactions = new ArrayList<>();
 
     // Getters and setters
     public Long getId() {
@@ -88,5 +92,13 @@ public class UserModel {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+    
+    public List<TransactionModel> getTransactions() { 
+    	return transactions; 
+    }
+    
+    public void setTransactions(List<TransactionModel> transactions) { 
+    	this.transactions = transactions; 
     }
 }
