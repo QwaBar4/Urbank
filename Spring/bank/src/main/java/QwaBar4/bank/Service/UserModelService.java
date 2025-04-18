@@ -19,6 +19,7 @@ import org.springframework.security.authentication.DisabledException;
 import java.util.Collection;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.TransactionModelRepository;
+import QwaBar4.bank.Model.TransactionModel;
 import QwaBar4.bank.DTO.*;
 
 
@@ -182,21 +183,26 @@ public class UserModelService implements UserDetailsService {
     }
     
 	public List<TransactionDTO> getUserTransactions(Long userId) {
-        return transactionRepo.findByUserId(userId).stream()
-            .map(transaction -> {
-                TransactionDTO dto = new TransactionDTO();
-                dto.setId(transaction.getId());
-                dto.setType(transaction.getType());
-                dto.setAmount(transaction.getAmount());
-                dto.setDescription(transaction.getDescription());
-                dto.setTimestamp(transaction.getTimestamp());
-                dto.setUser(transaction.getUser().getUsername());
-                dto.setSourceAccountNumber(transaction.getSourceAccount() != null ? 
-                    transaction.getSourceAccount().getAccountNumber() : null);
-                dto.setTargetAccountNumber(transaction.getTargetAccount() != null ? 
-                    transaction.getTargetAccount().getAccountNumber() : null);
-                return dto;
-            })
-            .collect(Collectors.toList());
-    }
+		UserModel user = userRepo.findById(userId)
+		    .orElseThrow(() -> new RuntimeException("User not found"));
+		
+		return transactionRepo.findByUser(user).stream()
+		    .map(this::convertToTransactionDTO)
+		    .collect(Collectors.toList());
+	}
+
+	private TransactionDTO convertToTransactionDTO(TransactionModel transaction) {
+		TransactionDTO dto = new TransactionDTO();
+		dto.setId(transaction.getId());
+		dto.setType(transaction.getType());
+		dto.setAmount(transaction.getAmount());
+		dto.setTimestamp(transaction.getTimestamp());
+		dto.setDescription(transaction.getDescription());
+		dto.setSourceAccountNumber(transaction.getSourceAccount() != null ? 
+		    transaction.getSourceAccount().getAccountNumber() : null);
+		dto.setTargetAccountNumber(transaction.getTargetAccount() != null ? 
+		    transaction.getTargetAccount().getAccountNumber() : null);
+		dto.setUser(transaction.getUser().getUsername()); // Ensure user is mapped
+		return dto;
+	}
 }

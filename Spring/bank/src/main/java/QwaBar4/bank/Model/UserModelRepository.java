@@ -16,6 +16,7 @@ public interface UserModelRepository extends JpaRepository<UserModel, Long> {
 
     @Query("SELECT u FROM UserModel u WHERE lower(u.username) = lower(:username)")
     Optional<UserModel> findByUsername(@Param("username") String username);
+    
 
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
           "FROM UserModel u WHERE LOWER(u.username) = LOWER(:username)")

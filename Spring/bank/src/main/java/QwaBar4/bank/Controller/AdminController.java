@@ -1,7 +1,5 @@
 package QwaBar4.bank.Controller;
 
-import QwaBar4.bank.DTO.*;
-import QwaBar4.bank.Service.UserModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Service.*;
+
 @RestController
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
@@ -17,6 +18,9 @@ public class AdminController {
 
     @Autowired
     private UserModelService userModelService;
+    
+    @Autowired
+    private TransactionService transactionService;
 
 	@GetMapping("/users/{userId}")
 	public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
@@ -56,10 +60,11 @@ public class AdminController {
         userModelService.updateUserStatus(userId, active);
         return ResponseEntity.ok("");
     }
-
+    
 	@GetMapping("/users/{userId}/transactions")
 	public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
-        List<TransactionDTO> transactions = userModelService.getUserTransactions(userId);
-        return ResponseEntity.ok(transactions);
-    }
+		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+		return ResponseEntity.ok(transactions);
+	}
+
 }

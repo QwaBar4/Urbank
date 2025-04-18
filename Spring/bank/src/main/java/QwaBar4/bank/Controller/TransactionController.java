@@ -108,4 +108,13 @@ public class TransactionController {
 		    return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
+	
+	@GetMapping("/admin/users/{userId}/transactions")
+	public ResponseEntity<List<TransactionDTO>> getUserTransactionsById(
+		@PathVariable Long userId) {
+		
+		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+		return ResponseEntity.ok(transactions);
+	}
+	
 }

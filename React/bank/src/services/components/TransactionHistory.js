@@ -91,6 +91,9 @@ const TransactionHistory = ({ userAccount }) => {
                                     {formatAmount(transaction)}
                                 </td>
                                 <td>
+								  {transaction.user?.username || 'System Transaction'}
+								</td>
+                                <td>
                                     <span className={`badge ${
                                         transaction.status === 'COMPLETED' ? 'bg-success' : 
                                         transaction.status === 'PENDING' ? 'bg-warning' : 'bg-danger'

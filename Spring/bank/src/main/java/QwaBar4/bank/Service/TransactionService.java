@@ -61,6 +61,7 @@ public class TransactionService {
         TransactionModel transaction = new TransactionModel();
         transaction.setType("TRANSFER");
         transaction.setAmount(amount);
+        transaction.setUser(source.getUser());
         transaction.setSourceAccount(source);
         transaction.setTargetAccount(target);
         transaction.setDescription(description);
@@ -93,27 +94,17 @@ public class TransactionService {
         return user.getAccount().getBalance();
     }
 
-    private TransactionDTO convertToDTO(TransactionModel transaction) {
-        TransactionDTO dto = new TransactionDTO();
-        dto.setId(transaction.getId());
-        dto.setType(transaction.getType());
-        dto.setAmount(transaction.getAmount());
-        dto.setTimestamp(transaction.getTimestamp());
-        dto.setDescription(transaction.getDescription());
-        
-        System.out.println("Converting transaction with description: " + 
-                          transaction.getDescription()); // Debug log
-
-        if (transaction.getSourceAccount() != null) {
-            dto.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());
-        }
-
-        if (transaction.getTargetAccount() != null) {
-            dto.setTargetAccountNumber(transaction.getTargetAccount().getAccountNumber());
-        }
-
-        return dto;
-    }
+    
+	public List<TransactionDTO> getUserTransactionsById(Long userId) {
+		UserModel user = userRepo.findById(userId)
+		    .orElseThrow(() -> new RuntimeException("User  not found"));
+		
+		List<TransactionModel> transactions = transactionRepo.findByUser (user);
+		
+		return transactions.stream()
+		    .map(this::convertToDTO)
+		    .collect(Collectors.toList());
+	}
 
     public TransactionDTO processDeposit(String accountNumber, double amount, String description, String username) {
         if (amount <= 0) {
@@ -133,6 +124,7 @@ public class TransactionService {
         TransactionModel transaction = new TransactionModel();
         transaction.setType("DEPOSIT");
         transaction.setAmount(amount);
+        transaction.setUser(account.getUser());
         transaction.setDescription(description);
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setTargetAccount(account);
@@ -163,6 +155,7 @@ public class TransactionService {
         TransactionModel transaction = new TransactionModel();
         transaction.setType("WITHDRAWAL");
         transaction.setAmount(amount);
+        transaction.setUser(account.getUser());
         transaction.setDescription(description);
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setSourceAccount(account);
@@ -174,4 +167,31 @@ public class TransactionService {
 
         return response;
     }
+    
+
+
+	private TransactionDTO convertToDTO(TransactionModel transaction) {
+		TransactionDTO dto = new TransactionDTO();
+		dto.setId(transaction.getId());
+		dto.setType(transaction.getType());
+		dto.setAmount(transaction.getAmount());
+		dto.setTimestamp(transaction.getTimestamp());
+		dto.setDescription(transaction.getDescription());
+		
+		if (transaction.getUser () != null) {
+		    dto.setUser (transaction.getUser ().getUsername());
+		} else {
+		    dto.setUser ("System Transaction");
+		}
+
+		if (transaction.getSourceAccount() != null) {
+		    dto.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());
+		}
+
+		if (transaction.getTargetAccount() != null) {
+		    dto.setTargetAccountNumber(transaction.getTargetAccount().getAccountNumber());
+		}
+
+		return dto;
+	}
 }

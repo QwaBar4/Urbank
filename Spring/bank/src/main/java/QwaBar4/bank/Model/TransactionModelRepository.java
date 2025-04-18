@@ -10,5 +10,5 @@ public interface TransactionModelRepository extends JpaRepository<TransactionMod
         AccountModel source, 
         AccountModel target
     );
-    List<TransactionModel> findByUserId(Long userId);
+    List<TransactionModel> findByUser(UserModel user);
 }
