@@ -12,7 +12,12 @@ const LoginForm = () => (
     validationSchema={LoginSchema}
     onSubmit={async (values, { setSubmitting, setErrors }) => {
       try {
-        await login(values);
+        const response = await login(values);
+        if (response.jwt) {
+          // Navigate to the dashboard and store the JWT token
+          navigate('/dashboard');
+          // storeJwtToken(response.jwt); // You might need to store the token
+        }
       } catch (error) {
         setErrors({ api: error.message });
       } finally {

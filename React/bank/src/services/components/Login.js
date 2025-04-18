@@ -7,55 +7,60 @@ const Login = () => {
         username: '',
         password: '',
     });
-    const [setError] = useState(''); // Add error state
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
     };
     
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		try {
-		    const response = await login(credentials);
-		    if (response.jwt) {
-		        navigate('/dashboard');
-		    }
-		} catch (error) {
-		    setError(error.message.includes("403") 
-		        ? "Invalid credentials" // More accurate error message
-		        : error.message);
-		}
-	};
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await login(credentials);
+            if (response.jwt) {
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                const { message } = error.response.data;
+                setError(message);
+            } else {
+                setError("An unexpected error occurred");
+            }
+        }
+    };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h1>Login</h1>
-            <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={credentials.username}
-                onChange={handleChange}
-                required
-            />
-            <p>
-            <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={credentials.password}
-                onChange={handleChange}
-                required
-            />
-            </p>
-            <button type="submit">Log In</button>
-            <p>Forgot password? <Link to="/login/recovery">Recover password</Link></p>
-            <p>
-                Don't have an account? <Link to="/signup">Sign Up</Link>
-            </p>
-        </form>
+        <div>
+            <form onSubmit={handleSubmit}>
+                <h1>Login</h1>
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={credentials.username}
+                    onChange={handleChange}
+                    required
+                />
+                <p>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={credentials.password}
+                    onChange={handleChange}
+                    required
+                />
+                </p>
+                <button type="submit">Log In</button>
+                <p>Forgot password? <Link to="/login/recovery">Recover password</Link></p>
+                <p>
+                    Don't have an account? <Link to="/signup">Sign Up</Link>
+                </p>
+            </form>
+            {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+        </div>
     );
 };
 

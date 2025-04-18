@@ -182,6 +182,11 @@ public class UserModelService implements UserDetailsService {
         userRepo.save(user);
     }
     
+    public UserModel findByUsername(String username) {
+    return userRepo.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User  not found with username: " + username));
+	}
+    
 	public List<TransactionDTO> getUserTransactions(Long userId) {
 		UserModel user = userRepo.findById(userId)
 		    .orElseThrow(() -> new RuntimeException("User not found"));

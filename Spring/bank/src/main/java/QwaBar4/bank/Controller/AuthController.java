@@ -28,17 +28,28 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final UserModelService userModelService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserModelService userModelService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.userModelService = userModelService;
     }
 
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(@RequestBody UserModel loginRequest) {
 		try {
 			System.out.println("Login attempt with username: " + loginRequest.getUsername());
+			UserModel user = userModelService.findByUsername(loginRequest.getUsername());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponse(null, "Invalid credentials", false));
+            }
+            if (!user.isActive()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new AuthResponse(null, "Account is deactivated", false)); // Specific error for deactivated accounts
+            }
 		    Authentication authentication = authenticationManager.authenticate(
 		        new UsernamePasswordAuthenticationToken(
 		            loginRequest.getUsername(),
