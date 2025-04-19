@@ -48,44 +48,51 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 		            sourceAccount: formData.sourceAccount,
 		            targetAccount: formData.targetAccount,
 		            amount: parseFloat(formData.amount),
-		            description: formData.description // Add this
+		            description: formData.description
 		        })
 		    });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Transfer failed');
-            }
 
-            const data = await response.json();
-            setSuccess(`Transfer successful! Transaction ID: ${data.id}`);
-            
-            // Reset form
-            setFormData(prev => ({
-                ...prev,
-                targetAccount: '',
-                amount: '',
-                description: ''
-            }));
-            
-            // Refresh balance
-            if (refreshBalance) refreshBalance();
-            
-        } catch (err) {
-            setError(err.message);
-            if (err.message.includes('Unauthorized') || err.message.includes('token')) {
-                navigate('/login');
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
+		    const responseText = await response.text();
+		    if (!response.ok) {
+		        try {
+		            const errorData = JSON.parse(responseText);
+		            throw new Error(errorData.message || 'Transfer failed');
+		        } catch {
+		            throw new Error(responseText || 'Transfer failed');
+		        }
+		    }
+
+		    const data = JSON.parse(responseText);
+		    setSuccess(`Transfer successful!`);
+		    
+		    setFormData(prev => ({
+		        ...prev,
+		        targetAccount: '',
+		        amount: '',
+		        description: ''
+		    }));
+		    
+		    if (refreshBalance) refreshBalance();
+		    
+		} catch (err) {
+		    setError(err.message);
+		    if (err.message.includes('Unauthorized') || err.message.includes('token')) {
+		        navigate('/login');
+		    }
+		} finally {
+		    setIsLoading(false);
+		}
+	};
 
     return (
         <div className="transfer-container card">
             <div className="card-body">
                 <h2 className="card-title">Transfer Money</h2>
-                {error && <div className="alert alert-danger">{error}</div>}
+				{error && (
+					<div className="alert alert-danger" style={{ color: 'red' }}>
+						{error}
+					</div>
+				)}
                 {success && <div className="alert alert-success">{success}</div>}
                 
                 <form onSubmit={handleSubmit}>

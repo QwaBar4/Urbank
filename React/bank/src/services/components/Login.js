@@ -16,18 +16,23 @@ const Login = () => {
     
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        
         try {
             const response = await login(credentials);
+            
             if (response.jwt) {
                 navigate('/dashboard');
+            } else {
+                // Handle case where login fails but no error is thrown
+                setError(response.message || "Login failed");
             }
         } catch (error) {
-            if (error.response && error.response.data) {
-                const { message } = error.response.data;
-                setError(message);
-            } else {
-                setError("An unexpected error occurred");
-            }
+            // Proper error message extraction
+            const errorMessage = error.response?.data?.message 
+                || error.message 
+                || "An unexpected error occurred";
+            setError(errorMessage);
         }
     };
 
