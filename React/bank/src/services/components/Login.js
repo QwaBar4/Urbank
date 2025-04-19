@@ -13,28 +13,21 @@ const Login = () => {
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value });
     };
-    
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        
-        try {
-            const response = await login(credentials);
-            
-            if (response.jwt) {
-                navigate('/dashboard');
-            } else {
-                // Handle case where login fails but no error is thrown
-                setError(response.message || "Login failed");
-            }
-        } catch (error) {
-            // Proper error message extraction
-            const errorMessage = error.response?.data?.message 
-                || error.message 
-                || "An unexpected error occurred";
-            setError(errorMessage);
-        }
-    };
+		
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setError('');
+		
+		try {
+		    const response = await login(credentials);
+		    console.log('Login response:', response);;
+		    
+		} catch (error) {
+		    console.error('Login error:', error);
+		    setError(error.message || "Login failed");
+		}
+		window.location.href = '/';
+	};
 
     return (
         <div>
@@ -58,7 +51,7 @@ const Login = () => {
                     required
                 />
                 </p>
-                <button type="submit">Log In</button>
+                <button type="submit" onClick={handleSubmit}>Log In</button>
                 <p>Forgot password? <Link to="/login/recovery">Recover password</Link></p>
                 <p>
                     Don't have an account? <Link to="/signup">Sign Up</Link>

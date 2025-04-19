@@ -4,21 +4,25 @@ import { getJwtToken, storeJwtToken } from '../utils/auth';
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 export const handleResponse = async (response) => {
-    const text = await response.text(); // Get the response as text
+    const text = await response.text();
+    if (!text) return null; // Handle empty responses
+    
     try {
-        const json = text ? JSON.parse(text) : {}; // Attempt to parse JSON
+        const json = JSON.parse(text);
         if (!response.ok) {
-            const error = new Error(json.message || json.error || 'Request failed');
+            const error = new Error(json.message || 'Request failed');
             error.status = response.status;
-            throw error; // Throw an error with the message
+            throw error;
         }
-        return json; // Return the parsed JSON data
+        return json;
     } catch (err) {
-        // Log the raw response text for debugging
-        console.error('Failed to parse response:', text);
-        const error = new Error(text || 'Failed to parse response');
-        error.status = response.status;
-        throw error; // Throw the error
+        // Return text if not JSON
+        if (!response.ok) {
+            const error = new Error(text || 'Request failed');
+            error.status = response.status;
+            throw error;
+        }
+        return text;
     }
 };
 
@@ -37,12 +41,15 @@ export const getIndexData = async () => {
   }
 };
 
+// Modify your fetch calls to include credentials
 export const getDashboardData = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
       headers: {
-        'Authorization': `Bearer ${getJwtToken()}`
-      }
+        'Authorization': `Bearer ${getJwtToken()}`,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
     });
     return handleResponse(response);
   } catch (error) {

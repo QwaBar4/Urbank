@@ -14,34 +14,44 @@ const Dashboard = () => {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
-    const fetchAccountData = useCallback(async () => {
-        try {
-            const data = await getDashboardData();
-            setUserData({
-                username: data.username,
-                account: {
-                    accountNumber: data.account.accountNumber,
-                    balance: data.account.balance,
-                    dailyTransferLimit: data.account.dailyTransferLimit,
-                    dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-                },
-                role: data.roles
-            });
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+	useEffect(() => {
+		const token = getJwtToken();
+		if (!token) {
+		    navigate('/login');
+		    return;
+		}
+        const fetchData = async () => {
+            try {
+                const data = await getDashboardData();
+                setUserData({
+                    username: data.username,
+                    account: {
+                        accountNumber: data.account.accountNumber,
+                        balance: data.account.balance,
+                        dailyTransferLimit: data.account.dailyTransferLimit,
+                        dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+                    },
+                    role: data.roles
+                });
+		    } catch (err) {
+		        if (err.response?.status === 401) {
+		            console.log('Session expired, redirecting to login');
+		            navigate('/login');
+		        } else {
+		            setError(err.message);
+		        }
+		    } finally {
+		        setLoading(false);
+		    }
+		};
 
-    useEffect(() => {
-        fetchAccountData();
-    }, [fetchAccountData]);
+		fetchData();
+	}, [navigate]);
 
     const handleLogout = () => {
         console.log('Logging out...');
         clearJwtToken();
-        navigate('/login');
+        navigate('/');
     };
 
     const handleDeleteAccount = async () => {

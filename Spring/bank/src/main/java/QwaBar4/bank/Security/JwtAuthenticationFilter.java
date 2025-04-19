@@ -30,31 +30,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                    HttpServletResponse response, 
-                                    FilterChain filterChain) throws ServletException, IOException {
-        String jwt = request.getHeader(JwtConstants.JWT_HEADER);
-        
-        if (jwt != null && jwt.startsWith("Bearer ")) {
-            jwt = jwt.substring(7);
-            try {
-                String username = jwtUtil.getUsernameFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username); // Fixed this line
-                
-                UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails, 
-                        null, 
-                        userDetails.getAuthorities()
-                    );
-                
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-                return;
-            }
-        }
-        filterChain.doFilter(request, response);
-    }
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, 
+		                            HttpServletResponse response, 
+		                            FilterChain filterChain) throws ServletException, IOException {
+		String authHeader = request.getHeader("Authorization");
+		
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+		    String jwt = authHeader.substring(7);
+		    try {
+		        String username = jwtUtil.getUsernameFromToken(jwt);
+		        
+		        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		        
+		        UsernamePasswordAuthenticationToken authentication = 
+		            new UsernamePasswordAuthenticationToken(
+		                userDetails,
+		                null,
+		                userDetails.getAuthorities()
+		            );
+		        
+		        SecurityContextHolder.getContext().setAuthentication(authentication);
+		        
+		    } catch (Exception e) {
+		        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+		        return;
+		    }
+		}
+		
+		filterChain.doFilter(request, response);
+	}
+	
 }

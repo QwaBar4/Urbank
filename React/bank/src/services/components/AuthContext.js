@@ -22,7 +22,6 @@ export function AuthProvider({ children }) {
       
       return mergedUser;
     } catch (error) {
-      clearJwtToken();
       return null;
     }
   };
