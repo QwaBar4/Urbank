@@ -66,5 +66,11 @@ public class AdminController {
 		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
 		return ResponseEntity.ok(transactions);
 	}
+	
+	@DeleteMapping("/users/{userId}")
+	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+		userModelService.deleteUser(userId);
+		return ResponseEntity.noContent().build();
+	}
 
 }

@@ -195,6 +195,20 @@ public class UserModelService implements UserDetailsService {
 		    .map(this::convertToTransactionDTO)
 		    .collect(Collectors.toList());
 	}
+	
+	@Transactional
+	public void deleteUser (Long userId) {
+		UserModel user = userRepo.findById(userId)
+		    .orElseThrow(() -> new UsernameNotFoundException("User  not found"));
+
+		List<TransactionModel> transactions = transactionRepo.findByUser (user);
+		transactionRepo.deleteAll(transactions);
+
+		if (user.getAccount() != null) {
+		    accountRepo.delete(user.getAccount());
+		}
+		userRepo.delete(user);
+	}
 
 	private TransactionDTO convertToTransactionDTO(TransactionModel transaction) {
 		TransactionDTO dto = new TransactionDTO();
