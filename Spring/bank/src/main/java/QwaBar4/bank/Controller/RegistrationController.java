@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import java.math.BigDecimal;
 
 import java.util.regex.Pattern;
 
@@ -84,7 +85,7 @@ public class RegistrationController {
 
             AccountModel account = new AccountModel();
             account.setAccountNumber("ACC-" + UUID.randomUUID());
-            account.setBalance(0.0);
+            account.setBalance(BigDecimal.ZERO); 
 
             UserModel newUser = new UserModel();
             newUser.setUsername(normalizedUsername);

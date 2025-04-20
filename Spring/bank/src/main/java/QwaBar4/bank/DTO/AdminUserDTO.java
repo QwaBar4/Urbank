@@ -2,6 +2,8 @@ package QwaBar4.bank.DTO;
 
 import java.time.LocalDateTime;
 
+import java.math.BigDecimal;
+
 public class AdminUserDTO extends UserDTO {
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
@@ -12,7 +14,7 @@ public class AdminUserDTO extends UserDTO {
     }
 
     public AdminUserDTO(Long id, String username, String email,
-                        String accountNumber, Double balance, boolean active,
+                        String accountNumber, BigDecimal balance, boolean active,
                         LocalDateTime createdAt, LocalDateTime lastLogin, boolean locked) {
         super(id, username, email, accountNumber, balance, active);
         this.createdAt = createdAt;

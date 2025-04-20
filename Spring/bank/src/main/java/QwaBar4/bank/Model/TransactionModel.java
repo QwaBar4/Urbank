@@ -1,6 +1,7 @@
 package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,7 +12,6 @@ public class TransactionModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String type;
-    private Double amount;
     private String description;
     private LocalDateTime timestamp;
     
@@ -22,6 +22,9 @@ public class TransactionModel {
     @ManyToOne
     @JoinColumn(name = "target_account_id")
     private AccountModel targetAccount;
+    
+    @Column(precision = 19, scale = 2)
+    private BigDecimal amount;
 
     @ManyToOne
     @JoinColumn(name = "user_id") 
@@ -44,11 +47,11 @@ public class TransactionModel {
         this.type = type;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() { // Change to BigDecimal
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) { // Change to BigDecimal
         this.amount = amount;
     }
 

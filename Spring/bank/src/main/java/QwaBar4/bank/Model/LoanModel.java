@@ -51,9 +51,7 @@ public class LoanModel {
     public AccountModel getAccount() { return account; }
     public void setAccount(AccountModel account) { this.account = account; }
 
-    // Helper method to generate payment schedule
     public void generatePaymentSchedule() {
-        // Implementation would calculate each payment
-        // based on principal, interest rate, and term
+
     }
 }

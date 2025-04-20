@@ -5,12 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.DecimalMax;
+import java.math.BigDecimal;
 
 
 public class TransferRequestDTO {
     @NotBlank
-    @Pattern(regexp = "^ACC-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89aAbB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
-    private String sourceAccount;
+	@Pattern(regexp = "^ACC-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89aAbB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
+	private String sourceAccount;
 
     @NotBlank
     @Pattern(regexp = "^ACC-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89aAbB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
@@ -18,7 +19,7 @@ public class TransferRequestDTO {
 
     @DecimalMin(value = "1.00", message = "Minimum transfer amount is $1.00")
     @DecimalMax(value = "10000.00", message = "Maximum transfer amount is $10,000.00")
-    private double amount;
+    private BigDecimal amount; 
 
     private String description;
 
@@ -39,11 +40,11 @@ public class TransferRequestDTO {
         this.targetAccount = targetAccount;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

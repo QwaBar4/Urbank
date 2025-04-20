@@ -1,18 +1,21 @@
 package QwaBar4.bank.DTO;
 
+import java.math.BigDecimal;
+
+
 public class AccountDTO {
     private Long id;
     private String accountNumber;
-    private Double balance;
-    private Double dailyTransferLimit;
-    private Double dailyWithdrawalLimit;
+    private BigDecimal balance;
+    private BigDecimal dailyTransferLimit;
+    private BigDecimal dailyWithdrawalLimit;
 
     // Default constructor
     public AccountDTO() {}
 
     // Parameterized constructor
-    public AccountDTO(Long id, String accountNumber, Double balance,
-                     Double dailyTransferLimit, Double dailyWithdrawalLimit) {
+    public AccountDTO(Long id, String accountNumber, BigDecimal balance,
+                     BigDecimal dailyTransferLimit, BigDecimal dailyWithdrawalLimit) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.balance = balance;
@@ -37,27 +40,27 @@ public class AccountDTO {
         this.accountNumber = accountNumber;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
-    public Double getDailyTransferLimit() {
+    public BigDecimal getDailyTransferLimit() {
         return dailyTransferLimit;
     }
 
-    public void setDailyTransferLimit(Double dailyTransferLimit) {
+    public void setDailyTransferLimit(BigDecimal dailyTransferLimit) {
         this.dailyTransferLimit = dailyTransferLimit;
     }
 
-    public Double getDailyWithdrawalLimit() {
+    public BigDecimal getDailyWithdrawalLimit() {
         return dailyWithdrawalLimit;
     }
 
-    public void setDailyWithdrawalLimit(Double dailyWithdrawalLimit) {
+    public void setDailyWithdrawalLimit(BigDecimal dailyWithdrawalLimit) {
         this.dailyWithdrawalLimit = dailyWithdrawalLimit;
     }
 }

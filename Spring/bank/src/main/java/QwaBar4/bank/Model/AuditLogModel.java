@@ -1,13 +1,12 @@
 package QwaBar4.bank.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 
 @Entity
-public class AuditLog {
+@Table(name = "audit_log")
+public class AuditLogModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,9 +16,9 @@ public class AuditLog {
     private LocalDateTime timestamp;
     private String details;
 
-    public AuditLog() {}
+    public AuditLogModel() {}
 
-    public AuditLog(String action, String username, LocalDateTime timestamp, String details) {
+    public AuditLogModel(String action, String username, LocalDateTime timestamp, String details) {
         this.action = action;
         this.username = username;
         this.timestamp = timestamp;

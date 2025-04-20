@@ -2,6 +2,8 @@ package QwaBar4.bank.DTO;
 
 import java.util.Set;
 
+import java.math.BigDecimal;
+
 public class UserDetailsDTO extends UserDTO {
     private Set<String> roles;
 
@@ -10,7 +12,7 @@ public class UserDetailsDTO extends UserDTO {
     }
 
     public UserDetailsDTO(Long id, String username, String email, 
-                        String accountNumber, Double balance, 
+                        String accountNumber, BigDecimal balance, 
                         boolean active, Set<String> roles) {
         super(id, username, email, accountNumber, balance, active);
         this.roles = roles;

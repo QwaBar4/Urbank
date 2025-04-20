@@ -168,6 +168,7 @@ const AdminDashboard = () => {
 		            <div>{txn.description}</div>
 		            <div className="text-muted small">
 		              {txn.sourceAccountNumber && `From: ${txn.sourceAccountNumber}`}
+		              <br></br>
 		              {txn.targetAccountNumber && `To: ${txn.targetAccountNumber}`}
 		            </div>
 		            <small className="text-muted">

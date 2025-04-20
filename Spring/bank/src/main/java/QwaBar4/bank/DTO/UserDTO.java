@@ -1,18 +1,20 @@
 package QwaBar4.bank.DTO;
 
+import java.math.BigDecimal;
+
 public class UserDTO {
     private Long id;
     private String username;
     private String email;
     private String accountNumber;
-    private Double balance;
+    private BigDecimal balance;
     private boolean active;
 
 
     public UserDTO() {}
 
     public UserDTO(Long id, String username, String email,
-                   String accountNumber, Double balance, boolean active) {
+                   String accountNumber, BigDecimal balance, boolean active) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -53,11 +55,11 @@ public class UserDTO {
         this.accountNumber = accountNumber;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 

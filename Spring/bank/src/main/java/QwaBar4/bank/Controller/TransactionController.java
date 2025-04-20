@@ -8,6 +8,7 @@ import QwaBar4.bank.Model.*;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -57,12 +58,12 @@ public class TransactionController {
         List<TransactionDTO> transactions = transactionService.getUserTransactions(authentication.getName());
         return ResponseEntity.ok(transactions);
     }
-
-    @GetMapping("/balance")
-    public ResponseEntity<Double> getAccountBalance(Authentication authentication) {
-        Double balance = transactionService.getAccountBalance(authentication.getName());
-        return ResponseEntity.ok(balance);
-    }
+    
+	@GetMapping("/balance")
+	public ResponseEntity<BigDecimal> getAccountBalance(Authentication authentication) {
+		BigDecimal balance = transactionService.getAccountBalance(authentication.getName());
+		return ResponseEntity.ok(balance);
+	}
     
 	@PostMapping("/deposit")
 	public ResponseEntity<?> depositFunds(
@@ -77,12 +78,12 @@ public class TransactionController {
 		        authentication.getName()
 		    );
 		    
-		    double newBalance = accountRepo.findByAccountNumber(request.getAccountNumber())
+		    BigDecimal newBalance = accountRepo.findByAccountNumber(request.getAccountNumber())
 		        .orElseThrow().getBalance();
 		    
 		    Map<String, Object> response = new HashMap<>();
 		    response.put("transaction", transaction);
-		    response.put("newBalance", newBalance);
+		    response.put("newBalance", newBalance.doubleValue()); 
 		    
 		    return ResponseEntity.ok(response);
 		} catch (RuntimeException e) {

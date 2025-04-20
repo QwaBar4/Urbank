@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Model.AuditLogModel;
+import QwaBar4.bank.Model.AuditLogRepository;
 import QwaBar4.bank.Service.*;
 
 @RestController
@@ -21,6 +23,9 @@ public class AdminController {
     
     @Autowired
     private TransactionService transactionService;
+    
+    @Autowired
+	private AuditLogRepository auditLogRepository;
 
 	@GetMapping("/users/{userId}")
 	public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
@@ -71,6 +76,11 @@ public class AdminController {
 	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
 		userModelService.deleteUser(userId);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@GetMapping("/audit-logs")
+	public ResponseEntity<List<AuditLogModel>> getAuditLogs() {
+		return ResponseEntity.ok(auditLogRepository.findAll());
 	}
 
 }

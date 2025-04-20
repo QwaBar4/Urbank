@@ -21,6 +21,7 @@ import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.TransactionModelRepository;
 import QwaBar4.bank.Model.TransactionModel;
 import QwaBar4.bank.DTO.*;
+import java.math.BigDecimal;
 
 
 import java.util.Collections;
@@ -73,16 +74,16 @@ public class UserModelService implements UserDetailsService {
 
 	public UserDetailsDTO getUserDetails(Long userId) {
 		UserModel user = userRepo.findById(userId)
-		        .orElseThrow(() -> new RuntimeException("User not found"));
-		
+		        .orElseThrow(() -> new RuntimeException("User  not found"));
+
 		return new UserDetailsDTO(
-		        user.getId(),
-		        user.getUsername(),
-		        user.getEmail(),
-		        user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
-		        user.getAccount() != null ? user.getAccount().getBalance() : null,
-		        user.isActive(),
-		        user.getRoles()
+			user.getId(),
+			user.getUsername(),
+			user.getEmail(),
+			user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
+			user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO, // Now returns BigDecimal
+			user.isActive(),
+			user.getRoles()
 		);
 	}
 	
@@ -115,7 +116,7 @@ public class UserModelService implements UserDetailsService {
 		        user.getUsername(),
 		        user.getEmail(),
 		        user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
-		        user.getAccount() != null ? user.getAccount().getBalance() : null,
+		        user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
 		        user.isActive(),
 		        user.getRoles()
 		);

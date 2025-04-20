@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,47 +32,45 @@ public class TransactionService {
         this.userRepo = userRepo;
     }
 
-    @Transactional
-    public TransactionDTO processTransfer(String sourceAccount, String targetAccount,
-                                          double amount, String description, String username) {
-        AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
-            .orElseThrow(() -> new RuntimeException("Source account not found"));
+	@Transactional
+	public TransactionDTO processTransfer(String sourceAccount, String targetAccount,
+		                                  BigDecimal amount, String description, String username) {
+		AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
+		    .orElseThrow(() -> new RuntimeException("Source account not found"));
 
-        if (!source.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized access to account");
-        }
+		if (!source.getUser ().getUsername().equals(username)) {
+		    throw new RuntimeException("Unauthorized access to account");
+		}
 
-        AccountModel target = accountRepo.findByAccountNumber(targetAccount)
-            .orElseThrow(() -> new RuntimeException("Target account not found"));
+		AccountModel target = accountRepo.findByAccountNumber(targetAccount)
+		    .orElseThrow(() -> new RuntimeException("Target account not found"));
 
-        if (source.getBalance() < amount) {
-            throw new RuntimeException("Insufficient funds");
-        }
+		if (source.getBalance().compareTo(amount) < 0) {
+		    throw new RuntimeException("Insufficient funds");
+		}
 
-        if (amount > DAILY_TRANSFER_LIMIT) {
-            throw new TransactionLimitException("Exceeds daily transfer limit");
-        }
+		if (amount.compareTo(BigDecimal.valueOf(DAILY_TRANSFER_LIMIT)) > 0) {
+		    throw new TransactionLimitException("Exceeds daily transfer limit");
+		}
 
-        source.setBalance(source.getBalance() - amount);
-        target.setBalance(target.getBalance() + amount);
+		source.setBalance(source.getBalance().subtract(amount)); 
+		target.setBalance(target.getBalance().add(amount)); 
 
-        accountRepo.save(source);
-        accountRepo.save(target);
+		accountRepo.save(source);
+		accountRepo.save(target);
 
-        TransactionModel transaction = new TransactionModel();
-        transaction.setType("TRANSFER");
-        transaction.setAmount(amount);
-        transaction.setUser(source.getUser());
-        transaction.setSourceAccount(source);
-        transaction.setTargetAccount(target);
-        transaction.setDescription(description);
-        transaction.setTimestamp(LocalDateTime.now());
-        transaction = transactionRepo.save(transaction);
+		TransactionModel transaction = new TransactionModel();
+		transaction.setType("TRANSFER");
+		transaction.setAmount(amount);
+		transaction.setUser (source.getUser ());
+		transaction.setSourceAccount(source);
+		transaction.setTargetAccount(target);
+		transaction.setDescription(description);
+		transaction.setTimestamp(LocalDateTime.now());
+		transaction = transactionRepo.save(transaction);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        return convertToDTO(transaction);
-    }
+		return convertToDTO(transaction);
+	}
 
     public List<TransactionDTO> getUserTransactions(String username) {
         UserModel user = userRepo.findByUsername(username)
@@ -88,11 +87,11 @@ public class TransactionService {
             .collect(Collectors.toList());
     }
 
-    public Double getAccountBalance(String username) {
-        UserModel user = userRepo.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getAccount().getBalance();
-    }
+	public BigDecimal getAccountBalance(String username) {
+		UserModel user = userRepo.findByUsername(username)
+		    .orElseThrow(() -> new RuntimeException("User  not found"));
+		return user.getAccount().getBalance();
+	}
 
     
 	public List<TransactionDTO> getUserTransactionsById(Long userId) {
@@ -106,67 +105,67 @@ public class TransactionService {
 		    .collect(Collectors.toList());
 	}
 
-    public TransactionDTO processDeposit(String accountNumber, double amount, String description, String username) {
-        if (amount <= 0) {
-            throw new RuntimeException("Deposit amount must be positive");
-        }
+	public TransactionDTO processDeposit(String accountNumber, BigDecimal amount, String description, String username) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) { // Use compareTo for BigDecimal
+		    throw new RuntimeException("Deposit amount must be positive");
+		}
 
-        AccountModel account = accountRepo.findByAccountNumber(accountNumber)
-            .orElseThrow(() -> new RuntimeException("Account not found"));
+		AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+		    .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        if (!account.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized deposit attempt");
-        }
+		if (!account.getUser().getUsername().equals(username)) {
+		    throw new RuntimeException("Unauthorized deposit attempt");
+		}
 
-        account.setBalance(account.getBalance() + amount);
-        accountRepo.save(account);
+		account.setBalance(account.getBalance().add(amount)); // Use add for BigDecimal
+		accountRepo.save(account);
 
-        TransactionModel transaction = new TransactionModel();
-        transaction.setType("DEPOSIT");
-        transaction.setAmount(amount);
-        transaction.setUser(account.getUser());
-        transaction.setDescription(description);
-        transaction.setTimestamp(LocalDateTime.now());
-        transaction.setTargetAccount(account);
-        transactionRepo.save(transaction);
+		TransactionModel transaction = new TransactionModel();
+		transaction.setType("DEPOSIT");
+		transaction.setAmount(amount); // Ensure amount is BigDecimal
+		transaction.setUser(account.getUser());
+		transaction.setDescription(description);
+		transaction.setTimestamp(LocalDateTime.now());
+		transaction.setTargetAccount(account);
+		transactionRepo.save(transaction);
 
-        return convertToDTO(transaction);
-    }
+		return convertToDTO(transaction);
+	}
 
-    public Map<String, Object> processWithdrawal(String accountNumber, double amount, String description, String username) {
-        if (amount <= 0) {
-            throw new RuntimeException("Withdrawal amount must be positive");
-        }
+	public Map<String, Object> processWithdrawal(String accountNumber, BigDecimal amount, String description, String username) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) { // Use compareTo for BigDecimal
+		    throw new RuntimeException("Withdrawal amount must be positive");
+		}
 
-        AccountModel account = accountRepo.findByAccountNumber(accountNumber)
-            .orElseThrow(() -> new RuntimeException("Account not found"));
+		AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+		    .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        if (!account.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized withdrawal attempt");
-        }
+		if (!account.getUser().getUsername().equals(username)) {
+		    throw new RuntimeException("Unauthorized withdrawal attempt");
+		}
 
-        if (account.getBalance() < amount) {
-            throw new RuntimeException("Insufficient funds for withdrawal");
-        }
+		if (account.getBalance().compareTo(amount) < 0) { // Use compareTo for BigDecimal
+		    throw new RuntimeException("Insufficient funds for withdrawal");
+		}
 
-        account.setBalance(account.getBalance() - amount);
-        AccountModel updatedAccount = accountRepo.save(account);
+		account.setBalance(account.getBalance().subtract(amount)); // Use subtract for BigDecimal
+		AccountModel updatedAccount = accountRepo.save(account);
 
-        TransactionModel transaction = new TransactionModel();
-        transaction.setType("WITHDRAWAL");
-        transaction.setAmount(amount);
-        transaction.setUser(account.getUser());
-        transaction.setDescription(description);
-        transaction.setTimestamp(LocalDateTime.now());
-        transaction.setSourceAccount(account);
-        transactionRepo.save(transaction);
+		TransactionModel transaction = new TransactionModel();
+		transaction.setType("WITHDRAWAL");
+		transaction.setAmount(amount); // Ensure amount is BigDecimal
+		transaction.setUser(account.getUser());
+		transaction.setDescription(description);
+		transaction.setTimestamp(LocalDateTime.now());
+		transaction.setSourceAccount(account);
+		transactionRepo.save(transaction);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("transaction", convertToDTO(transaction));
-        response.put("newBalance", updatedAccount.getBalance());
+		Map<String, Object> response = new HashMap<>();
+		response.put("transaction", convertToDTO(transaction));
+		response.put("new Balance", updatedAccount.getBalance());
 
-        return response;
-    }
+		return response;
+	}
     
 
 

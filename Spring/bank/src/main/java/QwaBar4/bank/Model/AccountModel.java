@@ -1,9 +1,10 @@
 package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "accounts")
@@ -14,13 +15,21 @@ public class AccountModel {
     private Long id;
 
     private String accountNumber;
-    private Double balance; // Change to Double
 
-    @Column(nullable = false)
-    private Double dailyTransferLimit = 10000.0; // Default $10k limit
+	@Column(precision = 19, scale = 2)
+	private BigDecimal balance;
 
-    @Column(nullable = false)
-    private Double dailyWithdrawalLimit = 2000.0; // Change to Double
+	@Column(precision = 19, scale = 2)
+	private BigDecimal dailyTransferLimit = new BigDecimal("10000.00");
+
+	@Column(precision = 19, scale = 2)
+	private BigDecimal dailyWithdrawalLimit = new BigDecimal("2000.00");
+
+    @Column(name = "daily_transfer_total", precision = 19, scale = 2)
+    private BigDecimal dailyTransferTotal = BigDecimal.ZERO;
+
+    @Column(name = "daily_withdrawal_total", precision = 19, scale = 2)
+    private BigDecimal dailyWithdrawalTotal = BigDecimal.ZERO;
 
     @Column(name = "last_interest_calculation")
     private LocalDateTime lastInterestCalculation;
@@ -29,36 +38,36 @@ public class AccountModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore 
     private UserModel user;
-    
-	@OneToMany(mappedBy = "sourceAccount", fetch = FetchType.LAZY)
-	@JsonIgnore
-	private List<TransactionModel> outgoingTransactions;
 
-	@OneToMany(mappedBy = "targetAccount", fetch = FetchType.LAZY)
-	@JsonIgnore
-	private List<TransactionModel> incomingTransactions;
+    @OneToMany(mappedBy = "sourceAccount", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<TransactionModel> outgoingTransactions;
+
+    @OneToMany(mappedBy = "targetAccount", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<TransactionModel> incomingTransactions;
 
     // Business methods
-    public void deposit(Double amount) { // Change to Double
+    public void deposit(Double amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Deposit amount must be positive");
         }
-        this.balance += amount;
+        this.balance = this.balance.add(BigDecimal.valueOf(amount)); // Convert to BigDecimal
     }
 
-    public void withdraw(Double amount) { // Change to Double
+    public void withdraw(Double amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Withdrawal amount must be positive");
         }
-        if (amount > balance) {
+        if (BigDecimal.valueOf(amount).compareTo(this.balance) > 0) { // Compare BigDecimal
             throw new IllegalArgumentException("Insufficient funds");
         }
-        this.balance -= amount;
+        this.balance = this.balance.subtract(BigDecimal.valueOf(amount)); // Convert to BigDecimal
     }
 
     public void applyDailyInterest(double annualRate) {
-        double dailyInterest = this.balance * (annualRate / 36500); // Divide by 100 for percentage
-        this.balance += dailyInterest;
+        BigDecimal dailyInterest = this.balance.multiply(BigDecimal.valueOf(annualRate / 36500)); // Divide by 100 for percentage
+        this.balance = this.balance.add(dailyInterest);
         this.lastInterestCalculation = LocalDateTime.now();
     }
 
@@ -79,27 +88,27 @@ public class AccountModel {
         this.accountNumber = accountNumber;
     }
 
-    public Double getBalance() { // Change to Double
+    public BigDecimal getBalance() { // Change to BigDecimal
         return balance;
     }
 
-    public void setBalance(Double balance) { // Change to Double
+    public void setBalance(BigDecimal balance) { // Change to BigDecimal
         this.balance = balance;
     }
 
-    public Double getDailyTransferLimit() { // Change to Double
+    public BigDecimal getDailyTransferLimit() { // Change to BigDecimal
         return dailyTransferLimit;
     }
 
-    public void setDailyTransferLimit(Double dailyTransferLimit) { // Change to Double
+    public void setDailyTransferLimit(BigDecimal dailyTransferLimit) { // Change to BigDecimal
         this.dailyTransferLimit = dailyTransferLimit;
     }
 
-    public Double getDailyWithdrawalLimit() { // Change to Double
+    public BigDecimal getDailyWithdrawalLimit() { // Change to BigDecimal
         return dailyWithdrawalLimit;
     }
 
-    public void setDailyWithdrawalLimit(Double dailyWithdrawalLimit) { // Change to Double
+    public void setDailyWithdrawalLimit(BigDecimal dailyWithdrawalLimit) { // Change to BigDecimal
         this.dailyWithdrawalLimit = dailyWithdrawalLimit;
     }
 
@@ -107,11 +116,11 @@ public class AccountModel {
         return lastInterestCalculation;
     }
 
-    public UserModel getUser () {
+    public UserModel getUser() {
         return user;
     }
 
-    public void setUser (UserModel user) {
+    public void setUser(UserModel user) {
         this.user = user;
     }
 
@@ -122,4 +131,9 @@ public class AccountModel {
     public List<TransactionModel> getIncomingTransactions() {
         return incomingTransactions;
     }
+    
+    public void setLastInterestCalculation(LocalDateTime timestamp) {
+		this.lastInterestCalculation = timestamp;
+	}
+    
 }

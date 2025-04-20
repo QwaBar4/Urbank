@@ -1,11 +1,12 @@
 package QwaBar4.bank.DTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DepositWithdrawRequestDTO {
     private String accountNumber;
-    private double amount;
+	private BigDecimal amount;
     private String description;
 
     public DepositWithdrawRequestDTO() {}
@@ -18,11 +19,11 @@ public class DepositWithdrawRequestDTO {
         this.accountNumber = accountNumber;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

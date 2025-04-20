@@ -1,11 +1,12 @@
 package QwaBar4.bank.DTO;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public class TransactionDTO {
     private Long id;
     private String type;
-    private double amount;
+	private BigDecimal amount; 
     private LocalDateTime timestamp;
     private String description;
     private String user;
@@ -31,13 +32,13 @@ public class TransactionDTO {
         this.type = type;
     }
 
-    public double getAmount() {
-        return amount;
-    }
+	public BigDecimal getAmount() {
+		return amount;
+	}
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
 
     public LocalDateTime getTimestamp() {
         return timestamp;
