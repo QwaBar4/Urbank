@@ -177,7 +177,7 @@ public class TransactionService {
 		dto.setAmount(transaction.getAmount());
 		dto.setTimestamp(transaction.getTimestamp());
 		dto.setDescription(transaction.getDescription());
-		
+
 		if (transaction.getUser () != null) {
 		    dto.setUser (transaction.getUser ().getUsername());
 		} else {
@@ -186,12 +186,18 @@ public class TransactionService {
 
 		if (transaction.getSourceAccount() != null) {
 		    dto.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());
+		    dto.setSourceAccountOwner(transaction.getSourceAccount().getUser ().getUsername());
 		}
 
 		if (transaction.getTargetAccount() != null) {
 		    dto.setTargetAccountNumber(transaction.getTargetAccount().getAccountNumber());
+		    dto.setTargetAccountOwner(transaction.getTargetAccount().getUser ().getUsername());
+
+		    String targetAccountName = transaction.getTargetAccount().getUser ().getUsername();
+		    dto.setTransferDescription("Transfer to account: " + targetAccountName);
 		}
 
 		return dto;
 	}
+	
 }

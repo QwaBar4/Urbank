@@ -117,4 +117,16 @@ public class TransactionController {
 		return ResponseEntity.ok(transactions);
 	}
 	
+	@GetMapping("/accounts/{accountNumber}")
+	public ResponseEntity<Map<String, Object>> getAccountDetails(@PathVariable String accountNumber) {
+		AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+		    .orElseThrow(() -> new RuntimeException("Account not found"));
+		
+		Map<String, Object> response = new HashMap<>();
+		response.put("accountNumber", account.getAccountNumber());
+		response.put("ownerName", account.getUser().getUsername());
+		
+		return ResponseEntity.ok(response);
+	}
+	
 }

@@ -4,6 +4,8 @@ import { getJwtToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 
 const Transfer = ({ userAccount, refreshBalance }) => {
+    const [targetAccountDetails, setTargetAccountDetails] = useState(null);
+    const [validationLoading, setValidationLoading] = useState(false);
     const [formData, setFormData] = useState({
         sourceAccount: userAccount?.accountNumber || '',
         targetAccount: '',
@@ -16,13 +18,32 @@ const Transfer = ({ userAccount, refreshBalance }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (userAccount) {
-            setFormData(prev => ({
-                ...prev,
-                sourceAccount: userAccount.accountNumber
-            }));
-        }
-    }, [userAccount]);
+        const validateAccount = async () => {
+            if (formData.targetAccount.length < 5) return;
+
+            setValidationLoading(true);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${formData.targetAccount}`, {
+                    headers: { 'Authorization': `Bearer ${getJwtToken()}` }
+                });
+
+                if (!response.ok) {
+                    setTargetAccountDetails(null);
+                    throw new Error('Account not found');
+                }
+
+                const data = await response.json();
+                setTargetAccountDetails(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setValidationLoading(false);
+            }
+        };
+
+        const debounceTimer = setTimeout(validateAccount, 500);
+        return () => clearTimeout(debounceTimer);
+    }, [formData.targetAccount]);
 
     const handleChange = (e) => {
         setFormData({
@@ -31,70 +52,70 @@ const Transfer = ({ userAccount, refreshBalance }) => {
         });
     };
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setIsLoading(true);
-		setError('');
-		setSuccess('');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
 
-		try {
-		    const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
-		        method: 'POST',
-		        headers: {
-		            'Content-Type': 'application/json',
-		            'Authorization': `Bearer ${getJwtToken()}`
-		        },
-		        body: JSON.stringify({
-		            sourceAccount: formData.sourceAccount,
-		            targetAccount: formData.targetAccount,
-		            amount: parseFloat(formData.amount),
-		            description: formData.description
-		        })
-		    });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getJwtToken()}`
+                },
+                body: JSON.stringify({
+                    sourceAccount: formData.sourceAccount,
+                    targetAccount: formData.targetAccount,
+                    amount: parseFloat (formData.amount),
+                    description: formData.description
+                })
+            });
 
-		    const responseText = await response.text();
-		    if (!response.ok) {
-		        try {
-		            const errorData = JSON.parse(responseText);
-		            throw new Error(errorData.message || 'Transfer failed');
-		        } catch {
-		            throw new Error(responseText || 'Transfer failed');
-		        }
-		    }
+            const responseText = await response.text();
+            if (!response.ok) {
+                try {
+                    const errorData = JSON.parse(responseText);
+                    throw new Error(errorData.message || 'Transfer failed');
+                } catch {
+                    throw new Error(responseText || 'Transfer failed');
+                }
+            }
 
-		    const data = JSON.parse(responseText);
-		    setSuccess(`Transfer successful!`);
-		    
-		    setFormData(prev => ({
-		        ...prev,
-		        targetAccount: '',
-		        amount: '',
-		        description: ''
-		    }));
-		    
-		    if (refreshBalance) refreshBalance();
-		    
-		} catch (err) {
-		    setError(err.message);
-		    if (err.message.includes('Unauthorized') || err.message.includes('token')) {
-		        navigate('/login');
-		    }
-		} finally {
-		    setIsLoading(false);
-		}
-	};
+            const data = JSON.parse(responseText);
+            setSuccess(`Transfer successful!`);
+
+            setFormData(prev => ({
+                ...prev,
+                targetAccount: '',
+                amount: '',
+                description: ''
+            }));
+
+            if (refreshBalance) refreshBalance();
+
+        } catch (err) {
+            setError(err.message);
+            if (err.message.includes('Unauthorized') || err.message.includes('token')) {
+                navigate('/login');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="transfer-container card">
             <div className="card-body">
                 <h2 className="card-title">Transfer Money</h2>
-				{error && (
-					<div className="alert alert-danger" style={{ color: 'red' }}>
-						{error}
-					</div>
-				)}
+                {error && (
+                    <div className="alert alert-danger" style={{ color: 'red' }}>
+                        {error}
+                    </div>
+                )}
                 {success && <div className="alert alert-success">{success}</div>}
-                
+
                 <form onSubmit={handleSubmit}>
                     <div className="form-group mb-3">
                         <label className="form-label">From Account:</label>
@@ -106,7 +127,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                             readOnly
                         />
                     </div>
-                    
+
                     <div className="form-group mb-3">
                         <label className="form-label">To Account:</label>
                         <input
@@ -118,8 +139,18 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                             required
                             placeholder="Enter recipient account number"
                         />
+                        {validationLoading && (
+                            <div className="spinner-border spinner-border-sm" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                        )}
+                        {targetAccountDetails && (
+                            <div className="mt-2 text-success" style={{ color: 'green' }}>
+                                Account Holder: {targetAccountDetails.ownerName}
+                            </div>
+                        )}
                     </div>
-                    
+
                     <div className="form-group mb-3">
                         <label className="form-label">Amount ($):</label>
                         <input
@@ -134,7 +165,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                             placeholder="0.00"
                         />
                     </div>
-                    
+
                     <div className="form-group mb-3">
                         <label className="form-label">Description (Optional):</label>
                         <input
@@ -146,7 +177,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                             placeholder="e.g., Rent payment"
                         />
                     </div>
-                    
+
                     <button 
                         type="submit" 
                         className="btn btn-primary"
