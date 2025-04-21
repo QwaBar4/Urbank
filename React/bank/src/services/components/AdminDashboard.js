@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser } from '../api';
+import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../api';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -14,46 +13,48 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [auditLogs, setAuditLogs] = useState(null);
+  const [showAuditLogsModal, setShowAuditLogsModal] = useState(false);
   const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchData = async () => {
-		  try {
-		    const data = await getAdminDashboardData();
-		    setAdminData(data);
-		    setError(null);
-		  } catch (error) {
-		    setError(error.message);
-		  }
-		};
-		fetchData();
-	}, [user, navigate]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAdminDashboardData();
+        setAdminData(data);
+        setError(null);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+    fetchData();
+  }, [user, navigate]);
 
-	const handleStatusChange = async (userId, currentStatus) => {
-	  try {
-		const result = await activateUser(userId, !currentStatus);
-		console.log('Activation success:', result);
-		
-		setAdminData(prev => ({
-		  ...prev,
-		  users: prev.users.map(u => 
-		    u.id === userId ? { ...u, active: !currentStatus } : u
-		  )
-		}));
-	  } catch (error) {
-		let errorMessage = error.message;
-		
-		// Handle specific error cases
-		if (error.message.includes('Failed to parse')) {
-		  errorMessage = "Server returned invalid response. Check backend logs.";
-		} else if (error.message.includes('Non-JSON')) {
-		  errorMessage = "Server error occurred. Please try again.";
-		}
-		
-		setError(errorMessage);
-	  }
-	};
-	
+  const handleStatusChange = async (userId, currentStatus) => {
+    try {
+      const result = await activateUser(userId, !currentStatus);
+      console.log('Activation success:', result);
+
+      setAdminData(prev => ({
+        ...prev,
+        users: prev.users.map(u =>
+          u.id === userId ? { ...u, active: !currentStatus } : u
+        )
+      }));
+    } catch (error) {
+      let errorMessage = error.message;
+
+      // Handle specific error cases
+      if (error.message.includes('Failed to parse')) {
+        errorMessage = "Server returned invalid response. Check backend logs.";
+      } else if (error.message.includes('Non-JSON')) {
+        errorMessage = "Server error occurred. Please try again.";
+      }
+
+      setError(errorMessage);
+    }
+  };
+
   const handleDelete = async () => {
     try {
       await deleteUser(selectedUser.id);
@@ -65,28 +66,39 @@ const AdminDashboard = () => {
     }
   };
 
-	const viewTransactions = async (userId) => {
-	  try {
-		setTransactionsLoading(true);
-		setError(null);
-		const transactions = await getUserTransactions(userId);
-		setShowTransactions(transactions);
-	  } catch (error) {
-		setError(error.message || 'Failed to load transactions');
-	  } finally {
-		setTransactionsLoading(false);
-	  }
-	};
+  const viewTransactions = async (userId) => {
+    try {
+      setTransactionsLoading(true);
+      setError(null);
+      const transactions = await getUserTransactions(userId);
+      setShowTransactions(transactions);
+    } catch (error) {
+      setError(error.message || 'Failed to load transactions');
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
+  const viewAuditLogs = async (userId) => {
+    try {
+      setError(null);
+      const logs = await getUserAuditLogs(userId);
+      setAuditLogs(logs);
+      setShowAuditLogsModal(true);
+    } catch (error) {
+      setError(error.message || 'Failed to load audit logs');
+    }
+  };
 
   if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
-  	return <div className="alert alert-danger">Unauthorized access</div>;
+    return <div className="alert alert-danger">Unauthorized access</div>;
   }
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Admin Dashboard</h1>
-        <button 
+        <button
           onClick={() => navigate('/dashboard')}
           className="btn btn-outline-warning"
         >
@@ -99,7 +111,7 @@ const AdminDashboard = () => {
           <div className="card-body">
             <h2 className="card-title mb-4">System Statistics</h2>
             <p className="lead">Total Users: {adminData.totalUsers}</p>
-            
+
             <h3 className="mb-3">User List</h3>
             <ul className="list-group">
               {adminData.users.map(user => (
@@ -109,7 +121,7 @@ const AdminDashboard = () => {
                     <p className="mb-0">{user.email}</p>
                     <small className="text-muted">Status: {user.active ? 'Active' : 'Inactive'}</small>
                   </div>
-                  
+
                   <div className="btn-group">
                     <button
                       className={`btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'}`}
@@ -117,21 +129,28 @@ const AdminDashboard = () => {
                     >
                       {user.active ? 'Deactivate' : 'Activate'}
                     </button>
-                    
+
                     <button
                       className="btn btn-sm btn-info"
                       onClick={() => navigate(`/edit-user/${user.id}`)}
                     >
                       Edit
                     </button>
-                    
+
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={() => viewTransactions(user.id)}
                     >
                       Transactions
                     </button>
-                    
+
+                    <button
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => viewAuditLogs(user.id)}
+                    >
+                      Audit Logs
+                    </button>
+
                     <button
                       className="btn btn-sm btn-danger"
                       onClick={() => {
@@ -150,43 +169,91 @@ const AdminDashboard = () => {
       )}
 
       {/* Transactions Modal */}
-	<Modal.Body>
-	  {transactionsLoading ? (
-		<div className="text-center">
-		  <div className="spinner-border text-primary" role="status">
-		    <span className="visually-hidden">Loading...</span>
-		  </div>
-		</div>
-	  ) : (
-		<ul className="list-group">
-		  {showTransactions?.length > 0 ? (
-		    showTransactions.map((txn, index) => (
-		      <li key={index} className="list-group-item transaction-item">
-		        <div className="d-flex justify-content-between align-items-start">
-		          <div>
-		            <div className="fw-bold">{txn.type}</div>
-		            <div>{txn.description}</div>
-		            <div className="text-muted small">
-		              {txn.sourceAccountNumber && `From: ${txn.sourceAccountNumber}`}
-		              <br></br>
-		              {txn.targetAccountNumber && `To: ${txn.targetAccountNumber}`}
-		            </div>
-		            <small className="text-muted">
-		              {new Date(txn.timestamp).toLocaleString()}
-		            </small>
-		          </div>
-		          <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
-		            ${Math.abs(txn.amount).toFixed(2)}
-		          </span>
-		        </div>
-		      </li>
-		    ))
-		  ) : (
-		    <div className="alert alert-info">No transactions found</div>
-		  )}
-		</ul>
-	  )}
-	</Modal.Body>
+      <Modal show={showTransactions !== null} onHide={() => setShowTransactions(null)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Transactions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {transactionsLoading ? (
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            <ul className="list-group">
+              {showTransactions?.length > 0 ? (
+                showTransactions.map((txn, index) => (
+                  <li key={index} className="list-group-item transaction-item">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="fw-bold">{txn.type}</div>
+                        <div>{txn.description}</div>
+                        <div className="text-muted small">
+                          {txn.sourceAccountNumber && `From: ${txn.sourceAccountNumber}`}
+                          <br></br>
+                          {txn.targetAccountNumber && `To: ${txn.targetAccountNumber}`}
+                        </div>
+                        <small className="text-muted">
+                          {new Date(txn.timestamp).toLocaleString()}
+                        </small>
+                      </div>
+                      <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
+                        ${Math.abs(txn.amount).toFixed(2)}
+                      </span>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <div className="alert alert-info">No transactions found</div>
+              )}
+            </ul>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowTransactions(null)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Audit Logs Modal */}
+      <Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Audit Logs</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {auditLogs ? (
+            <ul className="list-group">
+              {auditLogs.length > 0 ? (
+                auditLogs.map((log, index) => (
+                  <li key={index} className="list-group-item audit-log-item">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="fw-bold">{log.action}</div>
+                        <div>User: {log.username}</div>
+                        <div>Details: {log.details}</div>
+                        <small className="text-muted">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </small>
+                      </div>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <div className="alert alert-info">No audit logs found</div>
+              )}
+            </ul>
+          ) : (
+            <div className="alert alert-info">No audit logs available</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAuditLogsModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>

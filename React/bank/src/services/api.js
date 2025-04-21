@@ -1,12 +1,11 @@
 import { getJwtToken, storeJwtToken } from '../utils/auth';
 
-
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
 export const handleResponse = async (response) => {
     const text = await response.text();
     if (!text) return null; // Handle empty responses
-    
+
     try {
         const json = JSON.parse(text);
         if (!response.ok) {
@@ -25,7 +24,6 @@ export const handleResponse = async (response) => {
         return text;
     }
 };
-
 
 export const getIndexData = async () => {
   try {
@@ -72,7 +70,6 @@ export const getAdminDashboardData = async () => {
     }
 };
 
-
 export const resetPassword = (token, newPassword, confirmPassword) => {
     return fetch(`${API_BASE_URL}/login/recovery/reset`, {
         method: 'POST',
@@ -80,10 +77,6 @@ export const resetPassword = (token, newPassword, confirmPassword) => {
         body: JSON.stringify({ token, newPassword, confirmPassword })
     });
 };
-
-
-
-
 
 export const sendVerificationCode = async (email) => {
     const response = await fetch(`${API_BASE_URL}/auth/send-code`, {
@@ -98,7 +91,7 @@ export const signup = async (userData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/req/signup`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'X-XSRF-TOKEN': getCsrfToken()
             },
@@ -112,11 +105,11 @@ export const signup = async (userData) => {
         });
 
         const data = await handleResponse(response);
-        
+
         if (data.jwt) {
             storeJwtToken(data.jwt);
         }
-        
+
         return data;
     } catch (error) {
         console.error('Signup error:', error);
@@ -144,7 +137,7 @@ export const checkUsername = async (username) => {
         const response = await fetch(
             `${API_BASE_URL}/api/check-username?username=${encodedUsername}`
         );
-        
+
         console.log('Username check response status:', response.status);
         const data = await response.json();
         console.log('Username exists:', data);
@@ -166,22 +159,20 @@ const getCsrfToken = () => {
     return '';
 };
 
-
 export const login = async (credentials) => {
     const response = await fetch(`${API_BASE_URL}/req/login`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(credentials),
         credentials: 'include', // Add this line
     });
-    
+
     const data = await handleResponse(response);
     storeJwtToken(data.jwt);
     return data;
 };
-
 
 export const getUserDetails = async (userId) => {
   try {
@@ -231,7 +222,7 @@ export const activateUser = async (userId, active) => {
     });
 
     const contentType = response.headers.get('content-type');
-    
+
     const data = await handleResponse(response);
 
     if (!response.ok) {
@@ -278,6 +269,20 @@ export const getUserTransactions = async (userId) => {
   }
 };
 
+export const getUserAuditLogs = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/audit-logs`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Audit logs error:', error);
+    throw error;
+  }
+};
+
 const api = {
     API_BASE_URL,
     deleteUser,
@@ -291,5 +296,10 @@ const api = {
     resetPassword,
     sendVerificationCode,
     signup,
+    getAdminDashboardData,
+    getUserDetails,
+    updateUser,
+    activateUser,
+    getUserAuditLogs
 };
 export default api;
