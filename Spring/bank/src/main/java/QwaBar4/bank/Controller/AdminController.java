@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Model.AuditLogModel;
 import QwaBar4.bank.Model.AuditLogRepository;
 import QwaBar4.bank.Service.*;
+
 
 @RestController
 @RequestMapping("/admin")
@@ -26,6 +28,9 @@ public class AdminController {
     
     @Autowired
 	private AuditLogRepository auditLogRepository;
+	
+	@Autowired
+	private AnonymizationService anonymizationService;
 
 	@GetMapping("/users/{userId}")
 	public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
@@ -81,6 +86,16 @@ public class AdminController {
 	@GetMapping("/audit-logs")
 	public ResponseEntity<List<AuditLogModel>> getAuditLogs() {
 		return ResponseEntity.ok(auditLogRepository.findAll());
+	}
+	
+	@PostMapping("/deanonymize")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> deanonymizeValue(
+		@RequestBody Map<String, String> request
+		) {
+		
+		String result = anonymizationService.deanonymize(request.get("value"));
+		return ResponseEntity.ok(Collections.singletonMap("original", result));
 	}
 
 }
