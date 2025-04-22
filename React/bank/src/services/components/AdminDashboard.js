@@ -219,9 +219,6 @@ const AdminDashboard = () => {
 
       {/* Audit Logs Modal */}
       <Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Audit Logs</Modal.Title>
-        </Modal.Header>
         <Modal.Body>
           {auditLogs ? (
             <ul className="list-group">

@@ -20,13 +20,13 @@ const Login = () => {
 		
 		try {
 		    const response = await login(credentials);
-		    console.log('Login response:', response);;
+		    console.log('Login response:', response);
+		    window.location.href = '/';
 		    
 		} catch (error) {
 		    console.error('Login error:', error);
 		    setError(error.message || "Login failed");
 		}
-		window.location.href = '/';
 	};
 
     return (
