@@ -14,7 +14,7 @@ public class AESEncryptionService implements EncryptionService {
     private static final Logger logger = LoggerFactory.getLogger(AESEncryptionService.class);
     private static final String SECRET_KEY = System.getenv("ENCRYPTION_SECRET_KEY");
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
-    private static final byte[] IV = "0123456789abcdef".getBytes(); // Fixed IV
+    private static final byte[] IV = "0123456789abcdef".getBytes();
 
     @Override
     public String encrypt(String data) {
