@@ -13,6 +13,7 @@ import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
+import QwaBar4.bank.Service.AuditLogService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DashboardController {
 
     private final UserModelRepository userModelRepository;
+    
+    @Autowired
+	private AuditLogService auditLogService;
 
     @Autowired
     public DashboardController(UserModelRepository userModelRepository) {
@@ -100,6 +104,8 @@ public class DashboardController {
     @PostMapping("/api/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        auditLogService.logAction("LOG OUT", authentication.getName(), "User logged out"); 
         return ResponseEntity.ok().build();
     }
 }

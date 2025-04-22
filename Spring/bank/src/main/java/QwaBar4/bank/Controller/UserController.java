@@ -12,6 +12,7 @@ import QwaBar4.bank.Service.UserModelService;
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModelRepository;
+import QwaBar4.bank.Service.AuditLogService;
 
 @RestController
 @RequestMapping("/api")
@@ -20,6 +21,9 @@ public class UserController {
 	private final UserModelRepository userRepo;
     private final UserModelService userModelService;
     private final AccountModelRepository accountRepo;
+    
+    @Autowired
+	private AuditLogService auditLogService;
 
     @Autowired
     public UserController(UserModelService userModelService, AccountModelRepository accountRepo, UserModelRepository userRepo) {
@@ -60,6 +64,7 @@ public class UserController {
 
 		try {
 		    userModelService.deleteByUsername(username);
+		    auditLogService.logAction("DELETED ACCOUNT", username, "User deleted account"); 
 		    return ResponseEntity.noContent().build();
 		} catch (Exception e) {
 		    return ResponseEntity.internalServerError()
