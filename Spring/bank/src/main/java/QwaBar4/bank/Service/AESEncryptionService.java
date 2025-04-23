@@ -16,22 +16,25 @@ public class AESEncryptionService implements EncryptionService {
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final byte[] IV = "0123456789abcdef".getBytes();
 
-    @Override
-    public String encrypt(String data) {
-        try {
-            logger.info("Encrypting data: {}", data);
-            byte[] keyBytes = hexStringToByteArray(SECRET_KEY);
-            SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(IV);
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-            byte[] encryptedBytes = cipher.doFinal(data.getBytes());
-            return Base64.getEncoder().encodeToString(encryptedBytes);
-        } catch (Exception e) {
-            logger.error("Encryption failed", e);
-            throw new RuntimeException("Encryption failed", e);
-        }
-    }
+	@Override
+	public String encrypt(String data) {
+		if (data == null) {
+		    return null;
+		}
+		try {
+		    logger.info("Encrypting data: {}", data);
+		    byte[] keyBytes = hexStringToByteArray(SECRET_KEY);
+		    SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+		    IvParameterSpec ivSpec = new IvParameterSpec(IV);
+		    Cipher cipher = Cipher.getInstance(ALGORITHM);
+		    cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+		    byte[] encryptedBytes = cipher.doFinal(data.getBytes());
+		    return Base64.getEncoder().encodeToString(encryptedBytes);
+		} catch (Exception e) {
+		    logger.error("Encryption failed", e);
+		    throw new RuntimeException("Encryption failed", e);
+		}
+	}
 
     @Override
     public String decrypt(String encryptedData) {

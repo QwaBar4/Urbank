@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
 
+import QwaBar4.bank.Service.*;
+
 @Service
 public class TransactionService {
 
@@ -22,6 +24,9 @@ public class TransactionService {
     private final AccountModelRepository accountRepo;
     private final TransactionModelRepository transactionRepo;
     private final UserModelRepository userRepo;
+    
+    @Autowired
+	private AnonymizationService anonymizationService;
 
 
     public TransactionService(AccountModelRepository accountRepo,
@@ -38,7 +43,7 @@ public class TransactionService {
 		AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
 		    .orElseThrow(() -> new RuntimeException("Source account not found"));
 
-		if (!source.getUser ().getUsername().equals(username)) {
+		if (!source.getUser().getUsername().equals(username)) {
 		    throw new RuntimeException("Unauthorized access to account");
 		}
 
@@ -49,43 +54,56 @@ public class TransactionService {
 		    throw new RuntimeException("Insufficient funds");
 		}
 
-		if (amount.compareTo(BigDecimal.valueOf(DAILY_TRANSFER_LIMIT)) > 0) {
-		    throw new TransactionLimitException("Exceeds daily transfer limit");
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+		    throw new RuntimeException("Transfer amount must be positive");
 		}
 
-		source.setBalance(source.getBalance().subtract(amount)); 
-		target.setBalance(target.getBalance().add(amount)); 
-
+		// Deduct amount from source account
+		source.setBalance(source.getBalance().subtract(amount));
 		accountRepo.save(source);
+
+		// Add amount to target account
+		target.setBalance(target.getBalance().add(amount));
 		accountRepo.save(target);
 
+		// Create a single transaction
 		TransactionModel transaction = new TransactionModel();
 		transaction.setType("TRANSFER");
-		transaction.setAmount(amount);
-		transaction.setUser (source.getUser ());
+		transaction.setAmount(amount); // Positive amount for the transaction
+		transaction.setDescription(description);
 		transaction.setSourceAccount(source);
 		transaction.setTargetAccount(target);
-		transaction.setDescription(description);
-		transaction.setTimestamp(LocalDateTime.now());
-		transaction = transactionRepo.save(transaction);
+		transaction.setTimestamp(LocalDateTime.now()); // Set the timestamp
+		transactionRepo.save(transaction);
 
 		return convertToDTO(transaction);
 	}
 
-    public List<TransactionDTO> getUserTransactions(String username) {
-        UserModel user = userRepo.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<TransactionModel> transactions = transactionRepo
-            .findBySourceAccountOrTargetAccountOrderByTimestampDesc(
-                user.getAccount(),
-                user.getAccount()
-            );
 
-        return transactions.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
+	public List<TransactionDTO> getUserTransactions(Long userId) {
+		UserModel user = userRepo.findById(userId)
+		    .orElseThrow(() -> new RuntimeException("User not found"));
+
+		List<TransactionModel> transactions = transactionRepo.findBySourceAccountOrTargetAccountOrderByTimestampDesc(
+		    user.getAccount(), user.getAccount()
+		);
+
+		List<TransactionDTO> transactionDTOs = transactions.stream()
+		    .map(this::convertToDTO)
+		    .collect(Collectors.toList());
+
+		transactionDTOs.forEach(t -> {
+		    if (t.getSourceAccountNumber() != null) {
+		        t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
+		    }
+		    if (t.getTargetAccountNumber() != null) {
+		        t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
+		    }
+		});
+
+		return transactionDTOs;
+	}
 
 	public BigDecimal getAccountBalance(String username) {
 		UserModel user = userRepo.findByUsername(username)
@@ -173,26 +191,31 @@ public class TransactionService {
 		TransactionDTO dto = new TransactionDTO();
 		dto.setId(transaction.getId());
 		dto.setType(transaction.getType());
-		dto.setAmount(transaction.getAmount());
 		dto.setTimestamp(transaction.getTimestamp());
 		dto.setDescription(transaction.getDescription());
 
-		if (transaction.getUser () != null) {
-		    dto.setUser (transaction.getUser ().getUsername());
+		if ("TRANSFER".equals(transaction.getType())) {
+		    dto.setAmount(transaction.getAmount());
 		} else {
-		    dto.setUser ("System Transaction");
+		    dto.setAmount(transaction.getAmount());
+		}
+
+		if (transaction.getUser() != null) {
+		    dto.setUser(transaction.getUser().getUsername());
+		} else {
+		    dto.setUser("System Transaction");
 		}
 
 		if (transaction.getSourceAccount() != null) {
 		    dto.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());
-		    dto.setSourceAccountOwner(transaction.getSourceAccount().getUser ().getUsername());
+		    dto.setSourceAccountOwner(transaction.getSourceAccount().getUser().getUsername());
 		}
 
 		if (transaction.getTargetAccount() != null) {
 		    dto.setTargetAccountNumber(transaction.getTargetAccount().getAccountNumber());
-		    dto.setTargetAccountOwner(transaction.getTargetAccount().getUser ().getUsername());
+		    dto.setTargetAccountOwner(transaction.getTargetAccount().getUser().getUsername());
 
-		    String targetAccountName = transaction.getTargetAccount().getUser ().getUsername();
+		    String targetAccountName = transaction.getTargetAccount().getUser().getUsername();
 		    dto.setTransferDescription("Transfer to account: " + targetAccountName);
 		}
 

@@ -73,11 +73,29 @@ public class AdminController {
         return ResponseEntity.ok("");
     }
 
-	@GetMapping("/users/{userId}/transactions")
-	public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
-		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
-		return ResponseEntity.ok(transactions);
-	}
+    @GetMapping("/users/{userId}/transactions")
+    public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
+        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+        
+        transactions.forEach(t -> {
+        
+            if (t.getSourceAccountNumber() != null) {
+                t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
+            }
+            if (t.getTargetAccountNumber() != null) {
+                t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
+            }
+            
+            if (t.getSourceAccountOwner() != null) {
+                t.setSourceAccountOwner(anonymizationService.anonymize(t.getSourceAccountOwner()));
+            }
+            if (t.getTargetAccountOwner() != null) {
+                t.setTargetAccountOwner(anonymizationService.anonymize(t.getTargetAccountOwner()));
+            }
+        });
+        
+        return ResponseEntity.ok(transactions);
+    }
 
 	@DeleteMapping("/users/{userId}")
 	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {

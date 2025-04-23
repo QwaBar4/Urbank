@@ -2,26 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
 import { getJwtToken } from '../../utils/auth';
 import { handleResponse } from '../api';
+import { getDashboardData } from '../api';
 
 const TransactionHistory = ({ userAccount }) => {
     const [transactions, setTransactions] = useState([]);
+    const [name, setName] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    
+
     const getAmountClass = (transaction) => {
         if (transaction.type === 'DEPOSIT') return 'text-success';
-        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-danger';
+        if (transaction.sourceAccountOwner === userAccount.accountNumber) return 'text-danger';
         return 'text-success';
     };
 
     const formatAmount = (transaction) => {
         const amount = transaction.amount.toFixed(2);
-        if (transaction.sourceAccountNumber === userAccount.accountNumber) {
-            return `-$${amount}`;
+        if (transaction.sourceAccountOwner == name) {
+            return `+${amount}$`; // Outgoing transfer
         }
-        return `+$${amount}`;
+        return `-${amount}$`; // Incoming transfer or deposit
     };
-
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -37,7 +38,9 @@ const TransactionHistory = ({ userAccount }) => {
                 }
 
                 const data = await response.json();
+                const userData = await getDashboardData();
                 setTransactions(data);
+                setName(userData.username);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -52,7 +55,6 @@ const TransactionHistory = ({ userAccount }) => {
 
     if (loading) return <div>Loading transactions...</div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
-
 
     return (
         <div className="transaction-history">
@@ -74,34 +76,31 @@ const TransactionHistory = ({ userAccount }) => {
                             <tr key={transaction.id}>
                                 <td>{new Date(transaction.timestamp).toLocaleString()}</td>
                                 <td>{transaction.type}</td>
-								<td>
-									{transaction.type === 'TRANSFER' && (
-										<>
-											<div className="small text-muted">
-												From: {transaction.sourceAccountOwner} ({transaction.sourceAccountNumber})
-											</div>
-											<div className="small text-muted">
-												To: {transaction.targetAccountOwner} ({transaction.targetAccountNumber})
-											</div>
-											<div className="small text-muted">
-												{transaction.transferDescription} {/* Display the transfer description */}
-											</div>
-										</>
-									)}
-									{transaction.description && `Message: ${transaction.description}`}
-								</td>
+                                <td>
+                                    {transaction.type === 'TRANSFER' && (
+                                        <>
+                                            <div className="small text-muted">
+                                                From: {transaction.sourceAccountOwner} ({transaction.sourceAccountNumber})
+                                            </div>
+                                            <div className="small text-muted">
+                                                {transaction.transferDescription} {/* Display the transfer description */}
+                                            </div>
+                                        </>
+                                    )}
+                                    {transaction.description && `Message: ${transaction.description}`}
+                                </td>
                                 <td className={`text-end ${getAmountClass(transaction)}`}>
                                     {formatAmount(transaction)}
                                 </td>
                                 <td>
-								  {transaction.user?.username || 'System Transaction'}
-								</td>
+                                    {transaction.user?.username || 'System Transaction'}
+                                </td>
                                 <td>
                                     <span className={`badge ${
-                                        transaction.status === 'COMPLETED' ? 'bg-success' : 
+                                        transaction.status === 'COMPLETED' ? 'bg-success' :
                                         transaction.status === 'PENDING' ? 'bg-warning' : 'bg-danger'
                                     }`}>
-                                        {transaction.status}
+                                        COMPLETED
                                     </span>
                                 </td>
                                 <td className="text-muted small">{transaction.reference}</td>

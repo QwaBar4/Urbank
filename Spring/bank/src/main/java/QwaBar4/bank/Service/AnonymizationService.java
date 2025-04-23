@@ -19,12 +19,15 @@ public class AnonymizationService {
     @Autowired
     private EncryptionService encryptionService;
 
-    public String anonymize(String original) {
-        String hash = generateHash(original);
-        return mappingRepo.findByOriginalHash(hash)
-            .map(AnonymizedMapping::getAnonymizedValue)
-            .orElseGet(() -> createNewMapping(original, hash));
-    }
+	public String anonymize(String original) {
+		if (original == null) {
+		    return null;
+		}
+		String hash = generateHash(original);
+		return mappingRepo.findByOriginalHash(hash)
+		    .map(AnonymizedMapping::getAnonymizedValue)
+		    .orElseGet(() -> createNewMapping(original, hash));
+	}
 
     private String createNewMapping(String original, String hash) {
         String anonymized = "USER-" + UUID.randomUUID().toString().substring(0, 8);
