@@ -47,11 +47,11 @@ public class TransactionModel {
         this.type = type;
     }
 
-    public BigDecimal getAmount() { // Change to BigDecimal
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) { // Change to BigDecimal
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

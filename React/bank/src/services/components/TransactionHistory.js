@@ -16,13 +16,12 @@ const TransactionHistory = ({ userAccount }) => {
         return 'text-success';
     };
 
-    const formatAmount = (transaction) => {
-        const amount = transaction.amount.toFixed(2);
-        if (transaction.sourceAccountOwner == name) {
-            return `+${amount}$`; // Outgoing transfer
-        }
-        return `-${amount}$`; // Incoming transfer or deposit
-    };
+	const formatAmount = (transaction, currentAccount) => {
+		const amount = Math.abs(transaction.amount).toFixed(2);
+		return transaction.type === 'TRANSFER' 
+		    ? `${transaction.sourceAccountNumber === currentAccount ? '-' : '+'}${amount}$`
+		    : `${amount}$`;
+	};
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -72,23 +71,23 @@ const TransactionHistory = ({ userAccount }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.map((transaction) => (
-                            <tr key={transaction.id}>
-                                <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-                                <td>{transaction.type}</td>
-                                <td>
-                                    {transaction.type === 'TRANSFER' && (
-                                        <>
-                                            <div className="small text-muted">
-                                                From: {transaction.sourceAccountOwner} ({transaction.sourceAccountNumber})
-                                            </div>
-                                            <div className="small text-muted">
-                                                {transaction.transferDescription} {/* Display the transfer description */}
-                                            </div>
-                                        </>
-                                    )}
-                                    {transaction.description && `Message: ${transaction.description}`}
-                                </td>
+						{transactions.map((transaction) => (
+						    <tr key={transaction.id}>
+						        <td>{new Date(transaction.timestamp).toLocaleString()}</td>
+						        <td>{transaction.type}</td>
+						        <td>
+						            {transaction.type === 'TRANSFER' && (
+						                <>
+						                    <div className="small text-muted">
+						                        From: {transaction.anonymizedSourceOwner} ({transaction.anonymizedSourceAccount})
+						                    </div>
+						                    <div className="small text-muted">
+						                        {transaction.transferDescription}
+						                    </div>
+						                </>
+						            )}
+						            {transaction.description && `Message: ${transaction.description}`}
+						        </td>
                                 <td className={`text-end ${getAmountClass(transaction)}`}>
                                     {formatAmount(transaction)}
                                 </td>

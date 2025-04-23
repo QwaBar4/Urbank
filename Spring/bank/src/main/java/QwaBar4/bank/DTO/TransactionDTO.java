@@ -15,6 +15,10 @@ public class TransactionDTO {
     private String targetAccountNumber;
     private String targetAccountOwner;
     private String transferDescription;
+    private String anonymizedSourceAccount;
+    private String anonymizedTargetAccount;
+    private String anonymizedSourceOwner;
+    private String anonymizedTargetOwner;
 
     public Long getId() {
         return id;
@@ -102,5 +106,37 @@ public class TransactionDTO {
 
     public void setTransferDescription(String transferDescription) {
         this.transferDescription = transferDescription;
+    }
+    
+    public String getAnonymizedSourceAccount() {
+        return anonymizedSourceAccount;
+    }
+
+    public void setAnonymizedSourceAccount(String anonymizedSourceAccount) {
+        this.anonymizedSourceAccount = anonymizedSourceAccount;
+    }
+
+    public String getAnonymizedTargetAccount() {
+        return anonymizedTargetAccount;
+    }
+
+    public void setAnonymizedTargetAccount(String anonymizedTargetAccount) {
+        this.anonymizedTargetAccount = anonymizedTargetAccount;
+    }
+
+    public String getAnonymizedSourceOwner() {
+        return anonymizedSourceOwner;
+    }
+
+    public void setAnonymizedSourceOwner(String anonymizedSourceOwner) {
+        this.anonymizedSourceOwner = anonymizedSourceOwner;
+    }
+
+    public String getAnonymizedTargetOwner() {
+        return anonymizedTargetOwner;
+    }
+
+    public void setAnonymizedTargetOwner(String anonymizedTargetOwner) {
+        this.anonymizedTargetOwner = anonymizedTargetOwner;
     }
 }

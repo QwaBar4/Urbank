@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Model.AuditLogModel;
+import QwaBar4.bank.Model.TransactionModel;
+import QwaBar4.bank.Model.TransactionModelRepository;
 import QwaBar4.bank.Model.AuditLogRepository;
 import QwaBar4.bank.Service.*;
 
@@ -25,9 +28,15 @@ public class AdminController {
 
     @Autowired
     private TransactionService transactionService;
+    
+    @Autowired
+    private AESEncryptionService encryptionService;
 
     @Autowired
 	private AuditLogRepository auditLogRepository;
+
+    @Autowired
+	private TransactionModelRepository transactionRepo;
 
 	@Autowired
 	private AnonymizationService anonymizationService;
@@ -72,29 +81,20 @@ public class AdminController {
         userModelService.updateUserStatus(userId, active);
         return ResponseEntity.ok("");
     }
-
+    
     @GetMapping("/users/{userId}/transactions")
-    public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
-        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+    public ResponseEntity<Map<String, String>> getTransactionDetails(
+        @PathVariable Long transactionId) {
         
-        transactions.forEach(t -> {
+        TransactionModel transaction = transactionRepo.findById(transactionId)
+            .orElseThrow(() -> new RuntimeException("Transaction not found"));
         
-            if (t.getSourceAccountNumber() != null) {
-                t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
-            }
-            if (t.getTargetAccountNumber() != null) {
-                t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
-            }
-            
-            if (t.getSourceAccountOwner() != null) {
-                t.setSourceAccountOwner(anonymizationService.anonymize(t.getSourceAccountOwner()));
-            }
-            if (t.getTargetAccountOwner() != null) {
-                t.setTargetAccountOwner(anonymizationService.anonymize(t.getTargetAccountOwner()));
-            }
-        });
+        Map<String, String> details = new HashMap<>();
+        details.put("originalDescription", encryptionService.decrypt(transaction.getEncryptedDescription()));
+        details.put("originalSourceAccount", anonymizationService.deanonymize(transaction.getSourceAccountNumber()));
+        details.put("originalTargetAccount", anonymizationService.deanonymize(transaction.getTargetAccountNumber()));
         
-        return ResponseEntity.ok(transactions);
+        return ResponseEntity.ok(details);
     }
 
 	@DeleteMapping("/users/{userId}")
