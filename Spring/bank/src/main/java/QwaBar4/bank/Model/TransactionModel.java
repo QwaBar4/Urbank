@@ -11,24 +11,30 @@ public class TransactionModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String type;
-    private String description;
+
     private LocalDateTime timestamp;
-    
+
     @ManyToOne
     @JoinColumn(name = "source_account_id")
     private AccountModel sourceAccount;
-    
+
     @ManyToOne
     @JoinColumn(name = "target_account_id")
     private AccountModel targetAccount;
-    
+
     @Column(precision = 19, scale = 2)
     private BigDecimal amount;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id") 
-    private UserModel user;
+    @Column(name = "encrypted_description", columnDefinition = "TEXT")
+    private String encryptedDescription;
+
+    @Column(name = "source_account_number")
+    private String sourceAccountNumber;
+
+    @Column(name = "target_account_number")
+    private String targetAccountNumber;
 
     // Getters and Setters
     public Long getId() {
@@ -55,14 +61,6 @@ public class TransactionModel {
         this.amount = amount;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -87,11 +85,27 @@ public class TransactionModel {
         this.targetAccount = targetAccount;
     }
 
-    public UserModel getUser () {
-        return user;
+    public String getEncryptedDescription() { 
+        return encryptedDescription;
     }
-
-    public void setUser (UserModel user) {
-        this.user = user;
+    
+    public void setEncryptedDescription(String encryptedDescription) {
+        this.encryptedDescription = encryptedDescription;
+    }
+    
+    public String getSourceAccountNumber() { 
+        return sourceAccountNumber; 
+    }
+    
+    public void setSourceAccountNumber(String sourceAccountNumber) { 
+        this.sourceAccountNumber = sourceAccountNumber; 
+    }
+    
+    public String getTargetAccountNumber() { 
+        return targetAccountNumber; 
+    }
+    
+    public void setTargetAccountNumber(String targetAccountNumber) { 
+        this.targetAccountNumber = targetAccountNumber; 
     }
 }

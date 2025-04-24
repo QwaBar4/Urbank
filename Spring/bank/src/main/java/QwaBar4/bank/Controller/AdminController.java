@@ -28,35 +28,35 @@ public class AdminController {
 
     @Autowired
     private TransactionService transactionService;
-    
+
     @Autowired
     private AESEncryptionService encryptionService;
 
     @Autowired
-	private AuditLogRepository auditLogRepository;
+    private AuditLogRepository auditLogRepository;
 
     @Autowired
-	private TransactionModelRepository transactionRepo;
+    private TransactionModelRepository transactionRepo;
 
-	@Autowired
-	private AnonymizationService anonymizationService;
+    @Autowired
+    private AnonymizationService anonymizationService;
 
-	@Autowired
-	private AuditLogService auditLogService;
+    @Autowired
+    private AuditLogService auditLogService;
 
-	@GetMapping("/users/{userId}")
-	public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
-		UserDetailsDTO userDetails = userModelService.getUserDetails(userId);
-		return ResponseEntity.ok(userDetails);
-	}
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
+        UserDetailsDTO userDetails = userModelService.getUserDetails(userId);
+        return ResponseEntity.ok(userDetails);
+    }
 
-	@PutMapping("/users/{userId}")
-	public ResponseEntity<UserDetailsDTO> updateUserDetails(
-		    @PathVariable Long userId,
-		    @RequestBody UserUpdateDTO userUpdateDTO) {
-		UserDetailsDTO updatedUser = userModelService.updateUserDetails(userId, userUpdateDTO);
-		return ResponseEntity.ok(updatedUser);
-	}
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<UserDetailsDTO> updateUserDetails(
+            @PathVariable Long userId,
+            @RequestBody UserUpdateDTO userUpdateDTO) {
+        UserDetailsDTO updatedUser = userModelService.updateUserDetails(userId, userUpdateDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
 
     @PostMapping("/users/{userId}/assignRole")
     public ResponseEntity<?> assignRoleToUser(@PathVariable Long userId, @RequestBody Map<String, String> request) {
@@ -81,54 +81,60 @@ public class AdminController {
         userModelService.updateUserStatus(userId, active);
         return ResponseEntity.ok("");
     }
-    
+
     @GetMapping("/users/{userId}/transactions")
+    public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
+        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/transactions/{transactionId}")
     public ResponseEntity<Map<String, String>> getTransactionDetails(
-        @PathVariable Long transactionId) {
-        
+            @PathVariable Long transactionId) {
+
         TransactionModel transaction = transactionRepo.findById(transactionId)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
         Map<String, String> details = new HashMap<>();
         details.put("originalDescription", encryptionService.decrypt(transaction.getEncryptedDescription()));
         details.put("originalSourceAccount", anonymizationService.deanonymize(transaction.getSourceAccountNumber()));
         details.put("originalTargetAccount", anonymizationService.deanonymize(transaction.getTargetAccountNumber()));
-        
+
         return ResponseEntity.ok(details);
     }
 
-	@DeleteMapping("/users/{userId}")
-	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-		userModelService.deleteUser(userId);
-		return ResponseEntity.noContent().build();
-	}
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        userModelService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
 
-	@GetMapping("/audit-logs")
-	public ResponseEntity<List<AuditLogModel>> getAuditLogs() {
-		return ResponseEntity.ok(auditLogRepository.findAll());
-	}
+    @GetMapping("/audit-logs")
+    public ResponseEntity<List<AuditLogModel>> getAuditLogs() {
+        return ResponseEntity.ok(auditLogRepository.findAll());
+    }
 
-	@GetMapping("/users/{userId}/audit-logs")
-	public ResponseEntity<List<AuditLogDTO>> getUserAuditLogs(@PathVariable Long userId) {
-	    List<AuditLogModel> auditLogs = auditLogRepository.findByUsername(anonymizationService.anonymize(userModelService.getUserDetails(userId).getUsername()));
-	    List<AuditLogDTO> auditLogDTOs = auditLogs.stream()
-	        .map(log -> new AuditLogDTO(
-	            log.getId(),
-	            log.getAction(),
-	            anonymizationService.deanonymize(log.getUsername()),
-	            log.getTimestamp(),
-	            anonymizationService.deanonymize(log.getDetails())
-	        ))
-	        .collect(Collectors.toList());
-	    return ResponseEntity.ok(auditLogDTOs);
-	}
+    @GetMapping("/users/{userId}/audit-logs")
+    public ResponseEntity<List<AuditLogDTO>> getUserAuditLogs(@PathVariable Long userId) {
+        List<AuditLogModel> auditLogs = auditLogRepository.findByUsername(anonymizationService.anonymize(userModelService.getUserDetails(userId).getUsername()));
+        List<AuditLogDTO> auditLogDTOs = auditLogs.stream()
+                .map(log -> new AuditLogDTO(
+                        log.getId(),
+                        log.getAction(),
+                        anonymizationService.deanonymize(log.getUsername()),
+                        log.getTimestamp(),
+                        anonymizationService.deanonymize(log.getDetails())
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(auditLogDTOs);
+    }
 
-	@PostMapping("/deanonymize")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> deanonymizeValue(
-		@RequestBody Map<String, String> request
-		) {
-		String result = anonymizationService.deanonymize(request.get("value"));
-		return ResponseEntity.ok(Collections.singletonMap("original", result));
-	}
+    @PostMapping("/deanonymize")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deanonymizeValue(
+            @RequestBody Map<String, String> request
+    ) {
+        String result = anonymizationService.deanonymize(request.get("value"));
+        return ResponseEntity.ok(Collections.singletonMap("original", result));
+    }
 }

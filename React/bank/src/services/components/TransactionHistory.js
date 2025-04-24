@@ -12,16 +12,22 @@ const TransactionHistory = ({ userAccount }) => {
 
     const getAmountClass = (transaction) => {
         if (transaction.type === 'DEPOSIT') return 'text-success';
-        if (transaction.sourceAccountOwner === userAccount.accountNumber) return 'text-danger';
-        return 'text-success';
+        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-danger';
+        if (transaction.targetAccountNumber === userAccount.accountNumber) return 'text-success';
+        return 'text-muted';
     };
 
-	const formatAmount = (transaction, currentAccount) => {
-		const amount = Math.abs(transaction.amount).toFixed(2);
-		return transaction.type === 'TRANSFER' 
-		    ? `${transaction.sourceAccountNumber === currentAccount ? '-' : '+'}${amount}$`
-		    : `${amount}$`;
-	};
+    const formatAmount = (transaction) => {
+        const amount = Math.abs(transaction.amount).toFixed(2);
+        if (transaction.type == 'TRANSFER') {
+		    if (transaction.sourceAccountOwner == name) {
+		        return `-${amount}$`;
+		    } else {
+		        return `+${amount}$`;
+		    }
+        }
+        return `${amount}$`;
+    };
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -71,36 +77,28 @@ const TransactionHistory = ({ userAccount }) => {
                         </tr>
                     </thead>
                     <tbody>
-						{transactions.map((transaction) => (
-						    <tr key={transaction.id}>
-						        <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-						        <td>{transaction.type}</td>
-						        <td>
-						            {transaction.type === 'TRANSFER' && (
-						                <>
-						                    <div className="small text-muted">
-						                        From: {transaction.anonymizedSourceOwner} ({transaction.anonymizedSourceAccount})
-						                    </div>
-						                    <div className="small text-muted">
-						                        {transaction.transferDescription}
-						                    </div>
-						                </>
-						            )}
-						            {transaction.description && `Message: ${transaction.description}`}
-						        </td>
+                        {transactions.map((transaction) => (
+                            <tr key={transaction.id}>
+                                <td>{new Date(transaction.timestamp).toLocaleString()}</td>
+                                <td>{transaction.type}</td>
+                                <td>
+                                    {transaction.type === 'TRANSFER' && (
+                                        <>
+                                            <div className="small text-muted">
+                                                From: {transaction.sourceAccountOwner}
+                                            </div>
+                                            <div className="small text-muted">
+                                                To: {transaction.targetAccountOwner}
+                                            </div>
+                                        </>
+                                    )}
+                                    {transaction.description && `Message: ${transaction.description}`}
+                                </td>
                                 <td className={`text-end ${getAmountClass(transaction)}`}>
                                     {formatAmount(transaction)}
                                 </td>
                                 <td>
-                                    {transaction.user?.username || 'System Transaction'}
-                                </td>
-                                <td>
-                                    <span className={`badge ${
-                                        transaction.status === 'COMPLETED' ? 'bg-success' :
-                                        transaction.status === 'PENDING' ? 'bg-warning' : 'bg-danger'
-                                    }`}>
-                                        COMPLETED
-                                    </span>
+                                    {transaction.status}
                                 </td>
                                 <td className="text-muted small">{transaction.reference}</td>
                             </tr>

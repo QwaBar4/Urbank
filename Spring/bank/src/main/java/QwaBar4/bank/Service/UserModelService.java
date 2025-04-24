@@ -49,7 +49,6 @@ public class UserModelService implements UserDetailsService {
         UserModel user = userRepo.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 		
-		transactionRepo.deleteAll(user.getTransactions());
         user.setAccount(null);
         userRepo.save(user);
         userRepo.delete(user);
@@ -190,9 +189,12 @@ public class UserModelService implements UserDetailsService {
     
 	public List<TransactionDTO> getUserTransactions(Long userId) {
 		UserModel user = userRepo.findById(userId)
-		    .orElseThrow(() -> new RuntimeException("User not found"));
-		
-		return transactionRepo.findByUser(user).stream()
+		    .orElseThrow(() -> new RuntimeException("User  not found"));
+
+		List<TransactionModel> transactions = transactionRepo.findBySourceAccount(user.getAccount());
+		transactions.addAll(transactionRepo.findByTargetAccount(user.getAccount()));
+
+		return transactions.stream()
 		    .map(this::convertToTransactionDTO)
 		    .collect(Collectors.toList());
 	}
@@ -202,7 +204,11 @@ public class UserModelService implements UserDetailsService {
 		UserModel user = userRepo.findById(userId)
 		    .orElseThrow(() -> new UsernameNotFoundException("User  not found"));
 
-		List<TransactionModel> transactions = transactionRepo.findByUser (user);
+		// Retrieve transactions by the user's account
+		List<TransactionModel> transactions = transactionRepo.findBySourceAccount(user.getAccount());
+		transactions.addAll(transactionRepo.findByTargetAccount(user.getAccount()));
+		
+		// Delete all transactions associated with the user
 		transactionRepo.deleteAll(transactions);
 
 		if (user.getAccount() != null) {
@@ -217,12 +223,10 @@ public class UserModelService implements UserDetailsService {
 		dto.setType(transaction.getType());
 		dto.setAmount(transaction.getAmount());
 		dto.setTimestamp(transaction.getTimestamp());
-		dto.setDescription(transaction.getDescription());
 		dto.setSourceAccountNumber(transaction.getSourceAccount() != null ? 
 		    transaction.getSourceAccount().getAccountNumber() : null);
 		dto.setTargetAccountNumber(transaction.getTargetAccount() != null ? 
 		    transaction.getTargetAccount().getAccountNumber() : null);
-		dto.setUser(transaction.getUser().getUsername()); // Ensure user is mapped
 		return dto;
 	}
 }

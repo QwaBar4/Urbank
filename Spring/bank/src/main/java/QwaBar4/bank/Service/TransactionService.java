@@ -6,6 +6,8 @@ import QwaBar4.bank.Exception.TransactionLimitException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,11 +19,11 @@ import java.util.HashMap;
 public class TransactionService {
 
     private static final double DAILY_TRANSFER_LIMIT = 10000.00;
-	
+
     private final AccountModelRepository accountRepo;
     private final TransactionModelRepository transactionRepo;
     private final UserModelRepository userRepo;
-    
+
     @Autowired
     private final AnonymizationService anonymizationService;
 
@@ -38,58 +40,58 @@ public class TransactionService {
         this.userRepo = userRepo;
         this.anonymizationService = anonymizationService;
     }
-    
-    
-    
 
-	@Transactional
-	public TransactionDTO processTransfer(String sourceAccount, String targetAccount,
-		                                  BigDecimal amount, String description, String username) {
-		AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
-		        .orElseThrow(() -> new RuntimeException("Source account not found"));
+    @Transactional
+    public TransactionDTO processTransfer(String sourceAccount, String targetAccount,
+                                          BigDecimal amount, String description, String username) {
+        AccountModel source = accountRepo.findByAccountNumber(sourceAccount)
+                .orElseThrow(() -> new RuntimeException("Source account not found"));
 
-		if (!source.getUser().getUsername().equals(username)) {
-		    throw new RuntimeException("Unauthorized access to account");
-		}
+        if (!source.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized access to account");
+        }
 
-		AccountModel target = accountRepo.findByAccountNumber(targetAccount)
-		        .orElseThrow(() -> new RuntimeException("Target account not found"));
+        AccountModel target = accountRepo.findByAccountNumber(targetAccount)
+                .orElseThrow(() -> new RuntimeException("Target account not found"));
 
-		if (source.getBalance().compareTo(amount) < 0) {
-		    throw new RuntimeException("Insufficient funds");
-		}
+        if (source.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient funds");
+        }
 
-		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-		    throw new RuntimeException("Transfer amount must be positive");
-		}
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Transfer amount must be positive");
+        }
 
-		// Check daily transfer limit
-		BigDecimal dailyTotal = transactionRepo.getDailyTransferTotal(sourceAccount, LocalDateTime.now());
-		if (dailyTotal.add(amount).compareTo(BigDecimal.valueOf(DAILY_TRANSFER_LIMIT)) > 0) {
-		    throw new TransactionLimitException("Daily transfer limit exceeded");
-		}
+        // Check daily transfer limit
+        BigDecimal dailyTotal = transactionRepo.getDailyTransferTotal(sourceAccount, LocalDateTime.now());
+        if (dailyTotal.add(amount).compareTo(BigDecimal.valueOf(DAILY_TRANSFER_LIMIT)) > 0) {
+            throw new TransactionLimitException("Daily transfer limit exceeded");
+        }
 
-		// Deduct amount from source account
-		source.setBalance(source.getBalance().subtract(amount));
-		accountRepo.save(source);
+        // Deduct amount from source account
+        source.setBalance(source.getBalance().subtract(amount));
+        accountRepo.save(source);
 
-		// Add amount to target account
-		target.setBalance(target.getBalance().add(amount));
-		accountRepo.save(target);
+        // Add amount to target account
+        target.setBalance(target.getBalance().add(amount));
+        accountRepo.save(target);
 
-		// Create a single transaction
-		TransactionModel transaction = new TransactionModel();
-		transaction.setType("TRANSFER");
-		transaction.setAmount(amount);
-		transaction.setEncryptedDescription(encryptionService.encrypt(description));
-		transaction.setSourceAccount(encryptionService.encrypt(sourceAccount));
-		transaction.setTargetAccount(encryptionService.encrypt(targetAccount));
-		transaction.setTimestamp(LocalDateTime.now());
-		transactionRepo.save(transaction);
+        // Create a single transaction
+        TransactionModel transaction = new TransactionModel();
+        transaction.setType("TRANSFER");
+        transaction.setAmount(amount);
+        transaction.setEncryptedDescription(encryptionService.encrypt(description));
+        transaction.setSourceAccountNumber(anonymizationService.anonymize(sourceAccount));
+        transaction.setTargetAccountNumber(anonymizationService.anonymize(targetAccount));
+        transaction.setTimestamp(LocalDateTime.now());
 
-		return convertToDTO(transaction);
-	}
+        // Maintain relationships for business logic
+        transaction.setSourceAccount(source);
+        transaction.setTargetAccount(target);
 
+        transactionRepo.save(transaction);
+        return convertToDTO(transaction);
+    }
 
     public List<TransactionDTO> getUserTransactions(Long userId) {
         UserModel user = userRepo.findById(userId)
@@ -114,7 +116,8 @@ public class TransactionService {
         UserModel user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<TransactionModel> transactions = transactionRepo.findByUser(user);
+        List<TransactionModel> transactions = transactionRepo.findBySourceAccount(user.getAccount());
+        transactions.addAll(transactionRepo.findByTargetAccount(user.getAccount()));
 
         return transactions.stream()
                 .map(this::convertToDTO)
@@ -139,8 +142,7 @@ public class TransactionService {
         TransactionModel transaction = new TransactionModel();
         transaction.setType("DEPOSIT");
         transaction.setAmount(amount); // Ensure amount is BigDecimal
-        transaction.setUser(account.getUser());
-        transaction.setDescription(description);
+        transaction.setEncryptedDescription(encryptionService.encrypt(description));
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setTargetAccount(account);
         transactionRepo.save(transaction);
@@ -170,8 +172,7 @@ public class TransactionService {
         TransactionModel transaction = new TransactionModel();
         transaction.setType("WITHDRAWAL");
         transaction.setAmount(amount); // Ensure amount is BigDecimal
-        transaction.setUser(account.getUser());
-        transaction.setDescription(description);
+        transaction.setEncryptedDescription(encryptionService.encrypt(description));
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setSourceAccount(account);
         transactionRepo.save(transaction);
@@ -183,43 +184,45 @@ public class TransactionService {
         return response;
     }
 
-	private TransactionDTO convertToDTO(TransactionModel transaction) {
-		TransactionDTO dto = new TransactionDTO();
-		dto.setId(transaction.getId());
-		dto.setType(transaction.getType());
-		dto.setAmount(transaction.getAmount());
-		dto.setTimestamp(transaction.getTimestamp());
-		
-		// Use anonymized description if available
-		dto.setDescription(transaction.getDescription() != null ? 
-		    transaction.getDescription() : 
-		    "Anonymized transaction");
-		
-		// Use anonymized account numbers
-		dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
-		dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
-		
-		// For admin views, you can still access the real accounts through the relationships
-		if (transaction.getSourceAccount() != null) {
-		    dto.setSourceAccountOwner(anonymizationService.anonymize(
-		        transaction.getSourceAccount().getUser().getUsername()));
-		}
-		
-		if (transaction.getTargetAccount() != null) {
-		    dto.setTargetAccountOwner(anonymizationService.anonymize(
-		        transaction.getTargetAccount().getUser().getUsername()));
-		}
-		
-		    boolean isOutgoing = transaction.getSourceAccount() != null && 
-                        transaction.getSourceAccount().getUser().getId().equals(currentUserId);
-    
-		if ("TRANSFER".equals(transaction.getType())) {
-		    dto.setAmount(isOutgoing ? transaction.getAmount().negate() : transaction.getAmount());
-		} else {
-		    dto.setAmount(transaction.getAmount());
-		}
-		
-		return dto;
-		
-	}
+    private TransactionDTO convertToDTO(TransactionModel transaction) {
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(transaction.getId());
+        dto.setType(transaction.getType());
+        dto.setAmount(transaction.getAmount());
+        dto.setTimestamp(transaction.getTimestamp());
+
+        // Decrypt the description
+        String decryptedDescription = encryptionService.decrypt(transaction.getEncryptedDescription());
+        dto.setDescription(decryptedDescription);
+
+        // Use anonymized account numbers
+        dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
+        dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
+
+        // Use real usernames
+        if (transaction.getSourceAccount() != null) {
+            dto.setSourceAccountOwner(transaction.getSourceAccount().getUser().getUsername());
+        }
+
+        if (transaction.getTargetAccount() != null) {
+            dto.setTargetAccountOwner(transaction.getTargetAccount().getUser().getUsername());
+        }
+
+        // Determine if the current user is the source of the transaction
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserModel currentUser = userRepo.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isOutgoing = transaction.getSourceAccount() != null &&
+                              transaction.getSourceAccount().getUser().getId().equals(currentUser.getId());
+
+        // Adjust amount for display based on transaction type
+        if ("TRANSFER".equals(transaction.getType())) {
+            dto.setAmount(isOutgoing ? transaction.getAmount().negate() : transaction.getAmount());
+        } else {
+            dto.setAmount(transaction.getAmount());
+        }
+
+        return dto;
+    }
 }
