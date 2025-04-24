@@ -28,19 +28,19 @@ public class AuditLogService {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @Transactional
-    public void logAction(String action, String username, String details) {
-        String anonymizedUser = anonymizationService.anonymize(username);
-        String encryptedDetails = encryptionService.encrypt(details);
-        
-        AuditLogModel log = new AuditLogModel(
-            action,
-            anonymizedUser,
-            LocalDateTime.now(),
-            encryptedDetails
-        );
-        auditLogRepository.save(log);
-    }
+	@Transactional
+	public void logAction(String action, String username, String details) {
+		String anonymizedUser = anonymizationService.anonymize(username);
+		String encryptedDetails = encryptionService.encrypt(details);
+		
+		AuditLogModel log = new AuditLogModel(
+		    action,
+		    anonymizedUser,
+		    LocalDateTime.now(),
+		    encryptedDetails
+		);
+		auditLogRepository.save(log);
+	}
     
     @Scheduled(cron = "0 0 3 * * *") // Daily at 3 AM
     public void pruneOldLogs() {

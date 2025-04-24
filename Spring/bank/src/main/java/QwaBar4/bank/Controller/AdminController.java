@@ -114,20 +114,29 @@ public class AdminController {
         return ResponseEntity.ok(auditLogRepository.findAll());
     }
 
-    @GetMapping("/users/{userId}/audit-logs")
-    public ResponseEntity<List<AuditLogDTO>> getUserAuditLogs(@PathVariable Long userId) {
-        List<AuditLogModel> auditLogs = auditLogRepository.findByUsername(anonymizationService.anonymize(userModelService.getUserDetails(userId).getUsername()));
-        List<AuditLogDTO> auditLogDTOs = auditLogs.stream()
-                .map(log -> new AuditLogDTO(
-                        log.getId(),
-                        log.getAction(),
-                        anonymizationService.deanonymize(log.getUsername()),
-                        log.getTimestamp(),
-                        anonymizationService.deanonymize(log.getDetails())
-                ))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(auditLogDTOs);
-    }
+	@GetMapping("/users/{userId}/audit-logs")
+	public ResponseEntity<List<AuditLogDTO>> getUserAuditLogs(@PathVariable Long userId) {
+		try {
+		    String originalUsername = userModelService.getUserDetails(userId).getUsername();
+		    String anonymizedUsername = anonymizationService.anonymize(originalUsername);
+		    
+		    List<AuditLogModel> auditLogs = auditLogRepository.findByUsername(anonymizedUsername);
+		    
+		    List<AuditLogDTO> auditLogDTOs = auditLogs.stream()
+		        .map(log -> new AuditLogDTO(
+		            log.getId(),
+		            log.getAction(),
+		            anonymizationService.deanonymize(log.getUsername()),
+		            log.getTimestamp(),
+		            encryptionService.decrypt(log.getDetails()) // Decrypt instead of deanonymize
+		        ))
+		        .collect(Collectors.toList());
+		        
+		    return ResponseEntity.ok(auditLogDTOs);
+		} catch (Exception e) {
+		    return ResponseEntity.status(500).body(Collections.emptyList());
+		}
+	}
 
     @PostMapping("/deanonymize")
     @PreAuthorize("hasRole('ADMIN')")

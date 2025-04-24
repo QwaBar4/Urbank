@@ -79,16 +79,24 @@ const AdminDashboard = () => {
     }
   };
 
-  const viewAuditLogs = async (userId) => {
-    try {
-      setError(null);
-      const logs = await getUserAuditLogs(userId);
-      setAuditLogs(logs);
-      setShowAuditLogsModal(true);
-    } catch (error) {
-      setError(error.message || 'Failed to load audit logs');
-    }
-  };
+	const viewAuditLogs = async (userId) => {
+		try {
+		    setError(null);
+		    const logs = await getUserAuditLogs(userId);
+		    
+		    // Handle potential anonymization errors
+		    const safeLogs = logs.map(log => ({
+		        ...log,
+		        username: log.username.startsWith("USER-") ? "Anonymous User" : log.username,
+		        details: log.details || "No details available"
+		    }));
+		    
+		    setAuditLogs(safeLogs);
+		    setShowAuditLogsModal(true);
+		} catch (error) {
+		    setError(error.message || 'Failed to load audit logs');
+		}
+	};
 
   if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
     return <div className="alert alert-danger">Unauthorized access</div>;
