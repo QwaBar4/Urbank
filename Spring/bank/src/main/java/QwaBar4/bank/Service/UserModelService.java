@@ -187,27 +187,27 @@ public class UserModelService implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("User  not found with username: " + username));
 	}
     
-	public List<TransactionDTO> getUserTransactions(Long userId) {
-		UserModel user = userRepo.findById(userId)
-		    .orElseThrow(() -> new RuntimeException("User  not found"));
+    public List<TransactionDTO> getUserTransactions(Long userId) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User  not found"));
 
-		List<TransactionModel> transactions = transactionRepo.findBySourceAccount(user.getAccount());
-		transactions.addAll(transactionRepo.findByTargetAccount(user.getAccount()));
+        List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
+        transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
 
-		return transactions.stream()
-		    .map(this::convertToTransactionDTO)
-		    .collect(Collectors.toList());
-	}
+        return transactions.stream()
+            .map(this::convertToTransactionDTO)
+            .collect(Collectors.toList());
+    }
 	
 	@Transactional
-	public void deleteUser (Long userId) {
+	public void deleteUser(Long userId) {
 		UserModel user = userRepo.findById(userId)
-		    .orElseThrow(() -> new UsernameNotFoundException("User  not found"));
+		    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-		// Retrieve transactions by the user's account
-		List<TransactionModel> transactions = transactionRepo.findBySourceAccount(user.getAccount());
-		transactions.addAll(transactionRepo.findByTargetAccount(user.getAccount()));
-		
+		// Retrieve transactions by the user's account number
+		List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
+		transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
+
 		// Delete all transactions associated with the user
 		transactionRepo.deleteAll(transactions);
 
@@ -223,10 +223,9 @@ public class UserModelService implements UserDetailsService {
 		dto.setType(transaction.getType());
 		dto.setAmount(transaction.getAmount());
 		dto.setTimestamp(transaction.getTimestamp());
-		dto.setSourceAccountNumber(transaction.getSourceAccount() != null ? 
-		    transaction.getSourceAccount().getAccountNumber() : null);
-		dto.setTargetAccountNumber(transaction.getTargetAccount() != null ? 
-		    transaction.getTargetAccount().getAccountNumber() : null);
+		dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
+		dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
 		return dto;
 	}
+	
 }

@@ -16,14 +16,14 @@ public class AccountModel {
 
     private String accountNumber;
 
-	@Column(precision = 19, scale = 2)
-	private BigDecimal balance;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal balance;
 
-	@Column(precision = 19, scale = 2)
-	private BigDecimal dailyTransferLimit = new BigDecimal("10000.00");
+    @Column(precision = 19, scale = 2)
+    private BigDecimal dailyTransferLimit = new BigDecimal("10000.00");
 
-	@Column(precision = 19, scale = 2)
-	private BigDecimal dailyWithdrawalLimit = new BigDecimal("2000.00");
+    @Column(precision = 19, scale = 2)
+    private BigDecimal dailyWithdrawalLimit = new BigDecimal("2000.00");
 
     @Column(name = "daily_transfer_total", precision = 19, scale = 2)
     private BigDecimal dailyTransferTotal = BigDecimal.ZERO;
@@ -37,39 +37,14 @@ public class AccountModel {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore 
-    private UserModel user;
-
-    @OneToMany(mappedBy = "sourceAccount", fetch = FetchType.LAZY)
+    private UserModel user; // Keep this field to maintain the relationship ```java
+    @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     private List<TransactionModel> outgoingTransactions;
 
-    @OneToMany(mappedBy = "targetAccount", fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     private List<TransactionModel> incomingTransactions;
-
-    // Business methods
-    public void deposit(Double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Deposit amount must be positive");
-        }
-        this.balance = this.balance.add(BigDecimal.valueOf(amount)); // Convert to BigDecimal
-    }
-
-    public void withdraw(Double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Withdrawal amount must be positive");
-        }
-        if (BigDecimal.valueOf(amount).compareTo(this.balance) > 0) { // Compare BigDecimal
-            throw new IllegalArgumentException("Insufficient funds");
-        }
-        this.balance = this.balance.subtract(BigDecimal.valueOf(amount)); // Convert to BigDecimal
-    }
-
-    public void applyDailyInterest(double annualRate) {
-        BigDecimal dailyInterest = this.balance.multiply(BigDecimal.valueOf(annualRate / 36500)); // Divide by 100 for percentage
-        this.balance = this.balance.add(dailyInterest);
-        this.lastInterestCalculation = LocalDateTime.now();
-    }
 
     // Getters and Setters
     public Long getId() {
@@ -88,27 +63,27 @@ public class AccountModel {
         this.accountNumber = accountNumber;
     }
 
-    public BigDecimal getBalance() { // Change to BigDecimal
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) { // Change to BigDecimal
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
-    public BigDecimal getDailyTransferLimit() { // Change to BigDecimal
+    public BigDecimal getDailyTransferLimit() {
         return dailyTransferLimit;
     }
 
-    public void setDailyTransferLimit(BigDecimal dailyTransferLimit) { // Change to BigDecimal
+    public void setDailyTransferLimit(BigDecimal dailyTransferLimit) {
         this.dailyTransferLimit = dailyTransferLimit;
     }
 
-    public BigDecimal getDailyWithdrawalLimit() { // Change to BigDecimal
+    public BigDecimal getDailyWithdrawalLimit() {
         return dailyWithdrawalLimit;
     }
 
-    public void setDailyWithdrawalLimit(BigDecimal dailyWithdrawalLimit) { // Change to BigDecimal
+    public void setDailyWithdrawalLimit(BigDecimal dailyWithdrawalLimit) {
         this.dailyWithdrawalLimit = dailyWithdrawalLimit;
     }
 
@@ -116,11 +91,15 @@ public class AccountModel {
         return lastInterestCalculation;
     }
 
-    public UserModel getUser() {
+    public void setLastInterestCalculation(LocalDateTime lastInterestCalculation) {
+        this.lastInterestCalculation = lastInterestCalculation;
+    }
+
+    public UserModel getUser () {
         return user;
     }
 
-    public void setUser(UserModel user) {
+    public void setUser (UserModel user) {
         this.user = user;
     }
 
@@ -131,9 +110,4 @@ public class AccountModel {
     public List<TransactionModel> getIncomingTransactions() {
         return incomingTransactions;
     }
-    
-    public void setLastInterestCalculation(LocalDateTime timestamp) {
-		this.lastInterestCalculation = timestamp;
-	}
-    
 }

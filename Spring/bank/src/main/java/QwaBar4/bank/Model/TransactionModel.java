@@ -16,14 +16,6 @@ public class TransactionModel {
 
     private LocalDateTime timestamp;
 
-    @ManyToOne
-    @JoinColumn(name = "source_account_id")
-    private AccountModel sourceAccount;
-
-    @ManyToOne
-    @JoinColumn(name = "target_account_id")
-    private AccountModel targetAccount;
-
     @Column(precision = 19, scale = 2)
     private BigDecimal amount;
 
@@ -67,22 +59,6 @@ public class TransactionModel {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public AccountModel getSourceAccount() {
-        return sourceAccount;
-    }
-
-    public void setSourceAccount(AccountModel sourceAccount) {
-        this.sourceAccount = sourceAccount;
-    }
-
-    public AccountModel getTargetAccount() {
-        return targetAccount;
-    }
-
-    public void setTargetAccount(AccountModel targetAccount) {
-        this.targetAccount = targetAccount;
     }
 
     public String getEncryptedDescription() { 
