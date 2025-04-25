@@ -44,7 +44,7 @@ public class TransactionController {
 		        request.getSourceAccount(),
 		        request.getTargetAccount(),
 		        request.getAmount(),
-		        request.getDescription(), // Add this
+		        request.getDescription(),
 		        authentication.getName()
 		    );
 		    return ResponseEntity.ok(transaction);

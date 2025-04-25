@@ -197,11 +197,11 @@ const AdminDashboard = () => {
                       <div>
                         <div className="fw-bold">{txn.type}</div>
                         <div>{txn.description}</div>
-                        <div className="text-muted small">
-                          {txn.sourceAccountNumber && `From: ${txn.sourceAccountNumber}`}
-                          <br></br>
-                          {txn.targetAccountNumber && `To: ${txn.targetAccountNumber}`}
-                        </div>
+						<div className="text-muted small">
+						  {txn.sourceAccountOwner && `From: ${txn.sourceAccountOwner}`}
+						  <br />
+						  {txn.targetAccountOwner && `To: ${txn.targetAccountOwner}`}
+						</div>
                         <small className="text-muted">
                           {new Date(txn.timestamp).toLocaleString()}
                         </small>
