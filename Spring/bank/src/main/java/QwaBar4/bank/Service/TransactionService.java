@@ -92,9 +92,12 @@ public class TransactionService {
 		UserModel user = userRepo.findById(userId)
 		        .orElseThrow(() -> new RuntimeException("User not found"));
 
-		// Use the account number strings
+		String userAccountNumber = user.getAccount().getAccountNumber();
+		String anonymizedAccount = anonymizationService.anonymize(userAccountNumber);
+
 		List<TransactionModel> transactions = transactionRepo.findBySourceAccountOrTargetAccountOrderByTimestampDesc(
-		        user.getAccount().getAccountNumber(), user.getAccount().getAccountNumber()
+		        anonymizedAccount, 
+		        anonymizedAccount
 		);
 
 		return transactions.stream()
@@ -237,21 +240,27 @@ public class TransactionService {
 		String decryptedDescription = encryptionService.decrypt(transaction.getEncryptedDescription());
 		dto.setDescription(decryptedDescription);
 
-		// Use account numbers directly
-		dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
-		dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
+		// Deanonymize account numbers
+		String sourceAccount = transaction.getSourceAccountNumber() != null ?
+		        anonymizationService.deanonymize(transaction.getSourceAccountNumber()) : null;
+		String targetAccount = transaction.getTargetAccountNumber() != null ?
+		        anonymizationService.deanonymize(transaction.getTargetAccountNumber()) : null;
 
-		// Fetch real usernames based on account numbers
-		dto.setSourceAccountOwner(getUsernameByAccountNumber(transaction.getSourceAccountNumber()));
-		dto.setTargetAccountOwner(getUsernameByAccountNumber(transaction.getTargetAccountNumber()));
+		// Use deanonymized account numbers
+		dto.setSourceAccountNumber(sourceAccount);
+		dto.setTargetAccountNumber(targetAccount);
+
+		// Fetch real usernames using deanonymized account numbers
+		dto.setSourceAccountOwner(getUsernameByAccountNumber(sourceAccount));
+		dto.setTargetAccountOwner(getUsernameByAccountNumber(targetAccount));
 
 		// Determine if the current user is the source of the transaction
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		UserModel currentUser = userRepo.findByUsername(authentication.getName())
-		        .orElseThrow(() -> new RuntimeException("User not found"));
+		UserModel currentUser  = userRepo.findByUsername(authentication.getName())
+		        .orElseThrow(() -> new RuntimeException("User  not found"));
 
-		boolean isOutgoing = transaction.getSourceAccountNumber() != null &&
-		                      transaction.getSourceAccountNumber().equals(currentUser.getAccount().getAccountNumber());
+		boolean isOutgoing = sourceAccount != null &&
+		        sourceAccount.equals(currentUser .getAccount().getAccountNumber());
 
 		// Adjust amount for display based on transaction type
 		if ("TRANSFER".equals(transaction.getType())) {
