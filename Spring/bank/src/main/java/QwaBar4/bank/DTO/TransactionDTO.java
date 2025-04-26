@@ -16,6 +16,24 @@ public class TransactionDTO {
     private String targetAccountOwner;
     private String transferDescription;
 	private String encryptedDescription;
+	
+    @Override
+    public String toString() {
+        return "TransactionDTO{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", amount=" + amount +
+                ", timestamp=" + timestamp +
+                ", description='" + description + '\'' +
+                ", user='" + user + '\'' +
+                ", sourceAccountNumber='" + sourceAccountNumber + '\'' +
+                ", sourceAccountOwner='" + sourceAccountOwner + '\'' +
+                ", targetAccountNumber='" + targetAccountNumber + '\'' +
+                ", targetAccountOwner='" + targetAccountOwner + '\'' +
+                ", transferDescription='" + transferDescription + '\'' +
+                ", encryptedDescription='" + encryptedDescription + '\'' +
+                '}';
+    }
 
     public Long getId() {
         return id;

@@ -22,21 +22,19 @@ public class StatementService {
         this.pdfGenerator = pdfGenerator;
     }
 
-	public StatementPDF generateStatement(Long accountId) {
-		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(accountId);
-		
+    public StatementPDF generateStatement(Long accountId) {
+        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(accountId);
 
-		transactions.forEach(t -> {
-		    t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
-		    t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
-		});
-		
-		try {
+        transactions.forEach(t -> {
+            t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
+            t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
+        });
 
-		    byte[] pdfContent = pdfGenerator.generate(transactions);
-		    return new StatementPDF(pdfContent);
-		} catch (IOException e) {
-		    throw new RuntimeException("Failed to generate PDF statement", e);
-		}
-	}
+        try {
+            byte[] pdfContent = pdfGenerator.generate(transactions);
+            return new StatementPDF(pdfContent);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate PDF statement", e);
+        }
+    }
 }

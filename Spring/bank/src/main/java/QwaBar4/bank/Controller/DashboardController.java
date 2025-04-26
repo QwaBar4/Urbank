@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import java.util.Collections;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,8 @@ import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
 import QwaBar4.bank.Service.AuditLogService;
+import QwaBar4.bank.Service.StatementService;
+import QwaBar4.bank.Service.StatementPDF;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +32,9 @@ public class DashboardController {
     
     @Autowired
 	private AuditLogService auditLogService;
+
+    @Autowired
+    private StatementService statementService;
 
     @Autowired
     public DashboardController(UserModelRepository userModelRepository) {
@@ -100,6 +106,34 @@ public class DashboardController {
 		            .body(Collections.singletonMap("error", e.getMessage()));
 		}
 	}
+
+	@GetMapping("/api/user/statements")
+	public ResponseEntity<byte[]> generateUserStatement() {
+		try {
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		    String username = authentication.getName();
+
+		    UserModel user = userModelRepository.findByUsername(username)
+		            .orElseThrow(() -> new RuntimeException("User not found"));
+
+		    // Generate the statement PDF
+		    StatementPDF statementPDF = statementService.generateStatement(user.getAccount().getId());
+		    byte[] pdfContent = statementPDF.getContent();
+
+		    // Set the response headers
+		    HttpHeaders headers = new HttpHeaders();
+		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
+		    headers.add("Content-Type", "application/pdf");
+
+		    // Return the PDF as a response
+		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+		} catch (Exception e) {
+		    // Return an error response with a byte[] body
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body("Error generating PDF: ".getBytes());
+		}
+	}
+
 
     @PostMapping("/api/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {

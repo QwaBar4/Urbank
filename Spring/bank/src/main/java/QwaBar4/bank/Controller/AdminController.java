@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,9 @@ import QwaBar4.bank.Model.TransactionModel;
 import QwaBar4.bank.Model.TransactionModelRepository;
 import QwaBar4.bank.Model.AuditLogRepository;
 import QwaBar4.bank.Service.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/admin")
@@ -40,6 +45,9 @@ public class AdminController {
 
     @Autowired
     private AnonymizationService anonymizationService;
+    
+    @Autowired
+    private StatementService statementService;
 
     @Autowired
     private AuditLogService auditLogService;
@@ -137,6 +145,28 @@ public class AdminController {
 		    return ResponseEntity.status(500).body(Collections.emptyList());
 		}
 	}
+
+	@GetMapping("/users/{userId}/statements")
+	public ResponseEntity<byte[]> generateUserStatement(@PathVariable Long userId) {
+		try {
+		    // Generate the statement PDF for the specified user
+		    StatementPDF statementPDF = statementService.generateStatement(userId);
+		    byte[] pdfContent = statementPDF.getContent();
+
+		    // Set the response headers
+		    HttpHeaders headers = new HttpHeaders();
+		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
+		    headers.add("Content-Type", "application/pdf");
+
+		    // Return the PDF as a response
+		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+		} catch (Exception e) {
+		    // Return an error response with a byte[] body
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body("Error generating PDF: ".getBytes());
+		}
+	}
+
 
     @PostMapping("/deanonymize")
     @PreAuthorize("hasRole('ADMIN')")

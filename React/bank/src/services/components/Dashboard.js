@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../api';
 import { getJwtToken, clearJwtToken } from '../../utils/auth';
 import { getDashboardData } from '../api';
 import Transfer from './Transfer';
+import api from '../api';
 import TransactionHistory from './TransactionHistory';
 import BalanceCard from './BalanceCard';
 
@@ -124,6 +125,26 @@ const Dashboard = () => {
                         <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
                             Logout
                         </button>
+						<button
+							onClick={async () => {
+								try {
+									const response = await api.generateUserStatement(); // Adjust the API call
+									const blob = new Blob([response.data], { type: 'application/pdf' });
+									const url = window.URL.createObjectURL(blob);
+									const a = document.createElement('a');
+									a.href = url;
+									a.download = response.filename; // Use the filename from the response
+									document.body.appendChild(a);
+									a.click();
+									a.remove();
+								} catch (error) {
+									console.error('Error downloading statement:', error);
+								}
+							}}
+							className="btn btn-outline-success"
+						>
+							Download Statement
+						</button>
                         <button
                             onClick={() => setShowDeleteConfirmation(true)}
                             className="btn btn-outline-danger"

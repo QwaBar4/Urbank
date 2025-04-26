@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import api from '../api';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../api';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -158,7 +159,28 @@ const AdminDashboard = () => {
                     >
                       Audit Logs
                     </button>
-
+										
+					<button
+						className="btn btn-sm btn-success"
+						onClick={async () => {
+							try {
+								const response = await api.generateUserStatement(user.id); // Adjust the API call
+								const blob = new Blob([response.data], { type: 'application/pdf' });
+								const url = window.URL.createObjectURL(blob);
+								const a = document.createElement('a');
+								a.href = url;
+								a.download = response.filename; // Use the filename from the response
+								document.body.appendChild(a);
+								a.click();
+								a.remove();
+							} catch (error) {
+								console.error('Error downloading user statement:', error);
+							}
+						}}
+					>
+						Download Statement
+					</button>
+					
                     <button
                       className="btn btn-sm btn-danger"
                       onClick={() => {

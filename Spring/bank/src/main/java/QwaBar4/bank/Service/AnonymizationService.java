@@ -43,17 +43,17 @@ public class AnonymizationService {
         return anonymized;
     }
 
-	public String deanonymize(String anonymized) {
-		return mappingRepo.findByAnonymizedValue(anonymized)
-		    .map(m -> {
-		        try {
-		            return encryptionService.decrypt(m.getEncryptedOriginal());
-		        } catch (Exception e) {
-		            return "DECRYPTION_ERROR";
-		        }
-		    })
-		    .orElse("UNKNOWN_USER");
-	}
+    public String deanonymize(String anonymized) {
+        return mappingRepo.findByAnonymizedValue(anonymized)
+                .map(m -> {
+                    try {
+                        return encryptionService.decrypt(m.getEncryptedOriginal());
+                    } catch (Exception e) {
+                        return "DECRYPTION_ERROR";
+                    }
+                })
+                .orElse("UNKNOWN_USER");
+    }
 
     private String generateHash(String input) {
         return Hashing.sha256()

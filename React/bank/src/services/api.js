@@ -283,6 +283,31 @@ export const getUserAuditLogs = async (userId) => {
   }
 };
 
+export const generateUserStatement = async (userId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/user/statements`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${getJwtToken()}`,
+                'Content-Type': 'application/pdf'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to generate user statement');
+        }
+
+        const blob = await response.blob();
+        return {
+            data: blob,
+            filename: `${userId}_transaction_statement.pdf`
+        };
+    } catch (error) {
+        console.error('Error generating user statement:', error);
+        throw error;
+    }
+};
+
 const api = {
     API_BASE_URL,
     deleteUser,
@@ -300,6 +325,7 @@ const api = {
     getUserDetails,
     updateUser,
     activateUser,
-    getUserAuditLogs
+    getUserAuditLogs,
+    generateUserStatement
 };
 export default api;
