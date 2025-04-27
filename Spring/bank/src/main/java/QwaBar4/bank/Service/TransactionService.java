@@ -109,62 +109,54 @@ public class TransactionService {
         return user.getAccount().getBalance();
     }
 
-    public List<TransactionDTO> getUserTransactionsById(Long userId) {
-        // Fetch the user and their account number
-        UserModel user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+	public List<TransactionDTO> getUserTransactionsById(Long userId) {
+		UserModel user = userRepo.findById(userId)
+		        .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String accountNumber = user.getAccount().getAccountNumber();
-        String anonymizedAccount = anonymizationService.anonymize(accountNumber);
+		String accountNumber = user.getAccount().getAccountNumber();
+		String anonymizedAccount = anonymizationService.anonymize(accountNumber);
 
-        // Fetch transactions using the anonymized account number
-        List<TransactionModel> transactions = transactionRepo.findByAccountNumbers(anonymizedAccount);
+		List<TransactionModel> transactions = transactionRepo.findByAccountNumbers(anonymizedAccount);
 
-        return transactions.stream().map(transaction -> {
-            // Deanonymize account numbers
-            String source = anonymizationService.deanonymize(transaction.getSourceAccountNumber());
-            String target = anonymizationService.deanonymize(transaction.getTargetAccountNumber());
+		return transactions.stream().map(transaction -> {
+		    String source = anonymizationService.deanonymize(transaction.getSourceAccountNumber());
+		    String target = anonymizationService.deanonymize(transaction.getTargetAccountNumber());
 
-            TransactionDTO dto = new TransactionDTO();
-            dto.setId(transaction.getId());
-            dto.setType(transaction.getType());
-            dto.setAmount(transaction.getAmount());
-            dto.setTimestamp(transaction.getTimestamp());
+		    TransactionDTO dto = new TransactionDTO();
+		    dto.setId(transaction.getId());
+		    dto.setType(transaction.getType());
+		    dto.setAmount(transaction.getAmount());
+		    dto.setTimestamp(transaction.getTimestamp());
+		    dto.setDescription(encryptionService.decrypt(transaction.getEncryptedDescription()));
+		    dto.setSourceAccountNumber(source);
+		    dto.setTargetAccountNumber(target);
 
-            // Decrypt the description
-            String decryptedDescription = encryptionService.decrypt(transaction.getEncryptedDescription());
-            dto.setDescription(decryptedDescription);
+		    // Fetch real usernames using deanonymized account numbers
+		    dto.setSourceAccountOwner(getUsernameByAccountNumber(source));
+		    dto.setTargetAccountOwner(getUsernameByAccountNumber(target));
 
-            // Fetch usernames for source and target accounts
-            dto.setSourceAccountOwner(accountRepo.findByAccountNumber(source)
-                    .map(a -> a.getUser().getUsername()).orElse("Unknown"));
-            dto.setTargetAccountOwner(accountRepo.findByAccountNumber(target)
-                    .map(a -> a.getUser().getUsername()).orElse("Unknown"));
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		    UserModel currentUser = userRepo.findByUsername(authentication.getName())
+		            .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Determine if the current user is the source of the transaction
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            UserModel currentUser = userRepo.findByUsername(authentication.getName())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+		    boolean isOutgoing = transaction.getSourceAccountNumber() != null &&
+		            source.equals(currentUser.getAccount().getAccountNumber());
 
-            boolean isOutgoing = transaction.getSourceAccountNumber() != null &&
-                    source.equals(currentUser.getAccount().getAccountNumber());
+		    if ("TRANSFER".equals(transaction.getType())) {
+		        dto.setAmount(isOutgoing ? transaction.getAmount().negate() : transaction.getAmount());
+		    } else {
+		        dto.setAmount(transaction.getAmount());
+		    }
 
-            // Adjust amount for display based on transaction type
-            if ("TRANSFER".equals(transaction.getType())) {
-                dto.setAmount(isOutgoing ? transaction.getAmount().negate() : transaction.getAmount());
-            } else {
-                dto.setAmount(transaction.getAmount());
-            }
+		    return dto;
+		}).collect(Collectors.toList());
+	}
 
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    private String getUsernameByAccountNumber(String accountNumber) {
-        return accountRepo.findByAccountNumber(accountNumber)
-                .map(account -> account.getUser().getUsername())
-                .orElse("Unknown");
-    }
+	private String getUsernameByAccountNumber(String accountNumber) {
+		return accountRepo.findByAccountNumber(accountNumber)
+		        .map(account -> account.getUser().getUsername())
+		        .orElse("Unknown");
+	}
 
     public TransactionDTO processDeposit(String accountNumber, BigDecimal amount, String description, String username) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {

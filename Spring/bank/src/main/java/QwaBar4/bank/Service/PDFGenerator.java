@@ -30,20 +30,21 @@ public class PDFGenerator {
                 contentStream.beginText();
                 contentStream.newLineAtOffset(50, 730);
 
-                for (TransactionDTO transaction : transactions) {
-                    contentStream.showText("Type: " + transaction.getType());
-                    contentStream.newLineAtOffset(0, -15);
-                    contentStream.showText("Amount: " + transaction.getAmount());
-                    contentStream.newLineAtOffset(0, -15);
-                    contentStream.showText("Timestamp: " + transaction.getTimestamp());
-                    contentStream.newLineAtOffset(0, -15);
-                    contentStream.showText("Description: " + transaction.getDescription());
-                    contentStream.newLineAtOffset(0, -15);
-                    contentStream.showText("Source Account: " + transaction.getSourceAccountNumber());
-                    contentStream.newLineAtOffset(0, -15);
-                    contentStream.showText("Target Account: " + transaction.getTargetAccountNumber());
-                    contentStream.newLineAtOffset(0, -30); // Extra space between transactions
-                }
+				for (TransactionDTO transaction : transactions) {
+					contentStream.showText("Type: " + transaction.getType());
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Amount: " + transaction.getAmount());
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Timestamp: " + transaction.getTimestamp());
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Description: " + transaction.getDescription());
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Source Account: " + transaction.getSourceAccountOwner() + " (" + transaction.getSourceAccountNumber() + ")");
+					contentStream.newLineAtOffset(0, -15);
+					contentStream.showText("Target Account: " + transaction.getTargetAccountOwner() + " (" + transaction.getTargetAccountNumber() + ")");
+					contentStream.newLineAtOffset(0, -30);
+				}
+
                 contentStream.endText();
             }
 

@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 						className="btn btn-sm btn-success"
 						onClick={async () => {
 							try {
-								const response = await api.generateUserStatement(user.id); // Adjust the API call
+								const response = await api.generateUserStatementByID(user.id, user.username); // Adjust the API call
 								const blob = new Blob([response.data], { type: 'application/pdf' });
 								const url = window.URL.createObjectURL(blob);
 								const a = document.createElement('a');

@@ -167,7 +167,6 @@ public class AdminController {
 		}
 	}
 
-
     @PostMapping("/deanonymize")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deanonymizeValue(

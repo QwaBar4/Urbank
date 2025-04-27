@@ -128,7 +128,7 @@ const Dashboard = () => {
 						<button
 							onClick={async () => {
 								try {
-									const response = await api.generateUserStatement(); // Adjust the API call
+									const response = await api.generateUserStatement(userData.username); // Adjust the API call
 									const blob = new Blob([response.data], { type: 'application/pdf' });
 									const url = window.URL.createObjectURL(blob);
 									const a = document.createElement('a');
