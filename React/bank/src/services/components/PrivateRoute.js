@@ -8,5 +8,5 @@ export default function PrivateRoute({ children }) {
     return <div>Loading...</div>;
   }
   
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/" replace />;
 }

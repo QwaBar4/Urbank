@@ -200,7 +200,7 @@ const AdminDashboard = () => {
 
       {/* Transactions Modal */}
       <Modal show={showTransactions !== null} onHide={() => setShowTransactions(null)}>
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title>Transactions</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -249,6 +249,9 @@ const AdminDashboard = () => {
 
       {/* Audit Logs Modal */}
       <Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
+        <Modal.Header>
+          <Modal.Title>Audit logs</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           {auditLogs ? (
             <ul className="list-group">

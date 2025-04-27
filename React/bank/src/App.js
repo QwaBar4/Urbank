@@ -19,14 +19,14 @@ const PrivateRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/" replace />;
 };
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   // Check for ROLE_ADMIN in all role formats
   const isAdmin = user.roles?.some(role => 

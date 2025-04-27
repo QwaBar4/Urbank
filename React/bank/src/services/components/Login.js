@@ -57,6 +57,7 @@ const Login = () => {
                     Don't have an account? <Link to="/signup">Sign Up</Link>
                 </p>
             </form>
+            <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">Go home</button>
             {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
         </div>
     );

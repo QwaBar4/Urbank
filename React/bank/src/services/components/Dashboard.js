@@ -18,7 +18,7 @@ const Dashboard = () => {
 	useEffect(() => {
 		const token = getJwtToken();
 		if (!token) {
-		    navigate('/login');
+		    navigate('/');
 		    return;
 		}
         const fetchData = async () => {
@@ -37,7 +37,7 @@ const Dashboard = () => {
 		    } catch (err) {
 		        if (err.response?.status === 401) {
 		            console.log('Session expired, redirecting to login');
-		            navigate('/login');
+		            navigate('/');
 		        } else {
 		            setError(err.message);
 		        }
