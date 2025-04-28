@@ -39,9 +39,17 @@ public class PDFGenerator {
 					contentStream.newLineAtOffset(0, -15);
 					contentStream.showText("Description: " + transaction.getDescription());
 					contentStream.newLineAtOffset(0, -15);
-					contentStream.showText("Source Account: " + transaction.getSourceAccountOwner() + " (" + transaction.getSourceAccountNumber() + ")");
-					contentStream.newLineAtOffset(0, -15);
-					contentStream.showText("Target Account: " + transaction.getTargetAccountOwner() + " (" + transaction.getTargetAccountNumber() + ")");
+					if(transaction.getType().equals("DEPOSIT")){
+						contentStream.showText("Target Account: " + transaction.getTargetAccountOwner());
+					}
+					else if(transaction.getType().equals("WITHDRAWAL")){
+						contentStream.showText("Source Account: " + transaction.getSourceAccountOwner());
+					}
+					else{
+						contentStream.showText("Source Account: " + transaction.getSourceAccountOwner());
+						contentStream.newLineAtOffset(0, -15);
+						contentStream.showText("Target Account: " + transaction.getTargetAccountOwner());
+					}
 					contentStream.newLineAtOffset(0, -30);
 				}
 
