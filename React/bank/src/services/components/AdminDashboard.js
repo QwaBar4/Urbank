@@ -199,91 +199,95 @@ const AdminDashboard = () => {
       )}
 
       {/* Transactions Modal */}
-      <Modal show={showTransactions !== null} onHide={() => setShowTransactions(null)}>
-        <Modal.Header>
-          <Modal.Title>Transactions</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {transactionsLoading ? (
-            <div className="text-center">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          ) : (
-            <ul className="list-group">
-              {showTransactions?.length > 0 ? (
-                showTransactions.map((txn, index) => (
-                  <li key={index} className="list-group-item transaction-item">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="fw-bold">{txn.type}</div>
-                        <div>{txn.description}</div>
-						<div className="text-muted small">
-						  {txn.sourceAccountOwner && `From: ${txn.sourceAccountOwner}`}
-						  <br />
-						  {txn.targetAccountOwner && `To: ${txn.targetAccountOwner}`}
-						</div>
-                        <small className="text-muted">
-                          {new Date(txn.timestamp).toLocaleString()}
-                        </small>
-                      </div>
-                      <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
-                        ${Math.abs(txn.amount).toFixed(2)}
-                      </span>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <div className="alert alert-info">No transactions found</div>
-              )}
-            </ul>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowTransactions(null)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+	<Modal show={showTransactions !== null} onHide={() => setShowTransactions(null)}>
+	  <Modal.Header>
+		<Modal.Title>Transactions</Modal.Title>
+	  </Modal.Header>
+	  <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+		<div style={{ maxHeight: '100%', overflowY: 'auto' }}>
+		  {transactionsLoading ? (
+		    <div className="text-center">
+		      <div className="spinner-border text-primary" role="status">
+		        <span className="visually-hidden">Loading...</span>
+		      </div>
+		    </div>
+		  ) : (
+		    <ul className="list-group">
+		      {showTransactions?.length > 0 ? (
+		        showTransactions.map((txn, index) => (
+		          <li key={index} className="list-group-item transaction-item">
+		            <div className="d-flex justify-content-between align-items-start">
+		              <div>
+		                <div className="fw-bold">{txn.type}</div>
+		                <div>{txn.description}</div>
+		                <div className="text-muted small">
+		                  {txn.sourceAccountOwner && `From: ${txn.sourceAccountOwner}`}
+		                  <br />
+		                  {txn.targetAccountOwner && `To: ${txn.targetAccountOwner}`}
+		                </div>
+		                <small className="text-muted">
+		                  {new Date(txn.timestamp).toLocaleString()}
+		                </small>
+		              </div>
+		              <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
+		                ${Math.abs(txn.amount).toFixed(2)}
+		              </span>
+		            </div>
+		          </li>
+		        ))
+		      ) : (
+		        <div className="alert alert-info">No transactions found</div>
+		      )}
+		    </ul>
+		  )}
+		</div>
+	  </Modal.Body>
+	  <Modal.Footer>
+		<Button variant="secondary" onClick={() => setShowTransactions(null)}>
+		  Close
+		</Button>
+	  </Modal.Footer>
+	</Modal>
+
+
 
       {/* Audit Logs Modal */}
-      <Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
-        <Modal.Header>
-          <Modal.Title>Audit logs</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {auditLogs ? (
-            <ul className="list-group">
-              {auditLogs.length > 0 ? (
-                auditLogs.map((log, index) => (
-                  <li key={index} className="list-group-item audit-log-item">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="fw-bold">{log.action}</div>
-                        <div>User: {log.username}</div>
-                        <div>Details: {log.details}</div>
-                        <small className="text-muted">
-                          {new Date(log.timestamp).toLocaleString()}
-                        </small>
-                      </div>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <div className="alert alert-info">No audit logs found</div>
-              )}
-            </ul>
-          ) : (
-            <div className="alert alert-info">No audit logs available</div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAuditLogsModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+	<Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
+	  <Modal.Header>
+		<Modal.Title>Audit logs</Modal.Title>
+	  </Modal.Header>
+	  <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+		{auditLogs ? (
+		  <ul className="list-group">
+		    {auditLogs.length > 0 ? (
+		      auditLogs.map((log, index) => (
+		        <li key={index} className="list-group-item audit-log-item">
+		          <div className="d-flex justify-content-between align-items-start">
+		            <div>
+		              <div className="fw-bold">{log.action}</div>
+		              <div>User: {log.username}</div>
+		              <div>Details: {log.details}</div>
+		              <small className="text-muted">
+		                {new Date(log.timestamp).toLocaleString()}
+		              </small>
+		            </div>
+		          </div>
+		        </li>
+		      ))
+		    ) : (
+		      <div className="alert alert-info">No audit logs found</div>
+		    )}
+		  </ul>
+		) : (
+		  <div className="alert alert-info">No audit logs available</div>
+		)}
+	  </Modal.Body>
+	  <Modal.Footer>
+		<Button variant="secondary" onClick={() => setShowAuditLogsModal(false)}>
+		  Close
+		</Button>
+	  </Modal.Footer>
+	</Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
