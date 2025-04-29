@@ -5,6 +5,7 @@ import api from '../api';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../api';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import '../../index.css'; // Ensure this path is correct
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -80,214 +81,220 @@ const AdminDashboard = () => {
     }
   };
 
-	const viewAuditLogs = async (userId) => {
-		try {
-		    setError(null);
-		    const logs = await getUserAuditLogs(userId);
-		    
-		    // Handle potential anonymization errors
-		    const safeLogs = logs.map(log => ({
-		        ...log,
-		        username: log.username.startsWith("USER-") ? "Anonymous User" : log.username,
-		        details: log.details || "No details available"
-		    }));
-		    
-		    setAuditLogs(safeLogs);
-		    setShowAuditLogsModal(true);
-		} catch (error) {
-		    setError(error.message || 'Failed to load audit logs');
-		}
-	};
+  const viewAuditLogs = async (userId) => {
+    try {
+      setError(null);
+      const logs = await getUserAuditLogs(userId);
+
+      // Handle potential anonymization errors
+      const safeLogs = logs.map(log => ({
+        ...log,
+        username: log.username.startsWith("USER-") ? "Anonymous User" : log.username,
+        details: log.details || "No details available"
+      }));
+
+      setAuditLogs(safeLogs);
+      setShowAuditLogsModal(true);
+    } catch (error) {
+      setError(error.message || 'Failed to load audit logs');
+    }
+  };
 
   if (!user?.roles?.some(r => r.toUpperCase() === 'ROLE_ADMIN')) {
     return <div className="alert alert-danger">Unauthorized access</div>;
   }
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Admin Dashboard</h1>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="btn btn-outline-warning"
-        >
-          Back to Dashboard
-        </button>
-      </div>
-
-      {adminData && (
-        <div className="card shadow">
-          <div className="card-body">
-            <h2 className="card-title mb-4">System Statistics</h2>
-            <p className="lead">Total Users: {adminData.totalUsers}</p>
-
-            <h3 className="mb-3">User List</h3>
-            <ul className="list-group">
-              {adminData.users.map(user => (
-                <li key={user.id} className="list-group-item d-flex justify-content-between align-items-center">
-                  <div className="w-50">
-                    <h5>{user.username}</h5>
-                    <p className="mb-0">{user.email}</p>
-                    <small className="text-muted">Status: {user.active ? 'Active' : 'Inactive'}</small>
-                  </div>
-
-                  <div className="btn-group">
-                    <button
-                      className={`btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'}`}
-                      onClick={() => handleStatusChange(user.id, user.active)}
-                    >
-                      {user.active ? 'Deactivate' : 'Activate'}
-                    </button>
-
-                    <button
-                      className="btn btn-sm btn-info"
-                      onClick={() => navigate(`/edit-user/${user.id}`)}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => viewTransactions(user.id)}
-                    >
-                      Transactions
-                    </button>
-
-                    <button
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => viewAuditLogs(user.id)}
-                    >
-                      Audit Logs
-                    </button>
-										
-					<button
-						className="btn btn-sm btn-success"
-						onClick={async () => {
-							try {
-								const response = await api.generateUserStatementByID(user.id, user.username); // Adjust the API call
-								const blob = new Blob([response.data], { type: 'application/pdf' });
-								const url = window.URL.createObjectURL(blob);
-								const a = document.createElement('a');
-								a.href = url;
-								a.download = response.filename; // Use the filename from the response
-								document.body.appendChild(a);
-								a.click();
-								a.remove();
-							} catch (error) {
-								console.error('Error downloading user statement:', error);
-							}
-						}}
-					>
-						Download Statement
-					</button>
-					
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="scrollable-container">
+      <div className="container mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1>Admin Dashboard</h1>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="btn btn-outline-warning"
+          >
+            Back to Dashboard
+          </button>
         </div>
-      )}
 
+        {adminData && (
+          <div className="card shadow">
+            <div className="card-body">
+              <h2 className="card-title mb-4">System Statistics</h2>
+              <p className="lead">Total Users: {adminData.totalUsers}</p>
+
+              <h3 className="mb-3">User List</h3>
+              <ul className="list-group">
+                {adminData.users.map(user => (
+                  <li key={user.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <div className="w-50">
+                      <h5>{user.username}</h5>
+                      <p className="mb-0">{user.email}</p>
+                      <small className="text-muted">Status: {user.active ? 'Active' : 'Inactive'}</small>
+                    </div>
+
+                    <div className="btn-group">
+                      <button
+                        className={`btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'}`}
+                        onClick={() => handleStatusChange(user.id, user.active)}
+                      >
+                        {user.active ? 'Deactivate' : 'Activate'}
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={() => navigate(`/edit-user/${user.id}`)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => viewTransactions(user.id)}
+                      >
+                        Transactions
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => viewAuditLogs(user.id)}
+                      >
+                        Audit Logs
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={async () => {
+                          try {
+                            const response = await api.generateUserStatementByID(user.id, user.username); // Adjust the API call
+                            const blob = new Blob([response.data], { type: 'application/pdf' });
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = response.filename; // Use the filename from the response
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                          } catch (error) {
+                            console.error('Error downloading user statement:', error);
+                          }
+                        }}
+                      >
+                        Download Statement
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
       {/* Transactions Modal */}
-	<Modal show={showTransactions !== null} onHide={() => setShowTransactions(null)}>
-	  <Modal.Header>
-		<Modal.Title>Transactions</Modal.Title>
-	  </Modal.Header>
-	  <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-		<div style={{ maxHeight: '100%', overflowY: 'auto' }}>
-		  {transactionsLoading ? (
-		    <div className="text-center">
-		      <div className="spinner-border text-primary" role="status">
-		        <span className="visually-hidden">Loading...</span>
-		      </div>
-		    </div>
-		  ) : (
-		    <ul className="list-group">
-		      {showTransactions?.length > 0 ? (
-		        showTransactions.map((txn, index) => (
-		          <li key={index} className="list-group-item transaction-item">
-		            <div className="d-flex justify-content-between align-items-start">
-		              <div>
-		                <div className="fw-bold">{txn.type}</div>
-		                <div>{txn.description}</div>
-		                <div className="text-muted small">
-		                  {txn.sourceAccountOwner && `From: ${txn.sourceAccountOwner}`}
-		                  <br />
-		                  {txn.targetAccountOwner && `To: ${txn.targetAccountOwner}`}
-		                </div>
-		                <small className="text-muted">
-		                  {new Date(txn.timestamp).toLocaleString()}
-		                </small>
-		              </div>
-		              <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
-		                ${Math.abs(txn.amount).toFixed(2)}
-		              </span>
-		            </div>
-		          </li>
-		        ))
-		      ) : (
-		        <div className="alert alert-info">No transactions found</div>
-		      )}
-		    </ul>
-		  )}
-		</div>
-	  </Modal.Body>
-	  <Modal.Footer>
-		<Button variant="secondary" onClick={() => setShowTransactions(null)}>
-		  Close
-		</Button>
-	  </Modal.Footer>
-	</Modal>
-
-
-
+      <Modal
+        show={showTransactions !== null}
+        onHide={() => setShowTransactions(null)}
+        size="lg"
+        className="modal-90w"
+      >
+        <Modal.Header>
+          <Modal.Title>Transactions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="list-group" style={{ maxHeight: "70vh", overflowY: "auto" }}>
+            {transactionsLoading ? (
+              <div className="text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : showTransactions?.length > 0 ? (
+              showTransactions.map((txn, index) => (
+                <div key={index} className="list-group-item transaction-item">
+                  <div className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div className="fw-bold">{txn.type}</div>
+                      <div>{txn.description}</div>
+                      <div className="text-muted small">
+                        {txn.sourceAccountOwner && `From: ${txn.sourceAccountOwner}`}
+                        {txn.sourceAccountOwner && txn.targetAccountOwner && <br />}
+                        {txn.targetAccountOwner && `To: ${txn.targetAccountOwner}`}
+                      </div>
+                      <small className="text-muted">
+                        {new Date(txn.timestamp).toLocaleString()}
+                      </small>
+                    </div>
+                    <span className={`badge rounded-pill ${txn.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
+                      ${Math.abs(txn.amount).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="alert alert-info m-3">No transactions found</div>
+            )}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowTransactions(null)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
       {/* Audit Logs Modal */}
-	<Modal show={showAuditLogsModal} onHide={() => setShowAuditLogsModal(false)}>
-	  <Modal.Header>
-		<Modal.Title>Audit logs</Modal.Title>
-	  </Modal.Header>
-	  <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-		{auditLogs ? (
-		  <ul className="list-group">
-		    {auditLogs.length > 0 ? (
-		      auditLogs.map((log, index) => (
-		        <li key={index} className="list-group-item audit-log-item">
-		          <div className="d-flex justify-content-between align-items-start">
-		            <div>
-		              <div className="fw-bold">{log.action}</div>
-		              <div>User: {log.username}</div>
-		              <div>Details: {log.details}</div>
-		              <small className="text-muted">
-		                {new Date(log.timestamp).toLocaleString()}
-		              </small>
-		            </div>
-		          </div>
-		        </li>
-		      ))
-		    ) : (
-		      <div className="alert alert-info">No audit logs found</div>
-		    )}
-		  </ul>
-		) : (
-		  <div className="alert alert-info">No audit logs available</div>
-		)}
-	  </Modal.Body>
-	  <Modal.Footer>
-		<Button variant="secondary" onClick={() => setShowAuditLogsModal(false)}>
-		  Close
-		</Button>
-	  </Modal.Footer>
-	</Modal>
+      <Modal
+        show={showAuditLogsModal}
+        onHide={() => setShowAuditLogsModal(false)}
+        size="lg"
+        className="modal-90w"
+      >
+        <Modal.Header>
+          <Modal.Title>Audit Logs</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          {auditLogs ? (
+            <>
+              {auditLogs.length > 0 ? (
+                <div className="list-group">
+                  {auditLogs.map((log, index) => (
+                    <div key={index} className="list-group-item">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div className="fw-bold">{log.action}</div>
+                          <div>User: {log.username}</div>
+                          <div>Details: {log.details}</div>
+                          <small className="text-muted">
+                            {new Date(log.timestamp).toLocaleString()}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="alert alert-info">No audit logs found</div>
+              )}
+            </>
+          ) : (
+            <div className="alert alert-info">No audit logs available</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAuditLogsModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
