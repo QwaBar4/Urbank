@@ -1,15 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './services/components/AuthContext';
-import Index from './services/components/Index';
-import Signup from './services/components/Signup';
-import Login from './services/components/Login';
-import PasswordReset from './services/components/PasswordReset';
-import Dashboard from './services/components/Dashboard';
-import Deposit from './services/components/Deposit';
-import Withdraw from './services/components/Withdraw';
-import EditUser from './services/components/EditUser';
-import AdminDashboard from './services/components/AdminDashboard'; // Import AdminDashboard
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Index from './pages/Index';
+import Signup from './components/Auth/Signup';
+import Login from './pages/Login';
+import PasswordReset from './components/Auth/PasswordReset';
+import Dashboard from './pages/Dashboard';
+import Deposit from './components/Dashboard/Deposit';
+import Withdraw from './components/Dashboard/Withdraw';
+import EditUser from './components/Dashboard/EditUser';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Proper private route component
 const PrivateRoute = ({ children }) => {
