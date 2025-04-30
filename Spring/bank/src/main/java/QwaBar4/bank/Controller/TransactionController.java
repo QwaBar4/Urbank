@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import QwaBar4.bank.Model.*;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
+import QwaBar4.bank.Utils.AccountNumberUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class TransactionController {
 
     @GetMapping("/accounts/{accountNumber}")
     public ResponseEntity<Map<String, Object>> getAccountDetails(@PathVariable String accountNumber) {
-        AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+        AccountModel account = accountRepo.findByAccountNumber(AccountNumberUtils.convertUuidToFormattedNumber(accountNumber))
             .orElseThrow(() -> new RuntimeException("Account not found"));
 
         Map<String, Object> response = new HashMap<>();
