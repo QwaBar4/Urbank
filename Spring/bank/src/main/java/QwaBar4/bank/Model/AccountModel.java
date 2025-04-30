@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import QwaBar4.bank.Utils.AccountNumberUtils;
 
 @Entity
 @Table(name = "accounts")
@@ -37,7 +38,7 @@ public class AccountModel {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore 
-    private UserModel user; // Keep this field to maintain the relationship ```java
+    private UserModel user;
     @OneToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     private List<TransactionModel> outgoingTransactions;
@@ -56,7 +57,7 @@ public class AccountModel {
     }
 
     public String getAccountNumber() {
-        return accountNumber;
+        return AccountNumberUtils.convertUuidToFormattedNumber(accountNumber);
     }
 
     public void setAccountNumber(String accountNumber) {
