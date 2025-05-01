@@ -55,14 +55,14 @@ public class TransactionController {
         }
     }
 
-    @GetMapping("/history")
-    public ResponseEntity<List<TransactionDTO>> getTransactionHistory(Authentication authentication) {
-        UserModel user = userRepo.findByUsername(authentication.getName())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+	@GetMapping("/history")
+	public ResponseEntity<List<TransactionDTO>> getTransactionHistory(Authentication authentication) {
+		UserModel user = userRepo.findByUsername(authentication.getName())
+		    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<TransactionDTO> transactions = transactionService.getUserTransactions(user.getId());
-        return ResponseEntity.ok(transactions);
-    }
+		List<TransactionDTO> transactions = transactionService.getUserTransactions(user.getId());
+		return ResponseEntity.ok(transactions);
+	}
 
     @GetMapping("/balance")
     public ResponseEntity<BigDecimal> getAccountBalance(Authentication authentication) {

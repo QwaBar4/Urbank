@@ -93,8 +93,8 @@ public class TransactionService {
     public List<TransactionDTO> getUserTransactions(Long userId) {
         UserModel user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        String userAccountNumber = user.getAccount().getAccountNumber();
+		
+        String userAccountNumber = accountNumberUtils.convertFormattedNumberToUuid(user.getAccount().getAccountNumber());
         String anonymizedAccount = anonymizationService.anonymize(userAccountNumber);
 
         List<TransactionModel> transactions = transactionRepo.findBySourceAccountOrTargetAccountOrderByTimestampDesc(
