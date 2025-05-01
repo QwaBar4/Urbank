@@ -48,9 +48,18 @@ public class UserModelService implements UserDetailsService {
     public void deleteByUsername(String username) {
         UserModel user = userRepo.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-		
-        user.setAccount(null);
-        userRepo.save(user);
+
+        // Retrieve transactions by the user's account number
+        List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
+        transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
+
+        // Delete all transactions associated with the user
+        transactionRepo.deleteAll(transactions);
+
+        if (user.getAccount() != null) {
+            accountRepo.delete(user.getAccount());
+        }
+
         userRepo.delete(user);
     }
 
@@ -71,55 +80,55 @@ public class UserModelService implements UserDetailsService {
         userRepo.save(user);
     }
 
-	public UserDetailsDTO getUserDetails(Long userId) {
-		UserModel user = userRepo.findById(userId)
-		        .orElseThrow(() -> new RuntimeException("User  not found"));
+    public UserDetailsDTO getUserDetails(Long userId) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-		return new UserDetailsDTO(
-			user.getId(),
-			user.getUsername(),
-			user.getEmail(),
-			user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
-			user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO, // Now returns BigDecimal
-			user.isActive(),
-			user.getRoles()
-		);
-	}
-	
-	@Transactional
-	public UserDetailsDTO updateUserDetails(Long userId, UserUpdateDTO userUpdateDTO) {
-		UserModel user = userRepo.findById(userId)
-		        .orElseThrow(() -> new RuntimeException("User not found"));
-		
-		// Update basic info
-		if (userUpdateDTO.getUsername() != null) {
-		    user.setUsername(userUpdateDTO.getUsername());
-		}
-		if (userUpdateDTO.getEmail() != null) {
-		    user.setEmail(userUpdateDTO.getEmail());
-		}
-		
-		// Update roles if provided
-		if (userUpdateDTO.getRoles() != null) {
-		    user.getRoles().clear();
-		    user.getRoles().addAll(userUpdateDTO.getRoles());
-		}
-		
-		UserModel updatedUser = userRepo.save(user);
-		return convertToDetailsDTO(updatedUser);
-	}
+        return new UserDetailsDTO(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
+            user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
+            user.isActive(),
+            user.getRoles()
+        );
+    }
 
-	private UserDetailsDTO convertToDetailsDTO(UserModel user) {
-		return new UserDetailsDTO(
-		        user.getId(),
-		        user.getUsername(),
-		        user.getEmail(),
-		        user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
-		        user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
-		        user.isActive(),
-		        user.getRoles()
-		);
-	}
+    @Transactional
+    public UserDetailsDTO updateUserDetails(Long userId, UserUpdateDTO userUpdateDTO) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update basic info
+        if (userUpdateDTO.getUsername() != null) {
+            user.setUsername(userUpdateDTO.getUsername());
+        }
+        if (userUpdateDTO.getEmail() != null) {
+            user.setEmail(userUpdateDTO.getEmail());
+        }
+
+        // Update roles if provided
+        if (userUpdateDTO.getRoles() != null) {
+            user.getRoles().clear();
+            user.getRoles().addAll(userUpdateDTO.getRoles());
+        }
+
+        UserModel updatedUser = userRepo.save(user);
+        return convertToDetailsDTO(updatedUser);
+    }
+
+    private UserDetailsDTO convertToDetailsDTO(UserModel user) {
+        return new UserDetailsDTO(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
+            user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
+            user.isActive(),
+            user.getRoles()
+        );
+    }
 
     public UserDTO convertToDTO(UserModel user) {
         return new UserDTO(
@@ -181,15 +190,15 @@ public class UserModelService implements UserDetailsService {
         user.getRoles().remove(role);
         userRepo.save(user);
     }
-    
+
     public UserModel findByUsername(String username) {
-    return userRepo.findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User  not found with username: " + username));
-	}
-    
+        return userRepo.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
     public List<TransactionDTO> getUserTransactions(Long userId) {
         UserModel user = userRepo.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User  not found"));
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
         transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
@@ -198,34 +207,33 @@ public class UserModelService implements UserDetailsService {
             .map(this::convertToTransactionDTO)
             .collect(Collectors.toList());
     }
-	
-	@Transactional
-	public void deleteUser(Long userId) {
-		UserModel user = userRepo.findById(userId)
-		    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-		// Retrieve transactions by the user's account number
-		List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
-		transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
+    @Transactional
+    public void deleteUser(Long userId) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-		// Delete all transactions associated with the user
-		transactionRepo.deleteAll(transactions);
+        // Retrieve transactions by the user's account number
+        List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
+        transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
 
-		if (user.getAccount() != null) {
-		    accountRepo.delete(user.getAccount());
-		}
-		userRepo.delete(user);
-	}
+        // Delete all transactions associated with the user
+        transactionRepo.deleteAll(transactions);
 
-	private TransactionDTO convertToTransactionDTO(TransactionModel transaction) {
-		TransactionDTO dto = new TransactionDTO();
-		dto.setId(transaction.getId());
-		dto.setType(transaction.getType());
-		dto.setAmount(transaction.getAmount());
-		dto.setTimestamp(transaction.getTimestamp());
-		dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
-		dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
-		return dto;
-	}
-	
+        if (user.getAccount() != null) {
+            accountRepo.delete(user.getAccount());
+        }
+        userRepo.delete(user);
+    }
+
+    private TransactionDTO convertToTransactionDTO(TransactionModel transaction) {
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(transaction.getId());
+        dto.setType(transaction.getType());
+        dto.setAmount(transaction.getAmount());
+        dto.setTimestamp(transaction.getTimestamp());
+        dto.setSourceAccountNumber(transaction.getSourceAccountNumber());
+        dto.setTargetAccountNumber(transaction.getTargetAccountNumber());
+        return dto;
+    }
 }

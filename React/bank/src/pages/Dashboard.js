@@ -57,16 +57,12 @@ const Dashboard = () => {
     const handleDeleteAccount = async () => {
         try {
             console.log('Deleting account...');
-            const response = await fetch(`${API_BASE_URL}/api/user/delete`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${getJwtToken()}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: userData.username
-                })
-            });
+			const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(userData.username)}`, {
+						method: 'DELETE',
+						headers: {
+						    'Authorization': `Bearer ${getJwtToken()}`
+						}
+					});
 
             if (!response.ok) {
                 const errorData = await response.json();

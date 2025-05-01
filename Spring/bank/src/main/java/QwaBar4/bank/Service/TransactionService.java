@@ -3,6 +3,7 @@ package QwaBar4.bank.Service;
 import QwaBar4.bank.Model.*;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Exception.TransactionLimitException;
+import QwaBar4.bank.Utils.AccountNumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +26,21 @@ public class TransactionService {
     private final UserModelRepository userRepo;
     private final AnonymizationService anonymizationService;
     private final EncryptionService encryptionService;
+    private final AccountNumberUtils accountNumberUtils;
 
     @Autowired
     public TransactionService(AccountModelRepository accountRepo,
                               TransactionModelRepository transactionRepo,
                               UserModelRepository userRepo,
                               AnonymizationService anonymizationService,
-                              EncryptionService encryptionService) {
+                              EncryptionService encryptionService,
+                              AccountNumberUtils accountNumberUtils) {
         this.accountRepo = accountRepo;
         this.transactionRepo = transactionRepo;
         this.userRepo = userRepo;
         this.anonymizationService = anonymizationService;
         this.encryptionService = encryptionService;
+        this.accountNumberUtils = accountNumberUtils;
     }
 
     @Transactional
@@ -225,25 +229,20 @@ public class TransactionService {
         dto.setAmount(transaction.getAmount());
         dto.setTimestamp(transaction.getTimestamp());
 
-        // Decrypt the description
         String decryptedDescription = encryptionService.decrypt(transaction.getEncryptedDescription());
         dto.setDescription(decryptedDescription);
 
-        // Deanonymize account numbers
         String sourceAccount = transaction.getSourceAccountNumber() != null ?
                 anonymizationService.deanonymize(transaction.getSourceAccountNumber()) : null;
         String targetAccount = transaction.getTargetAccountNumber() != null ?
                 anonymizationService.deanonymize(transaction.getTargetAccountNumber()) : null;
 
-        // Use deanonymized account numbers
         dto.setSourceAccountNumber(sourceAccount);
         dto.setTargetAccountNumber(targetAccount);
 
-        // Fetch real usernames using deanonymized account numbers
         dto.setSourceAccountOwner(getUsernameByAccountNumber(sourceAccount));
         dto.setTargetAccountOwner(getUsernameByAccountNumber(targetAccount));
 
-        // Determine if the current user is the source of the transaction
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserModel currentUser = userRepo.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -251,7 +250,6 @@ public class TransactionService {
         boolean isOutgoing = sourceAccount != null &&
                 sourceAccount.equals(currentUser.getAccount().getAccountNumber());
 
-        // Adjust amount for display based on transaction type
         if ("TRANSFER".equals(transaction.getType())) {
             dto.setAmount(isOutgoing ? transaction.getAmount().negate() : transaction.getAmount());
         } else {

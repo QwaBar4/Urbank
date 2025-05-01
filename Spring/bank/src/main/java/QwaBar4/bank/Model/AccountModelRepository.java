@@ -7,5 +7,5 @@ import QwaBar4.bank.Utils.AccountNumberUtils;
 
 @Repository
 public interface AccountModelRepository extends JpaRepository<AccountModel, Long> {
-    Optional<AccountModel> findByAccountNumber(String accountNumber)
+    Optional<AccountModel> findByAccountNumber(String accountNumber);
 }

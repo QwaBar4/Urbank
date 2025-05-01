@@ -39,13 +39,6 @@ public class AccountModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore 
     private UserModel user;
-    @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<TransactionModel> outgoingTransactions;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<TransactionModel> incomingTransactions;
 
     // Getters and Setters
     public Long getId() {
@@ -102,13 +95,5 @@ public class AccountModel {
 
     public void setUser (UserModel user) {
         this.user = user;
-    }
-
-    public List<TransactionModel> getOutgoingTransactions() {
-        return outgoingTransactions;
-    }
-
-    public List<TransactionModel> getIncomingTransactions() {
-        return incomingTransactions;
     }
 }
