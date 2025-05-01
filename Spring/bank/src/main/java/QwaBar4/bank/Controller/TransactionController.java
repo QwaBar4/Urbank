@@ -42,9 +42,11 @@ public class TransactionController {
         Authentication authentication
     ) {
         try {
+        	String srcAcc = accountNumberUtils.convertFormattedNumberToUuid(request.getSourceAccount());
+        	String tgtACc = accountNumberUtils.convertFormattedNumberToUuid(request.getTargetAccount());
             TransactionDTO transaction = transactionService.processTransfer(
-                request.getSourceAccount(),
-                request.getTargetAccount(),
+                srcAcc,
+                tgtACc,
                 request.getAmount(),
                 request.getDescription(),
                 authentication.getName()
