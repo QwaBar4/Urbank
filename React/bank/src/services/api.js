@@ -333,6 +333,19 @@ export const generateUserStatementByID = async (userId, username) => {
     }
 };
 
+export const formatAccountNumber = (accountNumber) => {
+  if (!accountNumber) return '';
+  
+  const cleanNumber = accountNumber.replace(/-/g, '');
+  
+  return cleanNumber.replace(/(.{5})(.{5})(.{5})(.{0,7})/, '$1-$2-$3-$4');
+};
+
+export const unformatAccountNumber = (formattedNumber) => {
+  if (!formattedNumber) return '';
+  return formattedNumber.replace(/-/g, '');
+};
+
 const api = {
     API_BASE_URL,
     deleteUser,
@@ -352,6 +365,8 @@ const api = {
     activateUser,
     getUserAuditLogs,
     generateUserStatement,
-    generateUserStatementByID
+    generateUserStatementByID,
+    formatAccountNumber,
+    unformatAccountNumber
 };
 export default api;

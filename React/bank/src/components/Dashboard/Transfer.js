@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { unformatAccountNumber, formatAccountNumber } from '../../services/api'
 
 const Transfer = ({ userAccount, refreshBalance }) => {
     const [targetAccountDetails, setTargetAccountDetails] = useState(null);
@@ -23,7 +24,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 
             setValidationLoading(true);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${formData.targetAccount}`, {
+                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${unformatAccountNumber(formData.targetAccount)}`,  {
                     headers: { 'Authorization': `Bearer ${getJwtToken()}` }
                 });
 
@@ -52,26 +53,26 @@ const Transfer = ({ userAccount, refreshBalance }) => {
         });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
+		  const handleSubmit = async (e) => {
+			e.preventDefault();
+			setIsLoading(true);
+			setError('');
+			setSuccess('');
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getJwtToken()}`
-                },
-                body: JSON.stringify({
-                    sourceAccount: formData.sourceAccount,
-                    targetAccount: formData.targetAccount,
-                    amount: parseFloat (formData.amount),
-                    description: formData.description
-                })
-            });
+			try {
+			  const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
+				method: 'POST',
+				headers: {
+				  'Content-Type': 'application/json',
+				  'Authorization': `Bearer ${getJwtToken()}`
+				},
+				body: JSON.stringify({
+				  sourceAccount: unformatAccountNumber(formData.sourceAccount),
+				  targetAccount: unformatAccountNumber(formData.targetAccount),
+				  amount: parseFloat(formData.amount),
+				  description: formData.description
+				})
+			  });
 
             const responseText = await response.text();
             if (!response.ok) {
@@ -122,7 +123,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                         <input
                             type="text"
                             name="sourceAccount"
-                            value={formData.sourceAccount}
+                            value={formatAccountNumber(formData.sourceAccount)}
                             className="form-control"
                             readOnly
                         />

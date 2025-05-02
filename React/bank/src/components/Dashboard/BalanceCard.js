@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatAccountNumber} from '../../services/api'
 
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -45,7 +46,9 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                 
                 <div className="mb-3">
                     <small className="text-muted">Account Number</small>
-                    <p className="mb-0 font-monospace">{accountNumber || 'Loading...'}</p>
+                    <p className="mb-0 font-monospace">
+                   	 ${accountNumber ? formatAccountNumber(accountNumber) : 'Loading...'}
+                    </p>
                 </div>
                 
                 <div className="mb-4">
