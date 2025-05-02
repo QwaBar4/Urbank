@@ -119,14 +119,6 @@ public class TransactionController {
         }
     }
 
-    @GetMapping("/admin/users/{userId}/transactions")
-    public ResponseEntity<List<TransactionDTO>> getUserTransactionsById(
-        @PathVariable Long userId
-    ) {
-        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
-        return ResponseEntity.ok(transactions);
-    }
-
 	@GetMapping("/accounts/{accountNumber}")
 	public ResponseEntity<Map<String, Object>> getAccountDetails(@PathVariable String accountNumber) {
 		try {

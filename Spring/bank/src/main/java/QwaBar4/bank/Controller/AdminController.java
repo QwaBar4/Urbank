@@ -90,11 +90,11 @@ public class AdminController {
         return ResponseEntity.ok("");
     }
 
-    @GetMapping("/users/{userId}/transactions")
-    public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
-        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
-        return ResponseEntity.ok(transactions);
-    }
+	@GetMapping("/users/{userId}/transactions")
+	public ResponseEntity<List<TransactionDTO>> getUserTransactions(@PathVariable Long userId) {
+		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(userId);
+		return ResponseEntity.ok(transactions);
+	}
 
     @GetMapping("/transactions/{transactionId}")
     public ResponseEntity<Map<String, String>> getTransactionDetails(
