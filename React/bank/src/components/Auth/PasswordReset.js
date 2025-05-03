@@ -95,6 +95,7 @@ const PasswordRecovery = () => {
 		    setStep(3);
 		} catch (err) {
 		    setError(err.message);
+		    setIsLoading(false);
 		}
     };
 
