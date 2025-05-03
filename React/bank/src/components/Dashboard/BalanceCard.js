@@ -47,7 +47,7 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                 <div className="mb-3">
                     <small className="text-muted">Account Number</small>
                     <p className="mb-0 font-monospace">
-                   	 ${accountNumber ? formatAccountNumber(accountNumber) : 'Loading...'}
+                   	 {accountNumber ? formatAccountNumber(accountNumber) : 'Loading...'}
                     </p>
                 </div>
                 

@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import QwaBar4.bank.Service.EmailVerificationService;
+import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Security.JwtUtil;
+import QwaBar4.bank.Model.UserModel;
 
 import java.util.Collections;
 import java.util.Map;
@@ -15,11 +17,13 @@ public class VerificationController {
 
     private final EmailVerificationService verificationService;
     private final JwtUtil jwtUtil;
+    private final UserModelRepository userModelRepository;
 
     @Autowired
-    public VerificationController(EmailVerificationService verificationService, JwtUtil jwtUtil) {
+    public VerificationController(EmailVerificationService verificationService, JwtUtil jwtUtil, UserModelRepository userModelRepository) {
         this.verificationService = verificationService;
         this.jwtUtil = jwtUtil;
+        this.userModelRepository = userModelRepository;
     }
 
     @PostMapping("/send-code")
@@ -32,6 +36,8 @@ public class VerificationController {
     @PostMapping("/send-recovery-code")
     public ResponseEntity<?> sendRecoveryCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
+        UserModel user = userModelRepository.findByEmailIgnoreCase(email)
+                    .orElseThrow(() -> new RuntimeException("User  not found"));
         verificationService.sendRecoveryCode(email);
         return ResponseEntity.ok().build();
     }

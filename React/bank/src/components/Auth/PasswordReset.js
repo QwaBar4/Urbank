@@ -8,7 +8,7 @@ const PasswordRecovery = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [resetToken, setResetToken] = useState('');
-    const [step, setStep] = useState(1); // 1: request, 2: verify, 3: reset
+    const [step, setStep] = useState(1);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -37,13 +37,11 @@ const PasswordRecovery = () => {
                 body: JSON.stringify({ email: email.trim().toLowerCase() })
             });
 
-            // First check if response exists
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(errorText || 'Failed to send verification code');
             }
 
-            // Try to parse as JSON only if content exists
             let data;
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
@@ -55,10 +53,9 @@ const PasswordRecovery = () => {
             setSuccess(data.message || 'Verification code sent');
             setStep(2);
         } catch (err) {
-            // Handle both JSON and text errors
             try {
                 const errorData = JSON.parse(err.message);
-                setError(errorData.error || errorData.message || 'Request failed');
+                setError(errorData.error || errorData.errorMessage	|| 'Request failed');
             } catch {
                 setError(err.message || 'Request failed');
             }
@@ -90,7 +87,7 @@ const PasswordRecovery = () => {
 		    });
 		    
 		    const data = await handleResponse(response);
-		    if (!data.token) { // Проверка наличия токена в ответе
+		    if (!data.token) {
 		        throw new Error("Failed to get reset token");
 		    }
 		    setResetToken(data.token);
@@ -145,11 +142,9 @@ const PasswordRecovery = () => {
         <div style={{ maxWidth: '400px', margin: '0 auto' }}>
             <h2>Password Recovery</h2>
 
-            {/* Error and success messages */}
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
 
-            {/* Step 1: Request code */}
             {step === 1 && (
                 <form onSubmit={handleRequestCode}>
                     <input
@@ -168,7 +163,6 @@ const PasswordRecovery = () => {
                 </form>
             )}
 
-            {/* Step 2: Verify code */}
             {step === 2 && (
                 <form onSubmit={handleVerifyCode}>
                     <input
