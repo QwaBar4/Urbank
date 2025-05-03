@@ -25,6 +25,20 @@ export const handleResponse = async (response) => {
     }
 };
 
+export const getUserProfile = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Index data error:', error);
+    throw error;
+  }
+};
+
 export const getIndexData = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/user`, {
@@ -367,6 +381,7 @@ const api = {
     generateUserStatement,
     generateUserStatementByID,
     formatAccountNumber,
+    getUserProfile,
     unformatAccountNumber
 };
 export default api;
