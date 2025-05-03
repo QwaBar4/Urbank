@@ -106,8 +106,10 @@ public class TransactionController {
         Authentication authentication
     ) {
         try {
+        	String accNumber = accountNumberUtils.convertFormattedNumberToUuid(request.getAccountNumber());
+        	
             Map<String, Object> result = transactionService.processWithdrawal(
-                request.getAccountNumber(),
+                accNumber,
                 request.getAmount(),
                 request.getDescription(),
                 authentication.getName()
