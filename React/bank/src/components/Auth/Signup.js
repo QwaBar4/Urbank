@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { signup, checkUsername, checkEmail, sendVerificationCode } from '../../services/api';
 
 const Signup = () => {
@@ -12,8 +12,8 @@ const Signup = () => {
     const [codeSent, setCodeSent] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [error, setError] = useState('');
-    const [usernameAvailable, setUsernameAvailable] = useState(true);
-    const [emailAvailable, setEmailAvailable] = useState(true);
+    const [usernameAvailable, setUsernameAvailable] = useState(false);
+    const [emailAvailable, setEmailAvailable] = useState(false);
     const [isChecking, setIsChecking] = useState({ username: false, email: false });
     const [isDisabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
@@ -26,33 +26,20 @@ const Signup = () => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
     };
-    
 
-
-    // Unified validation handler
-    const validateForm = () => {
-        const errors = [];
-        
-        if (!usernameAvailable) errors.push("Username unavailable");
-        if (!emailAvailable) errors.push("Email invalid or taken");
-        if (formData.password !== formData.passwordcon) errors.push("Passwords mismatch");
-        if (formData.password.length < 6) errors.push("Password too short");
-        
-        return errors;
-    };
-	
+    // Check username availability
     useEffect(() => {
         const checkAvailability = async () => {
             if (formData.username.length >= 3) {
-                setIsChecking({ ...isChecking, username: true });
+                setIsChecking(prev => ({ ...prev, username: true }));
                 try {
                     const exists = await checkUsername(formData.username);
                     setUsernameAvailable(!exists);
                 } catch (error) {
                     console.error("Username check failed:", error);
-                    setUsernameAvailable(true);
+                    setUsernameAvailable(false);
                 } finally {
-                    setIsChecking({ ...isChecking, username: false });
+                    setIsChecking(prev => ({ ...prev, username: false }));
                 }
             } else {
                 setUsernameAvailable(false);
@@ -60,78 +47,90 @@ const Signup = () => {
         };
         
         const debounceTimer = setTimeout(checkAvailability, 500);
-        return () => {
-            clearTimeout(debounceTimer);
-        };
+        return () => clearTimeout(debounceTimer);
     }, [formData.username]);
     
-	useEffect(() => {
-		const checkEmailAvailability = async () => {
-		    const email = formData.email.trim();
-		    if (isValidEmail(email)) {
-		        setIsChecking({ ...isChecking, email: true });
-		        try {
-		            const exists = await checkEmail(email);
-		            setEmailAvailable(!exists);
-		        } catch (error) {
-		            setEmailAvailable(true);
-		        } finally {
-		            setIsChecking({ ...isChecking, email: false });
-		        }
-		    } else {
-		        setEmailAvailable(false);
-		    }
-		};
+    // Check email availability
+    useEffect(() => {
+        const checkEmailAvailability = async () => {
+            const email = formData.email.trim();
+            if (isValidEmail(email)) {
+                setIsChecking(prev => ({ ...prev, email: true }));
+                try {
+                    const exists = await checkEmail(email);
+                    setEmailAvailable(!exists);
+                } catch (error) {
+                    setEmailAvailable(false);
+                } finally {
+                    setIsChecking(prev => ({ ...prev, email: false }));
+                }
+            } else {
+                setEmailAvailable(false);
+            }
+        };
 
-		const debounceTimer = setTimeout(checkEmailAvailability, 500);
-		return () => clearTimeout(debounceTimer);
-	}, [formData.email]);
-	
-	
-	
+        const debounceTimer = setTimeout(checkEmailAvailability, 500);
+        return () => clearTimeout(debounceTimer);
+    }, [formData.email]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const errors = validateForm();
+        setIsDisabled(true);
+        setError('');
+
+        // Validation
+        const errors = [];
+        if (!usernameAvailable) errors.push("Username is not available");
+        if (!emailAvailable) errors.push("Email is invalid or already in use");
+        if (formData.password.length < 6) errors.push("Password must be at least 6 characters");
+        if (formData.password !== formData.passwordcon) errors.push("Passwords do not match");
+
         if (errors.length > 0) {
             setError(errors.join(', '));
+            setIsDisabled(false);
             return;
         }
-        setIsDisabled(true);
 
-        if (!codeSent) {
-            try {
+        try {
+            if (!codeSent) {
+                // Step 1: Send verification code
                 await sendVerificationCode(formData.email.trim().toLowerCase());
                 setCodeSent(true);
                 setError('');
-            } catch (error) {
-                setError('Failed to send verification code. Please try again.');
-            }
-        } else {
-        	setIsDisabled(false);
-            try {
-                await signup({
+            } else {
+                // Step 2: Submit registration
+                const response = await signup({
                     username: formData.username.trim(),
                     email: formData.email.trim().toLowerCase(),
                     password: formData.password,
                     code: verificationCode
                 });
-                setIsDisabled(false);
-                navigate('/login');
-            } catch (error) {
-                setError(error.message || "Registration failed");
-                setIsDisabled(false);
+
+                if (response.jwt) {
+                    // Successful registration and authentication
+                    navigate('/dashboard');
+                } else {
+                    // Account created but authentication failed
+                    setError('Account created! Please log in with your credentials.');
+                    navigate('/login');
+                }
             }
+        } catch (error) {
+            setError(error.message || "Registration failed. Please try again.");
+        } finally {
+            setIsDisabled(false);
         }
     };
 
     return (
-        <div>
-            <h1>Sign Up</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="signup-container">
+            <h1>Create Account</h1>
+            {error && <div className="error-message">{error}</div>}
+            
             <form onSubmit={handleSubmit}>
                 {!codeSent ? (
                     <>
-                        <div className="input-group">
+                        <div className="form-group">
                             <input
                                 type="text"
                                 name="username"
@@ -141,18 +140,15 @@ const Signup = () => {
                                 required
                                 minLength="3"
                             />
-                            {formData.username.length > 2 && (
-                                <small style={{ 
-                                    color: usernameAvailable ? 'green' : 'red',
-                                    opacity: isChecking.username ? 1 : 1
-                                }}>
+                            {formData.username.length > 0 && (
+                                <div className={`availability-message ${usernameAvailable ? 'available' : 'unavailable'}`}>
                                     {isChecking.username ? 'Checking...' : 
                                      (usernameAvailable ? '✓ Available' : '✗ Unavailable')}
-                                </small>
+                                </div>
                             )}
                         </div>
-                        <p></p>
-                        <div className="input-group">
+
+                        <div className="form-group">
                             <input
                                 type="email"
                                 name="email"
@@ -162,28 +158,26 @@ const Signup = () => {
                                 required
                             />
                             {formData.email.length > 0 && (
-                                <small style={{ 
-                                    color: emailAvailable ? 'green' : 'red',
-                                    opacity: isChecking.email ? 1 : 1
-                                }}>
+                                <div className={`availability-message ${emailAvailable ? 'available' : 'unavailable'}`}>
                                     {isChecking.email ? 'Checking...' : 
                                      (emailAvailable ? '✓ Available' : '✗ Unavailable')}
-                                </small>
+                                </div>
                             )}
                         </div>
-                        <p></p>
-                        <div className="input-group">
+
+                        <div className="form-group">
                             <input
                                 type="password"
                                 name="password"
-                                placeholder="Password"
+                                placeholder="Password (min 6 characters)"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                                minLength="6"
                             />
                         </div>
-                        <p></p>
-                        <div className="input-group">
+
+                        <div className="form-group">
                             <input
                                 type="password"
                                 name="passwordcon"
@@ -193,36 +187,43 @@ const Signup = () => {
                                 required
                             />
                         </div>
-                        <p></p>
-						<button 
-							type="submit" 
-							disabled={isDisabled}
-							onClick={handleSubmit}
-						>
-							{isDisabled ? 'Processing...' : 'Sign Up'}
-						</button>
+
+                        <button type="submit" disabled={isDisabled || !usernameAvailable || !emailAvailable}>
+                            {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
+                        </button>
                     </>
                 ) : (
                     <>
-                        <p>A verification code has been sent to {formData.email}. Please enter it below:</p>
-                        <input
-                            type="text"
-                            placeholder="Verification Code"
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            required
-                        />
+                        <p>We sent a verification code to {formData.email}. Please enter it below:</p>
+                        
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                placeholder="Verification Code"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <button type="submit" disabled={isDisabled}>
+                            {isDisabled ? 'Creating Account...' : 'Complete Registration'}
+                        </button>
+                        
                         <button 
-							type="submit" 
-							disabled={!isDisabled}
-							onClick={handleSubmit}
-						>
-							{isDisabled ? 'Sign Up' : 'Processing...'}
-						</button>
+                            type="button" 
+                            onClick={() => setCodeSent(false)}
+                            className="secondary-button"
+                        >
+                            Back
+                        </button>
                     </>
                 )}
             </form>
-            <p>Already have an account? <Link to="/login">Log In</Link></p>
+
+            <div className="login-link">
+                Already have an account? <Link to="/login">Log In</Link>
+            </div>
         </div>
     );
 };

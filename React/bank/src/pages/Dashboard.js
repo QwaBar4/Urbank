@@ -6,11 +6,15 @@ import Transfer from '../components/Dashboard/Transfer';
 import api from '../services/api';
 import TransactionHistory from '../components/Dashboard/TransactionHistory';
 import BalanceCard from '../components/Dashboard/BalanceCard';
+import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
 
 const Dashboard = () => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+	const [profileData, setProfileData] = useState(null);
+	const [showProfileModal, setShowProfileModal] = useState(false);
+	const [showPassport, setShowPassport] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const navigate = useNavigate();
 
@@ -53,6 +57,15 @@ const Dashboard = () => {
         clearJwtToken();
         navigate('/');
     };
+	
+	const fetchProfile = async () => {
+		try {
+		  const response = await api.getUserProfile();
+		  setProfileData(response.data);
+		} catch (error) {
+		  console.error('Error loading profile:', error);
+		}
+	  };
 
     const handleDeleteAccount = async () => {
         try {
@@ -102,6 +115,7 @@ const Dashboard = () => {
             console.error("Balance refresh error:", err);
         }
     };
+    if (userData) {fetchProfile(); }
     if (loading) return <div className="loading">Loading account information...</div>;
     if (error) return <div className="error alert alert-danger">Error: {error}</div>;
 
@@ -173,7 +187,81 @@ const Dashboard = () => {
                         <TransactionHistory userAccount={userData.account} />
                     </div>
                 </div>
+				  <div className="row mt-4">
+					<div className="col-md-6">
+					  <div className="card shadow">
+						<div className="card-header">
+						  <h5>Personal Profile</h5>
+						</div>
+						<div className="card-body">
+						  {profileData ? (
+							<>
+							  <p>
+								<strong>Full Name:</strong> {profileData.firstName}{' '}
+								{profileData.middleName} {profileData.lastName}
+							  </p>
+							  <p>
+								<strong>Date of Birth:</strong>{" "}
+								{new Date(profileData.dateOfBirth).toLocaleDateString()}
+							  </p>
+							  <div className="mb-3">
+								<label className="form-label">Passport Details</label>
+								<div className="input-group">
+								  <input
+								    type={showPassport ? "text" : "password"}
+								    className="form-control"
+								    value={
+								      showPassport
+								        ? `${profileData.passportSeries} ${profileData.passportNumber}`
+								        : "•••• ••••••"
+								    }
+								    readOnly
+								  />
+								  <button
+								    className="btn btn-outline-secondary"
+								    type="button"
+								    onClick={() => {
+								      if (!showPassport) {
+								        if (!window.confirm('Show sensitive passport data?')) return;
+								      }
+								      setShowPassport(!showPassport);
+								    }}
+								  >
+								    <i className={`bi bi-eye${showPassport ? "-slash" : ""}`}></i>
+								  </button>
+								</div>
+							  </div>
+							  <button
+								className="btn btn-primary"
+								onClick={() => setShowProfileModal(true)}
+							  >
+								Update Profile
+							  </button>
+							</>
+						  ) : (
+							<div className="spinner-border text-primary"></div>
+						  )}
+						</div>
+					  </div>
+					</div>
+				  </div>
 
+				  {/* Add Profile Update Modal */}
+				  {showProfileModal && (
+					<ProfileUpdateModal 
+					  profileData={profileData}
+					  onClose={() => setShowProfileModal(false)}
+					  onSave={async (updatedData) => {
+						try {
+						  await api.updateUserProfile(updatedData);
+						  setProfileData(updatedData);
+						  setShowProfileModal(false);
+						} catch (error) {
+						  console.error('Profile update failed:', error);
+						}
+					  }}
+					/>
+				  )}
                 {/* Delete Confirmation Modal */}
                 {showDeleteConfirmation && (
                     <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>

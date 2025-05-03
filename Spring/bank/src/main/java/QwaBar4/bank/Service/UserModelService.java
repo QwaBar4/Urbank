@@ -21,6 +21,7 @@ import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.TransactionModelRepository;
 import QwaBar4.bank.Model.TransactionModel;
 import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Service.AESEncryptionService;
 import java.math.BigDecimal;
 
 
@@ -32,12 +33,14 @@ public class UserModelService implements UserDetailsService {
     private final UserModelRepository userRepo;
     private final AccountModelRepository accountRepo;
     private final TransactionModelRepository transactionRepo;
+    private final AESEncryptionService encryptionService;
 
     @Autowired
-    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo, TransactionModelRepository transactionRepo) {
+    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo, TransactionModelRepository transactionRepo, AESEncryptionService encryptionService) {
         this.userRepo = userRepo;
         this.accountRepo = accountRepo;
         this.transactionRepo = transactionRepo;
+        this.encryptionService = encryptionService;
     }
 
     public boolean existsByUsernameIgnoreCase(String username) {
@@ -91,9 +94,16 @@ public class UserModelService implements UserDetailsService {
             user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
             user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
             user.isActive(),
-            user.getRoles()
+            user.getRoles(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getMiddleName(),
+            user.getPassportSeries(),
+            user.getPassportNumber(),
+            user.getDateOfBirth()
         );
     }
+
 
     @Transactional
     public UserDetailsDTO updateUserDetails(Long userId, UserUpdateDTO userUpdateDTO) {
@@ -106,6 +116,20 @@ public class UserModelService implements UserDetailsService {
         }
         if (userUpdateDTO.getEmail() != null) {
             user.setEmail(userUpdateDTO.getEmail());
+        }
+
+        // Update encrypted fields
+        if (userUpdateDTO.getFirstName() != null) {
+            user.setFirstName(userUpdateDTO.getFirstName());
+        }
+        if (userUpdateDTO.getLastName() != null) {
+            user.setLastName(userUpdateDTO.getLastName());
+        }
+        if (userUpdateDTO.getPassportSeries() != null) {
+            user.setPassportSeries(userUpdateDTO.getPassportSeries());
+        }
+        if (userUpdateDTO.getPassportNumber() != null) {
+            user.setPassportNumber(userUpdateDTO.getPassportNumber());
         }
 
         // Update roles if provided
@@ -126,8 +150,21 @@ public class UserModelService implements UserDetailsService {
             user.getAccount() != null ? user.getAccount().getAccountNumber() : null,
             user.getAccount() != null ? user.getAccount().getBalance() : BigDecimal.ZERO,
             user.isActive(),
-            user.getRoles()
+            user.getRoles(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getMiddleName(),
+            user.getPassportSeries(),
+            user.getPassportNumber(),
+            user.getDateOfBirth()
         );
+    }
+    
+    public String getDecryptedPassportForVerification(Long userId) {
+        UserModel user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        return encryptionService.decrypt(user.getPassportNumber());
     }
 
     public UserDTO convertToDTO(UserModel user) {

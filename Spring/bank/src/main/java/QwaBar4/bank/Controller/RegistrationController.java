@@ -1,7 +1,8 @@
 package QwaBar4.bank.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import java.math.BigDecimal;
 
 import java.util.regex.Pattern;
@@ -20,92 +22,72 @@ import QwaBar4.bank.Model.AccountModelRepository;
 import QwaBar4.bank.Security.AuthResponse;
 import QwaBar4.bank.Security.JwtUtil;
 import QwaBar4.bank.Service.EmailVerificationService;
+import QwaBar4.bank.Service.UserCreationService;
 
 import java.util.Map;
 import java.util.UUID;
 
+
 @RestController
 @RequestMapping("/req")
 public class RegistrationController {
-    private final UserModelRepository userRepo;
-    private final PasswordEncoder encoder;
-    private final AccountModelRepository accountRepo;
+    private final UserCreationService userCreationService;
     private final EmailVerificationService verificationService;
     private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    public RegistrationController(UserModelRepository userRepo, PasswordEncoder encoder, AccountModelRepository accountRepo, EmailVerificationService verificationService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.userRepo = userRepo;
-        this.encoder = encoder;
-        this.accountRepo = accountRepo;
+    public RegistrationController(UserCreationService userCreationService,
+                                EmailVerificationService verificationService,
+                                AuthenticationManager authenticationManager,
+                                JwtUtil jwtUtil) {
+        this.userCreationService = userCreationService;
         this.verificationService = verificationService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
-    
-    private boolean isValidEmail(String email) {
-        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return Pattern.compile(regex).matcher(email).matches();
-    }
 
-    @Transactional
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@RequestBody Map<String, String> request) {
+        // Validate required fields
         String username = request.get("username");
         String email = request.get("email");
         String password = request.get("password");
         String code = request.get("code");
 
+        if (username == null || email == null || password == null || code == null) {
+            return ResponseEntity.badRequest().body("Missing required fields");
+        }
+
+        // Verify email code
         if (!verificationService.verifyCode(email, code)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid verification code.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                   .body(new AuthResponse(null, "Invalid verification code", false));
         }
 
         try {
-            String normalizedUsername = username.trim().toLowerCase();
-            if (userRepo.existsByUsernameIgnoreCase(normalizedUsername)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new AuthResponse(null, "Username already exists", false));
-            }
+            // Create user with only basic info
+            UserModel newUser = userCreationService.createUserTransaction(username, email, password);
+            
+            // Attempt authentication
+            return attemptAuthentication(newUser.getUsername(), password);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                   .body(new AuthResponse(null, e.getMessage(), false));
+        }
+    }
 
-            if (userRepo.existsByEmailIgnoreCase(email)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new AuthResponse(null, "Email already exists", false));
-            }
-
-            if (!isValidEmail(email)) {
-                return ResponseEntity.badRequest().body("Invalid email format.");
-            }
-
-            if (password.length() < 6) {
-                return ResponseEntity.badRequest().body("Password must be at least 6 characters");
-            }
-
-            AccountModel account = new AccountModel();
-            account.setAccountNumber("ACC-" + UUID.randomUUID());
-            account.setBalance(BigDecimal.ZERO); 
-
-            UserModel newUser = new UserModel();
-            newUser.setUsername(normalizedUsername);
-            newUser.setEmail(email.trim().toLowerCase());
-            newUser.setPassword(encoder.encode(password));
-            newUser.setAccount(account);
-			newUser.setActive(true);
-            newUser.getRoles().add("USER");
-
-            account.setUser(newUser);
-            userRepo.save(newUser);
-
+    private ResponseEntity<?> attemptAuthentication(String username, String password) {
+        try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(normalizedUsername, password)
+                new UsernamePasswordAuthenticationToken(username, password)
             );
             String jwt = jwtUtil.generateToken(authentication);
-            return ResponseEntity.ok(new AuthResponse(jwt, "User created", true));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new AuthResponse(null, "Error creating user", false));
+            return ResponseEntity.ok(new AuthResponse(jwt, "User created and authenticated", true));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.ok(new AuthResponse(null, 
+                "Account created but automatic login failed. Please login manually.", 
+                false));
         }
     }
 }

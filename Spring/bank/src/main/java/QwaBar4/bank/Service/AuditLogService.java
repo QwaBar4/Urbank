@@ -28,21 +28,31 @@ public class AuditLogService {
         this.auditLogRepository = auditLogRepository;
     }
 
-	@Transactional
-	public void logAction(String action, String username, String details) {
-		String anonymizedUser = anonymizationService.anonymize(username);
-		String encryptedDetails = encryptionService.encrypt(details);
-		
-		AuditLogModel log = new AuditLogModel(
-		    action,
-		    anonymizedUser,
-		    LocalDateTime.now(),
-		    encryptedDetails
-		);
-		auditLogRepository.save(log);
-	}
-    
-    @Scheduled(cron = "0 0 3 * * *") // Daily at 3 AM
+    @Transactional
+    public void logAction(String action, String username, String details) {
+        String anonymizedUser = anonymizationService.anonymize(username);
+        String encryptedDetails = encryptionService.encrypt(details);
+
+        AuditLogModel log = new AuditLogModel(
+            action,
+            anonymizedUser,
+            LocalDateTime.now(),
+            encryptedDetails
+        );
+        auditLogRepository.save(log);
+    }
+
+    @Transactional
+    public void logAdminAction(String username, String action, String details) {
+        logAction("ADMIN_" + action, username, details);
+    }
+
+    @Transactional
+    public void logSensitiveDataAccess(String username, Long userId, String details) {
+        logAction("SENSITIVE_DATA_ACCESS", username, "User ID: " + userId + ", Details: " + details);
+    }
+
+    @Scheduled(cron = "0 0 3 * * *")
     public void pruneOldLogs() {
         auditLogRepository.deleteByTimestampBefore(LocalDateTime.now().minusYears(1));
     }

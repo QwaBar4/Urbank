@@ -3,6 +3,8 @@ package QwaBar4.bank.Model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDate;
+import QwaBar4.bank.Service.EncryptionConverter;
 
 import java.util.*;
 
@@ -32,6 +34,29 @@ public class UserModel {
 
     @Column(name = "active", nullable = false)
     private boolean active;
+
+    @Column(nullable = true)
+    @Convert(converter = EncryptionConverter.class)
+    private String firstName;
+
+    @Column(nullable = true)
+    @Convert(converter = EncryptionConverter.class)
+    private String lastName;
+
+    @Column(nullable = true)
+    @Convert(converter = EncryptionConverter.class)
+    private String middleName;
+
+    @Column(nullable = true)
+    @Convert(converter = EncryptionConverter.class)
+    private String passportSeries;
+
+    @Column(nullable = true)
+    @Convert(converter = EncryptionConverter.class)
+    private String passportNumber;
+
+    @Column(nullable = true)
+    private LocalDate dateOfBirth;
 
     // Getters and setters
     public Long getId() {
@@ -89,5 +114,52 @@ public class UserModel {
     public void setActive(boolean active) {
         this.active = active;
     }
-    
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public String getPassportSeries() {
+        return passportSeries;
+    }
+
+    public void setPassportSeries(String passportSeries) {
+        this.passportSeries = passportSeries;
+    }
+
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
 }

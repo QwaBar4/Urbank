@@ -6,6 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.CacheControl;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -14,14 +17,18 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.Exception.ResourceNotFoundException;
 import QwaBar4.bank.Model.AuditLogModel;
 import QwaBar4.bank.Model.TransactionModel;
 import QwaBar4.bank.Model.TransactionModelRepository;
+import QwaBar4.bank.Model.UserModelRepository;
+import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.Model.AuditLogRepository;
 import QwaBar4.bank.Service.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/admin")
@@ -52,11 +59,57 @@ public class AdminController {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private UserModelRepository userRepository;
+
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
         UserDetailsDTO userDetails = userModelService.getUserDetails(userId);
         return ResponseEntity.ok(userDetails);
     }
+    
+	@GetMapping("/users/{id}/details")
+	public ResponseEntity<UserDetailsDTO> getUserDetails(
+		@PathVariable Long id,
+		Authentication authentication) {
+
+		UserModel user = userRepository.findById(id)
+		        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+		auditLogService.logAdminAction(
+		    authentication.getName(),
+		    "VIEW_USER_DETAILS",
+		    "Accessed details of user ID: " + id
+		);
+
+		UserDetailsDTO dto = new UserDetailsDTO.Builder()
+		        .id(user.getId())
+		        .username(user.getUsername())
+		        .email(user.getEmail())
+		        .accountNumber(user.getAccount().getAccountNumber())
+		        .balance(user.getAccount().getBalance())
+		        .active(user.isActive())
+		        .roles(user.getRoles())
+		        .firstName(user.getFirstName())
+		        .lastName(user.getLastName())
+		        .middleName(user.getMiddleName())
+		        .passportSeries(user.getPassportSeries())
+		        .passportNumber(user.getPassportNumber())
+		        .dateOfBirth(user.getDateOfBirth())
+		        .build();
+
+		auditLogService.logSensitiveDataAccess(
+		    authentication.getName(),
+		    user.getId(),
+		    "PASSPORT_DATA_ACCESS"
+		);
+
+		return ResponseEntity.ok()
+		        .cacheControl(CacheControl.noStore())
+		        .header("X-Sensitive-Data", "true")
+		        .body(dto);
+	}
+                          
 
     @PutMapping("/users/{userId}")
     public ResponseEntity<UserDetailsDTO> updateUserDetails(

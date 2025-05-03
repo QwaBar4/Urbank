@@ -7,9 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.CacheControl;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.Collections;
 import org.springframework.web.bind.annotation.*;
 
+import QwaBar4.bank.DTO.ProfileDTO;
+import QwaBar4.bank.DTO.UserDetailsDTO;
 import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
@@ -17,10 +21,12 @@ import QwaBar4.bank.Model.AccountModel;
 import QwaBar4.bank.Service.AuditLogService;
 import QwaBar4.bank.Service.StatementService;
 import QwaBar4.bank.Service.StatementPDF;
+import QwaBar4.bank.Model.UserModelRepository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import javax.validation.Valid;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +41,11 @@ public class DashboardController {
 
     @Autowired
     private StatementService statementService;
+
+    private ProfileDTO profileDTO;
+
+    @Autowired
+    private UserModelRepository userRepository;
 
     @Autowired
     public DashboardController(UserModelRepository userModelRepository) {
@@ -76,6 +87,42 @@ public class DashboardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", e.getMessage()));
         }
+    }
+    
+    @GetMapping("/api/user/profile")
+    public ResponseEntity<UserDetailsDTO> getProfile() {
+        UserModel user = getCurrentUser();
+        
+        UserDetailsDTO dto = new UserDetailsDTO();
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setMiddleName(user.getMiddleName());
+        dto.setPassportSeries(user.getPassportSeries());
+        dto.setPassportNumber(user.getPassportNumber());
+        dto.setDateOfBirth(user.getDateOfBirth());
+        
+        return ResponseEntity.ok(dto);
+    }
+	
+	@PostMapping("/api/user/profile")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody ProfileDTO profileDTO) {
+        UserModel user = getCurrentUser();
+        
+        user.setFirstName(profileDTO.getFirstName());
+        user.setLastName(profileDTO.getLastName());
+        user.setMiddleName(profileDTO.getMiddleName());
+        user.setPassportSeries(profileDTO.getPassportSeries());
+        user.setPassportNumber(profileDTO.getPassportNumber());
+        user.setDateOfBirth(profileDTO.getDateOfBirth());
+        
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
+    }
+
+    private UserModel getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return userRepository.findByUsername(auth.getName())
+               .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 	@GetMapping("/api/admin/dashboard")
