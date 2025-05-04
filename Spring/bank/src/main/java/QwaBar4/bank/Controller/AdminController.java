@@ -202,19 +202,15 @@ public class AdminController {
 	@GetMapping("/users/{userId}/statements")
 	public ResponseEntity<byte[]> generateUserStatement(@PathVariable Long userId) {
 		try {
-		    // Generate the statement PDF for the specified user
 		    StatementPDF statementPDF = statementService.generateStatement(userId);
 		    byte[] pdfContent = statementPDF.getContent();
 
-		    // Set the response headers
 		    HttpHeaders headers = new HttpHeaders();
 		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
 		    headers.add("Content-Type", "application/pdf");
 
-		    // Return the PDF as a response
 		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
 		} catch (Exception e) {
-		    // Return an error response with a byte[] body
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 		            .body("Error generating PDF: ".getBytes());
 		}

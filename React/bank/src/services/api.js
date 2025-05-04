@@ -202,6 +202,20 @@ export const getUserDetails = async (userId) => {
   }
 };
 
+export const getUserFullDetails = async (userId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/details`, {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    throw error;
+  }
+};
+
 export const updateUser = async (userId, userData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
@@ -392,6 +406,7 @@ const api = {
     signup,
     getAdminDashboardData,
     getUserDetails,
+    getUserFullDetails,
     updateUser,
     updateUserProfile,
     activateUser,
