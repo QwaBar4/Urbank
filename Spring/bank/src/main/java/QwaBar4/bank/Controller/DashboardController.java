@@ -104,7 +104,7 @@ public class DashboardController {
         return ResponseEntity.ok(dto);
     }
 	
-	@PostMapping("/api/user/profile")
+	@PutMapping("/api/user/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody ProfileDTO profileDTO) {
         UserModel user = getCurrentUser();
         

@@ -223,6 +223,23 @@ export const updateUser = async (userId, userData) => {
   }
 };
 
+export const updateUserProfile = async (updatedData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedData)
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Profile update error:', error);
+    throw error;
+  }
+};
+
 export const activateUser = async (userId, active) => {
   try {
     const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
@@ -376,6 +393,7 @@ const api = {
     getAdminDashboardData,
     getUserDetails,
     updateUser,
+    updateUserProfile,
     activateUser,
     getUserAuditLogs,
     generateUserStatement,
