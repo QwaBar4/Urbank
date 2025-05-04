@@ -222,68 +222,12 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
-
-            <div className="row">
-                <div className="col-md-4">
-                    <BalanceCard
-                        accountNumber={userData.account.accountNumber}
-                        balance={userData.account.balance}
-                        refreshBalance={refreshBalance}
-                    />
-                    <Transfer
-                        userAccount={userData.account}
-                        refreshBalance={refreshBalance}
-                    />
-                </div>
-                <div className="col-md-8">
-                    <TransactionHistory userAccount={userData.account} />
-                </div>
-            </div>
-
-            <div className="row mt-4">
+            <h2>User data</h2>
+			<div className="row mt-4">
                 <div className="col-md-6">
                     <div className="card shadow">
-                        <div className="card-header">
-                            <h5>Personal Profile</h5>
-                        </div>
                         <div className="card-body">
                             {profileData ? (
-                                <>
-                                    <p>
-                                        <strong>Full Name:</strong> {profileData.firstName}{' '}
-                                        {profileData.middleName} {profileData.lastName}
-                                    </p>
-                                    <p>
-                                        <strong>Date of Birth:</strong>{" "}
-                                        {new Date(profileData.dateOfBirth).toLocaleDateString()}
-                                    </p>
-                                    <div className="mb-3">
-                                        <label className="form-label">Passport Details</label>
-                                        <div className="input-group">
-                                            <input
-                                                type={showPassport ? "text" : "password"}
-                                                className="form-control"
-                                                value={
-                                                    showPassport
-                                                        ? `${profileData.passportSeries} ${profileData.passportNumber}`
-                                                        : "•••• ••••••"
-                                                }
-                                                readOnly
-                                            />
-                                            <button
-                                                className="btn btn-outline-secondary"
-                                                type="button"
-                                                onClick={() => {
-                                                    if (!showPassport) {
-                                                        if (!window.confirm('Show sensitive passport data?')) return;
-                                                    }
-                                                    setShowPassport(!showPassport);
-                                                }}
-                                            >
-                                                <i className={`bi bi-eye${showPassport ? "-slash" : ""}`}></i>
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div className="d-flex gap-2">
                                         <button
                                             className="btn btn-primary"
@@ -301,12 +245,27 @@ const Dashboard = () => {
                                             View Full Details
                                         </button>
                                     </div>
-                                </>
                             ) : (
                                 <div className="spinner-border text-primary"></div>
                             )}
                         </div>
                     </div>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-md-4">
+                    <BalanceCard
+                        accountNumber={userData.account.accountNumber}
+                        balance={userData.account.balance}
+                        refreshBalance={refreshBalance}
+                    />
+                    <Transfer
+                        userAccount={userData.account}
+                        refreshBalance={refreshBalance}
+                    />
+                </div>
+                <div className="col-md-8">
+                    <TransactionHistory userAccount={userData.account} />
                 </div>
             </div>
 
