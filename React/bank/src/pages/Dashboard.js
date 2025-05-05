@@ -330,15 +330,7 @@ const Dashboard = () => {
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Your Full Details - {profileData.username}</h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => {
-                                        setShowUserDetailsModal(false);
-                                        setShowSensitiveData(false);
-                                    }}
-                                ></button>
+                                <h5 className="modal-title">Your Full Details{profileData.username}</h5>
                             </div>
                             <div className="modal-body">
                                 <div className="alert alert-warning">
@@ -349,10 +341,10 @@ const Dashboard = () => {
                                     <div className="col-md-6">
                                         <h5>Personal Information</h5>
                                         <p>
-                                            <strong>Name:</strong> {profileData.firstName} {profileData.lastName}
+                                            <strong>Name:</strong> {profileData.firstName}
                                         </p>
                                         <p>
-                                            <strong>Middle Name:</strong> {profileData.middleName || 'N/A'}
+                                            <strong>Middle Name:</strong> {profileData.lastName || 'N/A'}
                                         </p>
                                         <p>
                                             <strong>Date of Birth:</strong>{" "}
@@ -385,7 +377,7 @@ const Dashboard = () => {
                                                     className="btn btn-outline-secondary"
                                                     type="button"
                                                     onClick={() => setShowSensitiveData(!showSensitiveData)}
-                                                >
+                                                >Show/hide details
                                                     <i className={`bi bi-eye${showSensitiveData ? "-slash" : ""}`}></i>
                                                 </button>
                                             </div>
