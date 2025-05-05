@@ -24,6 +24,15 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                 />
                 {errors.firstName && <div className="invalid-feedback">Required field</div>}
               </div>
+              
+              <div className="mb-3">
+                <label className="form-label">Middle Name</label>
+                <input
+                  {...register("middleName", { required: true })}
+                  className={`form-control ${errors.middleName ? 'is-invalid' : ''}`}
+                />
+                {errors.middleName && <div className="invalid-feedback">Required field</div>}
+              </div>
 
               <div className="mb-3">
                 <label className="form-label">Last Name</label>

@@ -222,6 +222,7 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
+            
             <h2>User data</h2>
 			<div className="row mt-4">
                 <div className="col-md-6">
@@ -252,6 +253,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            
             <div className="row">
                 <div className="col-md-4">
                     <BalanceCard
@@ -344,17 +346,14 @@ const Dashboard = () => {
                                             <strong>Name:</strong> {profileData.firstName}
                                         </p>
                                         <p>
-                                            <strong>Middle Name:</strong> {profileData.lastName || 'N/A'}
+                                            <strong>Middle Name:</strong> {profileData.middleName || 'N/A'}
+                                        </p>
+                                        <p>
+                                            <strong>Last Name:</strong> {profileData.lastName || 'N/A'}
                                         </p>
                                         <p>
                                             <strong>Date of Birth:</strong>{" "}
                                             {new Date(profileData.dateOfBirth).toLocaleDateString()}
-                                        </p>
-                                        <p>
-                                            <strong>Email:</strong> {profileData.email || 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>Phone:</strong> {profileData.phoneNumber || 'N/A'}
                                         </p>
                                     </div>
 
@@ -385,35 +384,7 @@ const Dashboard = () => {
                                                 {showSensitiveData ? "Visible" : "Masked"} - Access logged
                                             </small>
                                         </div>
-                                        <p>
-                                            <strong>Passport Issued By:</strong> {profileData.passportIssuedBy || 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>Passport Issue Date:</strong>{" "}
-                                            {profileData.passportIssueDate ? new Date(profileData.passportIssueDate).toLocaleDateString() : 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>Passport Expiry Date:</strong>{" "}
-                                            {profileData.passportExpiryDate ? new Date(profileData.passportExpiryDate).toLocaleDateString() : 'N/A'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="row mt-3">
-                                    <div className="col-md-12">
-                                        <h5>Address Information</h5>
-                                        <p>
-                                            <strong>Address:</strong> {profileData.address || 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>City:</strong> {profileData.city || 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>Country:</strong> {profileData.country || 'N/A'}
-                                        </p>
-                                        <p>
-                                            <strong>Postal Code:</strong> {profileData.postalCode || 'N/A'}
-                                        </p>
+                                        <p></p>
                                     </div>
                                 </div>
                             </div>
