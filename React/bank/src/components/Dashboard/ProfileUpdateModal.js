@@ -12,7 +12,6 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">Update Profile</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
           <form onSubmit={handleSubmit(onSave)}>
             <div className="modal-body">
@@ -24,7 +23,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                 />
                 {errors.firstName && <div className="invalid-feedback">Required field</div>}
               </div>
-              
+              <p></p>
               <div className="mb-3">
                 <label className="form-label">Middle Name</label>
                 <input
@@ -33,7 +32,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                 />
                 {errors.middleName && <div className="invalid-feedback">Required field</div>}
               </div>
-
+			  <p></p>
               <div className="mb-3">
                 <label className="form-label">Last Name</label>
                 <input
@@ -42,7 +41,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                 />
                 {errors.lastName && <div className="invalid-feedback">Required field</div>}
               </div>
-
+			  <p></p>
               <div className="mb-3">
                 <label className="form-label">Passport Series</label>
                 <input
@@ -58,7 +57,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                   </div>
                 )}
               </div>
-
+			  <p></p>
               <div className="mb-3">
                 <label className="form-label">Passport Number</label>
                 <input
@@ -74,7 +73,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                   </div>
                 )}
               </div>
-
+			  <p></p>
               <div className="mb-3">
                 <label className="form-label">Date of Birth</label>
                 <input
@@ -85,6 +84,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                 {errors.dateOfBirth && <div className="invalid-feedback">Required field</div>}
               </div>
             </div>
+            <p></p>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={onClose}>
                 Cancel
