@@ -68,18 +68,20 @@ const AdminDashboard = () => {
     }
   };
 
-  const viewUserDetails = async (userId) => {
-    if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
+	const viewUserDetails = async (userId) => {
+	  if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
 
-    try {
-      const response = await api.getUserFullDetails(userId);
-      setSelectedUserDetails(response.data);
-      setShowSensitiveData(false); // Reset visibility state
-    } catch (error) {
-      console.error('Error loading user details:', error);
-      alert('Failed to load sensitive data');
-    }
-  };
+	  try {
+		setSelectedUserDetails(null);
+		const userDetails = await api.getUserFullDetails(userId);
+		setSelectedUserDetails(userDetails);
+		setShowSensitiveData(true);
+	  } catch (error) {
+		console.error('Error loading user details:', error);
+		setError('Failed to load sensitive data');
+		setShowSensitiveData(false);
+	  }
+	};
 
   const viewTransactions = async (userId) => {
     try {
@@ -358,6 +360,46 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+		{/* User Details Modal */}
+		<div className={`modal ${showSensitiveData ? 'show' : ''}`}>
+		  <div className="modal-content">
+			<span className="close" onClick={() => setShowSensitiveData(false)}>&times;</span>
+			<h2>User Details</h2>
+			
+			{error && <div className="alert alert-danger">{error}</div>}
+			
+			{!selectedUserDetails ? (
+			  <div className="text-center p-4">
+				<div className="spinner-border text-primary" role="status">
+				  <span className="visually-hidden">Loading...</span>
+				</div>
+			  </div>
+			) : (
+			  <div className="list-group">
+				<div className="list-group-item">
+				  <div className="row">
+				    <div className="col-md-6">
+				      <p><strong>Username:</strong> {selectedUserDetails.username}</p>
+				      <p><strong>Email:</strong> {selectedUserDetails.email}</p>
+				      <p><strong>Account Number:</strong> {selectedUserDetails.accountNumber}</p>
+				      <p><strong>Balance:</strong> {selectedUserDetails.balance.toFixed(2)} $</p>
+				      <p><strong>Status:</strong> {selectedUserDetails.active ? 'Active' : 'Inactive'}</p>
+				    </div>
+				    <div className="col-md-6">
+				      <p><strong>First Name:</strong> {selectedUserDetails.firstName}</p>
+				      <p><strong>Last Name:</strong> {selectedUserDetails.lastName}</p>
+				      <p><strong>Middle Name:</strong> {selectedUserDetails.middleName || 'N/A'}</p>
+				      <p><strong>Passport:</strong> {selectedUserDetails.passportSeries} {selectedUserDetails.passportNumber}</p>
+				      <p><strong>Date of Birth:</strong> {new Date(selectedUserDetails.dateOfBirth).toLocaleDateString()}</p>
+				      <p><strong>Roles: </strong> {selectedUserDetails.roles?.map((role, i) => (<li key={i}>{role}</li>))}</p>
+				    </div>
+				  </div>
+				</div>
+			  </div>
+			)}
+		  </div>
+		</div>
+
         {/* Delete Confirmation Modal */}
         <div className={`modal ${showDeleteModal ? 'show' : ''}`}>
           <div className="modal-content">
@@ -374,83 +416,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* User Details Modal */}
-        {selectedUserDetails && (
-          <div className="modal show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog modal-lg">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">User Details - {selectedUserDetails.username}</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setSelectedUserDetails(null)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div className="alert alert-warning">
-                    <i className="bi bi-shield-lock"></i> Sensitive Data - Access Logged
-                  </div>
-
-                  <div className="row">
-                    <div className="col-md-6">
-                      <h5>Personal Information</h5>
-                      <p>
-                        <strong>Name:</strong> {selectedUserDetails.firstName} {selectedUserDetails.lastName}
-                      </p>
-                      <p>
-                        <strong>Middle Name:</strong> {selectedUserDetails.middleName || 'N/A'}
-                      </p>
-                      <p>
-                        <strong>Date of Birth:</strong>{" "}
-                        {new Date(selectedUserDetails.dateOfBirth).toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    <div className="col-md-6">
-                      <h5>Passport Data</h5>
-                      <div className="input-group">
-                        <span className="input-group-text">
-                          <i className="bi bi-passport"></i>
-                        </span>
-                        <input
-                          type={showSensitiveData ? "text" : "password"}
-                          className="form-control"
-                          value={
-                            showSensitiveData
-                              ? `${selectedUserDetails.passportSeries} ${selectedUserDetails.passportNumber}`
-                              : "•••• ••••••"
-                          }
-                          readOnly
-                        />
-                        <button
-                          className="btn btn-outline-secondary"
-                          type="button"
-                          onClick={() => setShowSensitiveData(!showSensitiveData)}
-                        >
-                          <i className={`bi bi-eye${showSensitiveData ? "-slash" : ""}`}></i>
-                        </button>
-                      </div>
-                      <small className="text-muted">
-                        {showSensitiveData ? "Visible" : "Masked"} - Access logged
-                      </small>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setSelectedUserDetails(null)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+  
       </>
     </div>
   );
