@@ -27,7 +27,6 @@ const Index = () => {
                 console.error('Error fetching index data:', error);
                 setError(error.message);
                 
-                // Clear invalid token and redirect if unauthorized
                 if (error.message.includes('401')) {
                     clearJwtToken();
                     navigate('/login');

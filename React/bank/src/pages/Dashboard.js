@@ -332,7 +332,7 @@ const Dashboard = () => {
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Your Full Details{profileData.username}</h5>
+                                <h5 className="modal-title">Your Full Details, {profileData.username}</h5>
                             </div>
                             <div className="modal-body">
                                 <div className="alert alert-warning">
@@ -354,6 +354,14 @@ const Dashboard = () => {
                                         <p>
                                             <strong>Date of Birth:</strong>{" "}
                                             {new Date(profileData.dateOfBirth).toLocaleDateString()}
+                                        </p>
+                                        <p>
+                                            <strong>Email:</strong>{" "}
+                                            {(profileData.email)}
+                                        </p>
+                                        <p>
+                                            <strong>Account number:</strong>{" "}
+                                            {(profileData.accountNumber)}
                                         </p>
                                     </div>
 

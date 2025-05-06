@@ -93,13 +93,20 @@ public class DashboardController {
     public ResponseEntity<UserDetailsDTO> getProfile() {
         UserModel user = getCurrentUser();
         
-        UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setMiddleName(user.getMiddleName());
-        dto.setPassportSeries(user.getPassportSeries());
-        dto.setPassportNumber(user.getPassportNumber());
-        dto.setDateOfBirth(user.getDateOfBirth());
+        UserDetailsDTO dto = new UserDetailsDTO.Builder()
+		        .id(null)
+		        .username(user.getUsername())
+		        .email(user.getEmail())
+		        .accountNumber(user.getAccount().getAccountNumber())
+		        .balance(user.getAccount().getBalance())
+		        .roles(user.getRoles())
+		        .firstName(user.getFirstName())
+		        .lastName(user.getLastName())
+		        .middleName(user.getMiddleName())
+		        .passportSeries(user.getPassportSeries())
+		        .passportNumber(user.getPassportNumber())
+		        .dateOfBirth(user.getDateOfBirth())
+		        .build();
         
         return ResponseEntity.ok(dto);
     }
