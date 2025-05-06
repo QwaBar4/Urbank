@@ -170,19 +170,15 @@ public class DashboardController {
 		    UserModel user = userModelRepository.findByUsername(username)
 		            .orElseThrow(() -> new RuntimeException("User not found"));
 
-		    // Generate the statement PDF
 		    StatementPDF statementPDF = statementService.generateStatement(user.getAccount().getId());
 		    byte[] pdfContent = statementPDF.getContent();
 
-		    // Set the response headers
 		    HttpHeaders headers = new HttpHeaders();
 		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
 		    headers.add("Content-Type", "application/pdf");
 
-		    // Return the PDF as a response
 		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
 		} catch (Exception e) {
-		    // Return an error response with a byte[] body
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 		            .body("Error generating PDF: ".getBytes());
 		}

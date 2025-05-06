@@ -189,7 +189,7 @@ public class AdminController {
 		            log.getAction(),
 		            anonymizationService.deanonymize(log.getUsername()),
 		            log.getTimestamp(),
-		            encryptionService.decrypt(log.getDetails()) // Decrypt instead of deanonymize
+		            encryptionService.decrypt(log.getDetails())
 		        ))
 		        .collect(Collectors.toList());
 		        
