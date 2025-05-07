@@ -76,12 +76,6 @@ public class AdminController {
 		UserModel user = userRepository.findById(id)
 		        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-		auditLogService.logAdminAction(
-		    authentication.getName(),
-		    "VIEW_USER_DETAILS",
-		    "Accessed details of user ID: " + id
-		);
-
 		UserDetailsDTO dto = new UserDetailsDTO.Builder()
 		        .id(user.getId())
 		        .username(user.getUsername())
@@ -97,12 +91,6 @@ public class AdminController {
 		        .passportNumber(user.getPassportNumber())
 		        .dateOfBirth(user.getDateOfBirth())
 		        .build();
-
-		auditLogService.logSensitiveDataAccess(
-		    authentication.getName(),
-		    user.getId(),
-		    "PASSPORT_DATA_ACCESS"
-		);
 
 		return ResponseEntity.ok()
 		        .cacheControl(CacheControl.noStore())
@@ -187,7 +175,7 @@ public class AdminController {
 		        .map(log -> new AuditLogDTO(
 		            log.getId(),
 		            log.getAction(),
-		            anonymizationService.deanonymize(log.getUsername()),
+		            originalUsername,
 		            log.getTimestamp(),
 		            encryptionService.decrypt(log.getDetails())
 		        ))

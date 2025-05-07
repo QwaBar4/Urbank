@@ -14,6 +14,7 @@ public class AuditLogModel {
     private String action;
     private String username;
     private LocalDateTime timestamp;
+    @Column(columnDefinition = "TEXT")
     private String details;
 
     public AuditLogModel() {}

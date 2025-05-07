@@ -92,7 +92,6 @@ public class DashboardController {
     @GetMapping("/api/user/profile")
     public ResponseEntity<UserDetailsDTO> getProfile() {
         UserModel user = getCurrentUser();
-        
         UserDetailsDTO dto = new UserDetailsDTO.Builder()
 		        .id(null)
 		        .username(user.getUsername())
@@ -123,6 +122,7 @@ public class DashboardController {
         user.setDateOfBirth(profileDTO.getDateOfBirth());
         
         userRepository.save(user);
+        auditLogService.logAction("SENSITIVE_DATA_UPDATE", user.getUsername(), "Sensitive data updated");
         return ResponseEntity.ok().build();
     }
 
@@ -176,7 +176,8 @@ public class DashboardController {
 		    HttpHeaders headers = new HttpHeaders();
 		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
 		    headers.add("Content-Type", "application/pdf");
-
+			
+			auditLogService.logAction("STATEMENT_DOWNLOAD", authentication.getName(), "User downloaded statement");
 		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
 		} catch (Exception e) {
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -189,7 +190,7 @@ public class DashboardController {
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        auditLogService.logAction("LOG OUT", authentication.getName(), "User logged out"); 
+        auditLogService.logAction("LOG_OUT", authentication.getName(), "User logged out"); 
         return ResponseEntity.ok().build();
     }
 }

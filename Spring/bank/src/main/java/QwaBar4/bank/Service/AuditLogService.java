@@ -47,11 +47,6 @@ public class AuditLogService {
         logAction("ADMIN_" + action, username, details);
     }
 
-    @Transactional
-    public void logSensitiveDataAccess(String username, Long userId, String details) {
-        logAction("SENSITIVE_DATA_ACCESS", username, "User ID: " + userId + ", Details: " + details);
-    }
-
     @Scheduled(cron = "0 0 3 * * *")
     public void pruneOldLogs() {
         auditLogRepository.deleteByTimestampBefore(LocalDateTime.now().minusYears(1));
