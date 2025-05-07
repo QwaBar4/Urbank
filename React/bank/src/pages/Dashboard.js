@@ -70,10 +70,22 @@ const Dashboard = () => {
         }
     };
 
-    const handleLogout = () => {
-        console.log('Logging out...');
-        clearJwtToken();
-        navigate('/');
+    const handleLogout = async () => {
+    	try {
+		    const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
+				method: 'POST',
+				headers: {
+		        	'Authorization': `Bearer ${getJwtToken()}`
+		        }
+            });
+            console.log('Logging out...');
+		    navigate('/');
+		    clearJwtToken();
+        } catch (error) {
+        	console.error('Logout error:', error);
+            alert('Failed to log out: ' + error.message);
+        }
+        
     };
 
     const handleDeleteAccount = async () => {

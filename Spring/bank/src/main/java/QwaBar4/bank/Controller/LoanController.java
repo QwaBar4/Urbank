@@ -31,7 +31,6 @@ public class LoanController {
 		loan.setStartDate(application.getStartDate());
 		loan.setTermMonths(application.getTermMonths());
 		
-		// Assuming you have a method in LoanService to save the loan
 		LoanModel savedLoan = loanService.createLoan(loan);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedLoan);
 	}

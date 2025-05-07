@@ -18,10 +18,13 @@ const TransactionHistory = ({ userAccount }) => {
     const formatAmount = (transaction) => {
         const amount = Math.abs(transaction.amount).toFixed(2);
         if (transaction.type == 'TRANSFER') {
-		    if (transaction.sourceAccountOwner == name) {
+		    if (transaction.targetAccountOwner == transaction.sourceAccountOwner){
+		        return `${amount}$`;
+		    } else if (transaction.sourceAccountOwner == name){
 		        return `-${amount}$`;
-		    } else {
-		        return `+${amount}$`;
+		    }
+		    else{
+		    	return `+${amount}$`;
 		    }
         }
         return `${amount}$`;

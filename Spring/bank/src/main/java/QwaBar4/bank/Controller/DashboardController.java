@@ -19,6 +19,7 @@ import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
 import QwaBar4.bank.Service.AuditLogService;
+import QwaBar4.bank.Service.UserModelService;
 import QwaBar4.bank.Service.StatementService;
 import QwaBar4.bank.Service.StatementPDF;
 import QwaBar4.bank.Model.UserModelRepository;
@@ -38,6 +39,9 @@ public class DashboardController {
     
     @Autowired
 	private AuditLogService auditLogService;
+
+    @Autowired
+	private UserModelService userModelService;
 
     @Autowired
     private StatementService statementService;
@@ -186,11 +190,30 @@ public class DashboardController {
 	}
 
 
-    @PostMapping("/api/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        SecurityContextHolder.clearContext();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        auditLogService.logAction("LOG_OUT", authentication.getName(), "User logged out"); 
-        return ResponseEntity.ok().build();
-    }
+	@PostMapping("/api/logout")
+	public ResponseEntity<?> logout(@RequestParam String username, Authentication authentication) {
+		auditLogService.logAction("LOG_OUT", authentication.getName(), "User logged out");
+		
+		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/delete-user")
+	public ResponseEntity<?> deleteUser(
+		@RequestParam String username,
+		Authentication authentication) {
+		
+		if (!authentication.getName().equals(username)) {
+		    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		        .body("You can only delete your own account");
+		}
+
+		try {
+		    userModelService.deleteByUsername(username);
+		    auditLogService.logAction("DELETED ACCOUNT", username, "User deleted account"); 
+		    return ResponseEntity.noContent().build();
+		} catch (Exception e) {
+		    return ResponseEntity.internalServerError()
+		        .body("Deletion failed: " + e.getMessage());
+		}
+	}
 }
