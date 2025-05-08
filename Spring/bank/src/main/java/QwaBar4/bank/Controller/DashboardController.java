@@ -208,8 +208,8 @@ public class DashboardController {
 		}
 
 		try {
+			auditLogService.logAction("DELETED ACCOUNT", username, "User deleted account"); 
 		    userModelService.deleteByUsername(username);
-		    auditLogService.logAction("DELETED ACCOUNT", username, "User deleted account"); 
 		    return ResponseEntity.noContent().build();
 		} catch (Exception e) {
 		    return ResponseEntity.internalServerError()

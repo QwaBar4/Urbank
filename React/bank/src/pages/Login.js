@@ -24,8 +24,9 @@ const Login = () => {
 		    window.location.href = '/';
 		    
 		} catch (error) {
-		    console.error('Login error:', error);
-		    setError(error.message || "Login failed");
+		    console.log('Login error:', error);
+		    const text = error.text;
+		    setError(error || "Login failed");
 		}
 	};
 

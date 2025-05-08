@@ -8,6 +8,7 @@ export const handleResponse = async (response) => {
 
     try {
         const json = JSON.parse(text);
+        console.log(json.message);
         if (!response.ok) {
             const error = new Error(json.message || 'Request failed');
             error.status = response.status;
@@ -15,10 +16,10 @@ export const handleResponse = async (response) => {
         }
         return json;
     } catch (err) {
-        // Return text if not JSON
         if (!response.ok) {
             const error = new Error(text || 'Request failed');
             error.status = response.status;
+            if(JSON.parse(text).message == "Account is deactivated") throw JSON.parse(text).message;
             throw error;
         }
         return text;
