@@ -8,7 +8,6 @@ export const handleResponse = async (response) => {
 
     try {
         const json = JSON.parse(text);
-        console.log(json.message);
         if (!response.ok) {
             const error = new Error(json.message || 'Request failed');
             error.status = response.status;

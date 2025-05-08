@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
 
   const loadAdminDashboardData = async () => {
     try {
-      const adminData = await getAdminDashboardData(); // Call the new admin data function
+      const adminData = await getAdminDashboardData(); 
       return adminData;
     } catch (error) {
       throw error;
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const data = await apiLogin(credentials);
       storeJwtToken(data.jwt);
-      const userData = await loadUserData(); // Load user data after login
+      const userData = await loadUserData();
       setUser (userData);
       return data;
     } catch (error) {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
-    loadAdminDashboardData, // Expose the new function
+    loadAdminDashboardData
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

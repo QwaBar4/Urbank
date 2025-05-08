@@ -307,11 +307,6 @@ const Dashboard = () => {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Confirm Account Deletion</h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowDeleteConfirmation(false)}
-                                ></button>
                             </div>
                             <div className="modal-body">
                                 <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
