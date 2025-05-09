@@ -107,7 +107,8 @@ const Signup = () => {
                 });
 
                 if (response.jwt) {
-                    // Successful registration and authentication
+                    localStorage.setItem('profileModalShown_' + formData.username.trim(), 'false');
+                    console.log(localStorage.getItem('profileModalShown_' + formData.username.trim()))
                     navigate('/dashboard');
                 } else {
                     // Account created but authentication failed

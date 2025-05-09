@@ -20,41 +20,49 @@ const Dashboard = () => {
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = getJwtToken();
-        if (!token) {
-            navigate('/');
-            return;
-        }
-        
-        const fetchData = async () => {
-            try {
-                const data = await getDashboardData();
-                setUserData({
-                    username: data.username,
-                    account: {
-                        accountNumber: data.account.accountNumber,
-                        balance: data.account.balance,
-                        dailyTransferLimit: data.account.dailyTransferLimit,
-                        dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-                    },
-                    role: data.roles
-                });
-            } catch (err) {
-                if (err.response?.status === 401) {
-                    console.log('Session expired, redirecting to login');
-                    navigate('/');
-                } else {
-                    setError(err.message);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
+	useEffect(() => {
+		const token = getJwtToken();
+		if (!token) {
+		    navigate('/');
+		    return;
+		}
 
-        fetchData();
-    }, [navigate]);
 
+		const fetchData = async () => {
+		    try {
+		        const data = await getDashboardData();
+		        setUserData({
+		            username: data.username,
+		            account: {
+		                accountNumber: data.account.accountNumber,
+		                balance: data.account.balance,
+		                dailyTransferLimit: data.account.dailyTransferLimit,
+		                dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+		            },
+		            role: data.roles
+		        });
+		        const profileModalShown = localStorage.getItem('profileModalShown_' + data.username);
+		        console.log(profileModalShown);
+				if (profileModalShown == "false") {
+					setShowProfileModal(true);
+					localStorage.setItem('profileModalShown_' + data.username, 'true');
+				}
+		    } catch (err) {
+		        if (err.response?.status === 401) {
+		            console.log('Session expired, redirecting to login');
+		            navigate('/');
+		        } else {
+		            setError(err.message);
+		        }
+		    } finally {
+		        setLoading(false);
+		    }
+		};
+
+		fetchData();
+	}, [navigate]);
+	
+	
     useEffect(() => {
         if (userData) {
             fetchProfile();
@@ -70,23 +78,22 @@ const Dashboard = () => {
         }
     };
 
-    const handleLogout = async () => {
-    	try {
+	const handleLogout = async () => {
+		try {
 		    const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
-				method: 'POST',
-				headers: {
-		        	'Authorization': `Bearer ${getJwtToken()}`
+		        method: 'POST',
+		        headers: {
+		            'Authorization': `Bearer ${getJwtToken()}`
 		        }
-            });
-            console.log('Logging out...');
+		    });
+		    console.log('Logging out...');
 		    navigate('/');
 		    clearJwtToken();
-        } catch (error) {
-        	console.error('Logout error:', error);
-            alert('Failed to log out: ' + error.message);
-        }
-        
-    };
+		} catch (error) {
+		    console.error('Logout error:', error);
+		    alert('Failed to log out: ' + error.message);
+		}
+	};
 
     const handleDeleteAccount = async () => {
         try {

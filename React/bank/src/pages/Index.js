@@ -25,9 +25,9 @@ const Index = () => {
                 setUsername(data.username || "");
             } catch (error) {
                 console.error('Error fetching index data:', error);
-                setError(error.message);
+                setError(error);
                 
-                if (error.message.includes('401')) {
+                if (error) {
                     clearJwtToken();
                     navigate('/login');
                 }
