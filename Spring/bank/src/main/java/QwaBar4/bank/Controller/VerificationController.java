@@ -38,10 +38,34 @@ public class VerificationController {
         String email = request.get("email");
         UserModel user = userModelRepository.findByEmailIgnoreCase(email)
                     .orElseThrow(() -> new RuntimeException("User  not found"));
-        verificationService.sendRecoveryCode(email);
+        verificationService.sendCode(email, 1);
         return ResponseEntity.ok().build();
     }
     
+    @PostMapping("/email-verification-code")
+	public ResponseEntity<?> sendEmailVerificationCode(@RequestBody Map<String, String> request) {
+		String email = request.get("email");
+        UserModel user = userModelRepository.findByEmailIgnoreCase(email)
+                    .orElseThrow(() -> new RuntimeException("User  not found"));
+        verificationService.sendCode(email, 2);
+        return ResponseEntity.ok().build();
+	}
+
+    
+    @PostMapping("/verify-email-code")
+    public ResponseEntity<?> verifyOldEmailCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+
+        if (!verificationService.verifyCode(email, code)) {
+            return ResponseEntity.badRequest().body("Invalid code");
+        }
+
+        String token = jwtUtil.generateEmailUpdateToken(email);
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
+
 	@PostMapping("/verify-recovery-code")
 	public ResponseEntity<?> verifyRecoveryCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");

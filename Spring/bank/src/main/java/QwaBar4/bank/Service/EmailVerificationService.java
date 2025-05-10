@@ -43,14 +43,24 @@ public class EmailVerificationService {
         mailSender.send(message);
     }
     
-    public void sendRecoveryCode(String email) {
+    public void sendCode(String email, int action) {
         String code = generateRandomCode();
         verificationCodes.put(email, new VerificationData(code));
         
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("Password recovery");
-        message.setText("Your recovery code is: " + code);
+        switch (action){
+        	case 1:
+				message.setSubject("Password recovery");
+				message.setText("Your recovery code is: " + code);
+				break;
+			case 2:
+				message.setSubject("Verification of your email");
+				message.setText("Your verification code is: " + code);
+				break;
+            default:
+                return;
+        }
         mailSender.send(message);
     }
 

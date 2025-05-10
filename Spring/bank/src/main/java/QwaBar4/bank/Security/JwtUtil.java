@@ -50,6 +50,15 @@ public class JwtUtil {
             .compact();
     }
 
+    public String generateEmailUpdateToken(String email) {
+        return Jwts.builder()
+            .subject(email)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + 360000))
+            .signWith(secretKey, Jwts.SIG.HS512)
+            .compact();
+    }
+
     public SecretKey getSecretKey() {
         return this.secretKey;
     }
