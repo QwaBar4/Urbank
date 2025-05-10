@@ -113,7 +113,37 @@ public class DashboardController {
         
         return ResponseEntity.ok(dto);
     }
-	
+    
+	@PutMapping("/api/user/update-email")
+	public ResponseEntity<?> updateEmail(@RequestBody Map<String, String> request, Authentication authentication) {
+		try {
+		    String oldEmail = request.get("oldEmail");
+		    String newEmail = request.get("newEmail");
+		    String verificationCode = request.get("verificationCode");
+		    
+		    UserModel user = userRepository.findByUsername(authentication.getName())
+		        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		    
+		    if (!user.getEmail().equalsIgnoreCase(oldEmail)) {
+		        return ResponseEntity.badRequest().body("Current email doesn't match");
+		    }
+		    
+		    if (userModelRepository.existsByEmailIgnoreCase(newEmail)) {
+		        return ResponseEntity.badRequest().body("Email already in use");
+		    }
+		    
+		    user.setEmail(newEmail);
+		    userRepository.save(user);
+		    
+		    auditLogService.logAction("EMAIL_UPDATE", user.getUsername(), 
+		        "User updated email from " + oldEmail + " to " + newEmail);
+		        
+		    return ResponseEntity.ok().build();
+		} catch (Exception e) {
+		    return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+
 	@PutMapping("/api/user/profile")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody ProfileDTO profileDTO) {
         UserModel user = getCurrentUser();

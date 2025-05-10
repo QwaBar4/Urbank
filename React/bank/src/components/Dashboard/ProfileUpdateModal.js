@@ -10,7 +10,9 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
   const [currentEmail, setCurrentEmail] = useState(profileData.email);
 
   const handleEmailUpdated = (newEmail) => {
+    onSave({ ...profileData, email: newEmail });
     setCurrentEmail(newEmail);
+    setShowEmailModal(false);
   };
 
   return (
@@ -50,24 +52,24 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
                   {errors.lastName && <div className="invalid-feedback">Required field</div>}
                 </div>
 				<p></p>
-                <div className="mb-3">
-                  <label className="form-label">Email: </label>
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={currentEmail}
-                      readOnly
-                    />
-                    <button 
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setShowEmailModal(true)}
-                    >
-                      Change Email
-                    </button>
-                  </div>
-                </div>
+				<div className="mb-3">
+				  <label className="form-label">Email: </label>
+				  <div className="input-group">
+				    <input
+				      type="text"
+				      className="form-control"
+				      value={currentEmail}
+				      readOnly
+				    />
+				    <button 
+				      type="button"
+				      className="btn btn-outline-secondary"
+				      onClick={() => setShowEmailModal(true)}
+				    >
+				      Change Email
+				    </button>
+				  </div>
+				</div>
 				<p></p>
                 <div className="mb-3">
                   <label className="form-label">Passport Series: </label>

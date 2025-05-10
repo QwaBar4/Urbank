@@ -73,13 +73,41 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
   const handleVerifyNewEmail = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/auth/verify-code', {
+      const verifyResponse = await fetch('/auth/verify-code', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newEmail, code: newEmailCode }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          email: newEmail, 
+          code: newEmailCode 
+        }),
       });
 
-      if (!response.ok) throw new Error('Verification failed');
+      if (!verifyResponse.ok) {
+        const errorData = await verifyResponse.json();
+        throw new Error(errorData.message || 'Verification failed');
+      }
+
+      const updateResponse = await fetch('/api/user/update-email', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          oldEmail: currentEmail,
+          newEmail: newEmail,
+          verificationCode: newEmailCode 
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.message || 'Failed to update email');
+      }
+
       onEmailUpdated(newEmail);
       onClose();
     } catch (error) {
