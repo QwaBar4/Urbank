@@ -19,7 +19,7 @@ const PrivateRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/" replace />;
+  return user ? children : <Navigate to="/dashboard" replace />;
 };
 
 const AdminRoute = ({ children }) => {
