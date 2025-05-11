@@ -14,7 +14,6 @@ const Dashboard = () => {
     const [error, setError] = useState('');
     const [profileData, setProfileData] = useState(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showPassport, setShowPassport] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
     const [showSensitiveData, setShowSensitiveData] = useState(false);
@@ -43,7 +42,7 @@ const Dashboard = () => {
 		        });
 		        const profileModalShown = localStorage.getItem('profileModalShown_' + data.username);
 		        console.log(profileModalShown);
-				if (profileModalShown == "false") {
+				if (profileModalShown === "false") {
 					setShowProfileModal(true);
 					localStorage.setItem('profileModalShown_' + data.username, 'true');
 				}
@@ -86,7 +85,7 @@ const Dashboard = () => {
 		            'Authorization': `Bearer ${getJwtToken()}`
 		        }
 		    });
-		    console.log('Logging out...');
+		    console.log('Logging out...' + response);
 		    navigate('/');
 		    clearJwtToken();
 		} catch (error) {

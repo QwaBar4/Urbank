@@ -28,7 +28,6 @@ const AdminRoute = ({ children }) => {
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/" replace />;
 
-  // Check for ROLE_ADMIN in all role formats
   const isAdmin = user.roles?.some(role => 
     role === 'ADMIN' || 
     role === 'ROLE_ADMIN' ||
