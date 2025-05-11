@@ -44,6 +44,9 @@ public class TransactionController {
         try {
         	String srcAcc = accountNumberUtils.convertFormattedNumberToUuid(request.getSourceAccount());
         	String tgtACc = accountNumberUtils.convertFormattedNumberToUuid(request.getTargetAccount());
+        	if (srcAcc.equals(tgtACc)) {
+        		return ResponseEntity.badRequest().body("You cant send money to yourself");
+        	}
             TransactionDTO transaction = transactionService.processTransfer(
                 srcAcc,
                 tgtACc,
@@ -51,7 +54,7 @@ public class TransactionController {
                 request.getDescription(),
                 authentication.getName()
             );
-            return ResponseEntity.ok(transaction);
+            return ResponseEntity.ok("Transfer completed");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -84,7 +84,6 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                 }
             }
 
-            const data = JSON.parse(responseText);
             setSuccess(`Transfer successful!`);
 
             setFormData(prev => ({
