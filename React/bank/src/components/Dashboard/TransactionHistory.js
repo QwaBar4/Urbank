@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL, handleResponse, getDashboardData } from '../../services/api';
+import { API_BASE_URL, getDashboardData } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 
 const TransactionHistory = ({ userAccount }) => {
@@ -17,10 +17,10 @@ const TransactionHistory = ({ userAccount }) => {
 
     const formatAmount = (transaction) => {
         const amount = Math.abs(transaction.amount).toFixed(2);
-        if (transaction.type == 'TRANSFER') {
-		    if (transaction.targetAccountOwner == transaction.sourceAccountOwner){
+        if (transaction.type === 'TRANSFER') {
+		    if (transaction.targetAccountOwner === transaction.sourceAccountOwner){
 		        return `${amount}$`;
-		    } else if (transaction.sourceAccountOwner == name){
+		    } else if (transaction.sourceAccountOwner === name){
 		        return `-${amount}$`;
 		    }
 		    else{

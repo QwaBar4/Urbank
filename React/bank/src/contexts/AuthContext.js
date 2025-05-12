@@ -25,14 +25,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loadDashboardData = async () => {
-    try {
-      const dashboardData = await getDashboardData();
-      return dashboardData;
-    } catch (error) {
-      throw error;
-    }
-  };
 
   const loadAdminDashboardData = async () => {
     try {

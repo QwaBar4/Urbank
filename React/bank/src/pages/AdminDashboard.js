@@ -305,7 +305,7 @@ const AdminDashboard = () => {
                           transaction.type === 'DEPOSIT' ? 'text-success' :
                           transaction.sourceAccountOwner === selectedUser?.username ? 'text-danger' : 'text-success'
                         }`}>
-                          {transaction.type === 'TRANSFER' && transaction.sourceAccountOwner == transaction.targetAccountOwner
+                          {transaction.type === 'TRANSFER' && transaction.sourceAccountOwner === transaction.targetAccountOwner
                             ? `${Math.abs(transaction.amount).toFixed(2)}$`
                             : transaction.sourceAccountOwner === selectedUser?.username 
                             ? `+${Math.abs(transaction.amount).toFixed(2)}$`

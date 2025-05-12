@@ -266,8 +266,6 @@ export const activateUser = async (userId, active) => {
       body: JSON.stringify({ active })
     });
 
-    const contentType = response.headers.get('content-type');
-
     const data = await handleResponse(response);
 
     if (!response.ok) {
