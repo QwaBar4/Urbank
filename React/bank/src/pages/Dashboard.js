@@ -19,49 +19,45 @@ const Dashboard = () => {
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const navigate = useNavigate();
 
-	useEffect(() => {
-		const token = getJwtToken();
-		if (!token) {
-		    navigate('/');
-		    return;
-		}
+    useEffect(() => {
+        const token = getJwtToken();
+        if (!token) {
+            navigate('/');
+            return;
+        }
 
+        const fetchData = async () => {
+            try {
+                const data = await getDashboardData();
+                setUserData({
+                    username: data.username,
+                    account: {
+                        accountNumber: data.account.accountNumber,
+                        balance: data.account.balance,
+                        dailyTransferLimit: data.account.dailyTransferLimit,
+                        dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+                    },
+                    role: data.roles
+                });
+                const profileModalShown = localStorage.getItem('profileModalShown_' + data.username);
+                if (profileModalShown === "false") {
+                    setShowProfileModal(true);
+                    localStorage.setItem('profileModalShown_' + data.username, 'true');
+                }
+            } catch (err) {
+                if (err.response?.status === 401) {
+                    navigate('/');
+                } else {
+                    setError(err.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
 
-		const fetchData = async () => {
-		    try {
-		        const data = await getDashboardData();
-		        setUserData({
-		            username: data.username,
-		            account: {
-		                accountNumber: data.account.accountNumber,
-		                balance: data.account.balance,
-		                dailyTransferLimit: data.account.dailyTransferLimit,
-		                dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-		            },
-		            role: data.roles
-		        });
-		        const profileModalShown = localStorage.getItem('profileModalShown_' + data.username);
-		        console.log(profileModalShown);
-				if (profileModalShown === "false") {
-					setShowProfileModal(true);
-					localStorage.setItem('profileModalShown_' + data.username, 'true');
-				}
-		    } catch (err) {
-		        if (err.response?.status === 401) {
-		            console.log('Session expired, redirecting to login');
-		            navigate('/');
-		        } else {
-		            setError(err.message);
-		        }
-		    } finally {
-		        setLoading(false);
-		    }
-		};
-
-		fetchData();
-	}, [navigate]);
-	
-	
+        fetchData();
+    }, [navigate]);
+    
     useEffect(() => {
         if (userData) {
             fetchProfile();
@@ -77,26 +73,24 @@ const Dashboard = () => {
         }
     };
 
-	const handleLogout = async () => {
-		try {
-		    const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
-		        method: 'POST',
-		        headers: {
-		            'Authorization': `Bearer ${getJwtToken()}`
-		        }
-		    });
-		    console.log('Logging out...' + response);
-		    navigate('/');
-		    clearJwtToken();
-		} catch (error) {
-		    console.error('Logout error:', error);
-		    alert('Failed to log out: ' + error.message);
-		}
-	};
+    const handleLogout = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}`
+                }
+            });
+            navigate('/');
+            clearJwtToken();
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('Failed to log out: ' + error.message);
+        }
+    };
 
     const handleDeleteAccount = async () => {
         try {
-            console.log('Deleting account...');
             const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(userData.username)}`, {
                 method: 'DELETE',
                 headers: {
@@ -121,7 +115,6 @@ const Dashboard = () => {
 
     const refreshBalance = async () => {
         try {
-            console.log('Refreshing balance...');
             const response = await fetch(`${API_BASE_URL}/api/transactions/balance`, {
                 headers: {
                     'Authorization': `Bearer ${getJwtToken()}`
@@ -144,64 +137,28 @@ const Dashboard = () => {
     };
 
     if (loading) return <div className="loading">Loading account information...</div>;
-    if (error) return <div className="error alert alert-danger">Error: {error}</div>;
+    if (error) return <div className="error">Error: {error}</div>;
     if (!userData) return null;
 
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="dashboard-container container mt-4">
-            <style>
-                {`
-                    .modal {
-                        display: none;
-                        position: fixed;
-                        z-index: 1;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
-                        height: 100%;
-                        overflow: auto;
-                        background-color: rgba(0,0,0,0.4);
-                    }
-
-                    .modal.show {
-                        display: block;
-                    }
-
-                    .modal-content {
-                        background-color: #fefefe;
-                        margin: 5% auto;
-                        padding: 20px;
-                        border: 1px solid #888;
-                        width: 80%;
-                        max-width: 800px;
-                        border-radius: 5px;
-                    }
-
-                    .close {
-                        color: #aaaaaa;
-                        float: right;
-                        font-size: 28px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    }
-
-                    .close:hover {
-                        color: #000;
-                    }
-                `}
-            </style>
-
-            <div className="dashboard-header row mb-4">
+        <div className="container mt-4">
+            <div className="row mb-4">
                 <div className="col-md-8">
                     <h1>Welcome, {userData.username}!</h1>
                 </div>
                 <div className="col-md-4 text-end">
-                    <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">
+                    <button 
+                        onClick={() => navigate('/')} 
+                        className="btn-outline-primary mr-2"
+                    >
                         Go Home
                     </button>
-                    <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
+                    <button 
+                        onClick={handleLogout} 
+                        className="btn-outline-secondary mr-2"
+                    >
                         Logout
                     </button>
                     <button
@@ -220,20 +177,20 @@ const Dashboard = () => {
                                 console.error('Error downloading statement:', error);
                             }
                         }}
-                        className="btn btn-outline-success"
+                        className="btn-outline-success"
                     >
                         Download Statement
                     </button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
-                        className="btn btn-outline-danger"
+                        className="btn-outline-danger"
                     >
                         Delete Account
                     </button>
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/admin')}
-                            className="btn btn-outline-warning me-2"
+                            className="btn-outline-warning mr-2"
                         >
                             Admin Dashboard
                         </button>
@@ -242,30 +199,30 @@ const Dashboard = () => {
             </div>
             
             <h2>User data</h2>
-			<div className="row mt-4">
+            <div className="row mt-4">
                 <div className="col-md-6">
                     <div className="card shadow">
                         <div className="card-body">
                             {profileData ? (
-                                    <div className="d-flex gap-2">
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => setShowProfileModal(true)}
-                                        >
-                                            Update Profile
-                                        </button>
-                                        <button
-                                            className="btn btn-info"
-                                            onClick={() => {
-                                                if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
-                                                setShowUserDetailsModal(true);
-                                            }}
-                                        >
-                                            View Full Details
-                                        </button>
-                                    </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => setShowProfileModal(true)}
+                                    >
+                                        Update Profile
+                                    </button>
+                                    <button
+                                        className="btn-info"
+                                        onClick={() => {
+                                            if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
+                                            setShowUserDetailsModal(true);
+                                        }}
+                                    >
+                                        View Full Details
+                                    </button>
+                                </div>
                             ) : (
-                                <div className="spinner-border text-primary"></div>
+                                <div className="spinner"></div>
                             )}
                         </div>
                     </div>
@@ -308,7 +265,7 @@ const Dashboard = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirmation && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -321,14 +278,14 @@ const Dashboard = () => {
                             <div className="modal-footer">
                                 <button
                                     type="button"
-                                    className="btn btn-secondary"
+                                    className="btn-secondary"
                                     onClick={() => setShowDeleteConfirmation(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn btn-danger"
+                                    className="btn-danger"
                                     onClick={handleDeleteAccount}
                                 >
                                     Confirm Delete
@@ -341,15 +298,15 @@ const Dashboard = () => {
 
             {/* User Details Modal */}
             {showUserDetailsModal && profileData && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Your Full Details, {profileData.username}</h5>
                             </div>
                             <div className="modal-body">
-                                <div className="alert alert-warning">
-                                    <i className="bi bi-shield-lock"></i> Sensitive Data - Access Logged
+                                <div className="alert-warning">
+                                    Sensitive Data - Access Logged
                                 </div>
 
                                 <div className="row">
@@ -394,25 +351,24 @@ const Dashboard = () => {
                                                     readOnly
                                                 />
                                                 <button
-                                                    className="btn btn-outline-secondary"
+                                                    className="btn-outline-secondary"
                                                     type="button"
                                                     onClick={() => setShowSensitiveData(!showSensitiveData)}
-                                                >Show/hide details
-                                                    <i className={`bi bi-eye${showSensitiveData ? "-slash" : ""}`}></i>
+                                                >
+                                                    {showSensitiveData ? 'Hide' : 'Show'} details
                                                 </button>
                                             </div>
                                             <small className="text-muted">
                                                 {showSensitiveData ? "Visible" : "Masked"} - Access logged
                                             </small>
                                         </div>
-                                        <p></p>
                                     </div>
                                 </div>
                             </div>
                             <div className="modal-footer">
                                 <button
                                     type="button"
-                                    className="btn btn-secondary"
+                                    className="btn-secondary"
                                     onClick={() => {
                                         setShowUserDetailsModal(false);
                                         setShowSensitiveData(false);
