@@ -193,11 +193,42 @@ const Dashboard = () => {
                     }
                 `}
             </style>
+			<div className="pt-[5vh] flex flex-col items-center">
+			  {/* Horizontal top dashes */}
+			  <div className="flex space-x-1 mb-2">
+				{[...Array(24)].map((_, i) => (
+				  <div key={i} className="w-2 h-px bg-gray-400"></div>
+				))}
+			  </div>
 
-            <div className="dashboard-header row mb-4">
+			  {/* Button with vertical dashes */}
+			  <div className="flex items-center">
+				<div className="flex flex-col space-y-1 mr-2">
+				  {[...Array(6)].map((_, i) => (
+					<div key={i} className="w-px h-2 bg-gray-400"></div>
+				  ))}
+				</div>
+				<button className="px-4 py-2 border border-black">
 					<h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
 					  Welcome, {userData.username}!
 					</h1>
+				</button>
+				<div className="flex flex-col space-y-1 ml-2">
+				  {[...Array(6)].map((_, i) => (
+					<div key={i} className="w-px h-2 bg-gray-400"></div>
+				  ))}
+				</div>
+			  </div>
+
+			  {/* Horizontal bottom dashes */}
+			  <div className="flex space-x-1 mt-2">
+				{[...Array(24)].map((_, i) => (
+				  <div key={i} className="w-2 h-px bg-gray-400"></div>
+				))}
+			  </div>
+			</div>
+            <div className="dashboard-header row mb-4">
+
                 <div className="col-md-4">
                     <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">
                         Go Home
