@@ -107,7 +107,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 
     return (
         <div className="transfer-container card border w-30 h-50 me-2 border-black me-2">
-            <div className="card-body">
+            <div className="card-body ml-2">
                 <h2 className="card-title ">Transfer Money</h2>
                 {error && (
                     <div className="alert alert-danger" style={{ color: 'red' }}>
@@ -180,7 +180,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 
                     <button 
                         type="submit" 
-                        className="btn btn-primary border w-20 h-7 me-2 border-black me-2"
+                        className="btn btn-primary border w-20 h-7 mb-2 me-2 border-black me-2"
                         disabled={isLoading}
                     >
                         {isLoading ? (

@@ -220,7 +220,6 @@ const Dashboard = () => {
 				  ))}
 				</div>
 			  </div>
-
 			  {/* Horizontal bottom dashes */}
 			  <div className="flex space-x-1 mt-2">
 				{[...Array(24)].map((_, i) => (
@@ -228,7 +227,7 @@ const Dashboard = () => {
 				))}
 			  </div>
 			</div>
-            <div className="dashboard-header row mb-4">
+            <div className="dashboard-header row mb-4 mt-2">
 
                 <div className="col-md-4">
                     <button onClick={() => navigate('/')} className="btn btn-outline-primary border w-20 h-7 me-2 border-black me-2">
@@ -320,7 +319,7 @@ const Dashboard = () => {
             </div>
 			<button 
 				onClick={() => setShowTransactionHistoryModal(true)}
-				className="btn btn-primary border w-70 h-7 me-2 border-black me-2"
+				className="btn btn-primary border w-70 h-7 me-2 border-black me-2 mt-2"
 			>
 				View Full Transaction History
 			</button>

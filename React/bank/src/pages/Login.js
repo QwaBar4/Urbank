@@ -31,7 +31,7 @@ const Login = () => {
 	};
 
     return (
-        <div>
+        <div className="mt-2 ml-2">
             <form onSubmit={handleSubmit}>
                 <h1>Login</h1>
                 <input
@@ -52,13 +52,13 @@ const Login = () => {
                     required
                 />
                 </p>
-                <button type="submit" onClick={handleSubmit}>Log In</button>
+                <button type="submit" className="border w-28 h-7 me-2 border-black me-2 mt-2" onClick={handleSubmit}>Log In</button>
                 <p>Forgot password? <Link to="/login/recovery">Recover password</Link></p>
                 <p>
                     Don't have an account? <Link to="/signup">Sign Up</Link>
                 </p>
             </form>
-            <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">Go home</button>
+            <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2 border w-28 h-7 me-2 border-black me-2 mt-2">Go home</button>
             {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
         </div>
     );

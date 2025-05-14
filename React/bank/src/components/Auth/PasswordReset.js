@@ -158,7 +158,7 @@ const PasswordRecovery = () => {
                     {!isEmailValid && email.length > 0 && (
                         <div className="error-message">Invalid email format</div>
                     )}
-                    <button type="submit" disabled={isLoading || !isEmailValid}>
+                    <button type="submit" className="border w-48 h-7 me-2 border-black me-2 mt-2" disabled={isLoading || !isEmailValid}>
                         {isLoading ? 'Sending...' : 'Send Verification Code'}
                     </button>
                 </form>
@@ -173,10 +173,11 @@ const PasswordRecovery = () => {
                         onChange={(e) => setCode(e.target.value)}
                         required
                     />
-                    <button type="submit" disabled={isLoading}>
+                    <p></p>
+                    <button type="submit" className="border w-28 h-7 me-2 border-black me-2 mt-2" disabled={isLoading}>
                         {isLoading ? 'Verifying...' : 'Verify Code'}
                     </button>
-                    <button type="button" onClick={() => setStep(1)}>
+                    <button type="button" className="border w-20 h-7 me-2 border-black me-2 mt-2" onClick={() => setStep(1)}>
                         Back
                     </button>
                 </form>
@@ -202,7 +203,7 @@ const PasswordRecovery = () => {
                         required
                         minLength="6"
                     />
-					<button type="submit" disabled={isLoading}>
+					<button className = "border w-48 h-7 me-2 border-black me-2 mt-2"type="submit" disabled={isLoading}>
                         {isLoading ? 'Reseting...' : 'Reset password'}
                     </button>
                 </form>
