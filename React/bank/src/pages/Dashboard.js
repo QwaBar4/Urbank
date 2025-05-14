@@ -340,115 +340,123 @@ const Dashboard = () => {
 			  />
 			)}
 
-			{showDeleteConfirmation && (
-			  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-				<div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-				  <div className="p-4 border-b">
-					<h3 className="text-lg font-semibold">Confirm Account Deletion</h3>
-				  </div>
-				  <div className="p-4">
-					<p className="mb-2">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
-					<p>All your account data and transaction history will be permanently erased.</p>
-				  </div>
-				  <div className="p-4 border-t flex justify-end space-x-3">
-					<button
-					  onClick={() => setShowDeleteConfirmation(false)}
-					  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-					>
-					  Cancel
-					</button>
-					<button
-					  onClick={handleDeleteAccount}
-					  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-					>
-					  Confirm Delete
-					</button>
-				  </div>
-				</div>
-			  </div>
-			)}
+            {showDeleteConfirmation && (
+                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Account Deletion</h5>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+                                <p>All your account data and transaction history will be permanently erased.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowDeleteConfirmation(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={handleDeleteAccount}
+                                >
+                                    Confirm Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-			{showUserDetailsModal && profileData && (
-			  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto p-4">
-				<div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
-				  <div className="p-4 border-b flex justify-between items-center">
-					<h3 className="text-lg font-semibold">Your Full Details, {profileData.username}</h3>
-					<button 
-					  onClick={() => {
-						setShowUserDetailsModal(false);
-						setShowSensitiveData(false);
-					  }}
-					  className="text-gray-500 hover:text-gray-700"
-					>
-					  ✕
-					</button>
-				  </div>
-				  
-				  <div className="p-4 border-b bg-yellow-50 border-l-4 border-yellow-400">
-					<div className="flex items-center">
-					  <svg className="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-						<path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-					  </svg>
-					  <span>Sensitive Data - Access Logged</span>
-					</div>
-				  </div>
+            {showUserDetailsModal && profileData && (
+                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Your Full Details, {profileData.username}</h5>
+                            </div>
+                            <div className="modal-body">
+                                <div className="alert alert-warning">
+                                    <i className="bi bi-shield-lock"></i> Sensitive Data - Access Logged
+                                </div>
 
-				  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-					  <h4 className="font-medium text-gray-700 mb-3">Personal Information</h4>
-					  <div className="space-y-2">
-						<p><span className="font-medium">Name:</span> {profileData.firstName}</p>
-						<p><span className="font-medium">Middle Name:</span> {profileData.middleName || 'N/A'}</p>
-						<p><span className="font-medium">Last Name:</span> {profileData.lastName || 'N/A'}</p>
-						<p><span className="font-medium">Date of Birth:</span> {new Date(profileData.dateOfBirth).toLocaleDateString()}</p>
-						<p><span className="font-medium">Email:</span> {profileData.email}</p>
-						<p><span className="font-medium">Account number:</span> {profileData.accountNumber}</p>
-					  </div>
-					</div>
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        <h5>Personal Information</h5>
+                                        <p>
+                                            <strong>Name:</strong> {profileData.firstName}
+                                        </p>
+                                        <p>
+                                            <strong>Middle Name:</strong> {profileData.middleName || 'N/A'}
+                                        </p>
+                                        <p>
+                                            <strong>Last Name:</strong> {profileData.lastName || 'N/A'}
+                                        </p>
+                                        <p>
+                                            <strong>Date of Birth:</strong>{" "}
+                                            {new Date(profileData.dateOfBirth).toLocaleDateString()}
+                                        </p>
+                                        <p>
+                                            <strong>Email:</strong>{" "}
+                                            {(profileData.email)}
+                                        </p>
+                                        <p>
+                                            <strong>Account number:</strong>{" "}
+                                            {(profileData.accountNumber)}
+                                        </p>
+                                    </div>
 
-					<div>
-					  <h4 className="font-medium text-gray-700 mb-3">Identification Data</h4>
-					  <div className="mb-4">
-						<label className="block text-sm font-medium text-gray-700 mb-1">Passport Details</label>
-						<div className="flex">
-						  <input
-						    type={showSensitiveData ? "text" : "password"}
-						    className="flex-1 px-3 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-blue-500"
-						    value={
-						      showSensitiveData
-						        ? `${profileData.passportSeries} ${profileData.passportNumber}`
-						        : "•••• ••••••"
-						    }
-						    readOnly
-						  />
-						  <button
-						    className="px-3 py-2 border border-l-0 border-gray-300 rounded-r bg-gray-100 hover:bg-gray-200"
-						    onClick={() => setShowSensitiveData(!showSensitiveData)}
-						  >
-						    {showSensitiveData ? 'Hide' : 'Show'} details
-						  </button>
-						</div>
-						<p className="text-xs text-gray-500 mt-1">
-						  {showSensitiveData ? "Visible" : "Masked"} - Access logged
-						</p>
-					  </div>
-					</div>
-				  </div>
-
-				  <div className="p-4 border-t flex justify-end">
-					<button
-					  onClick={() => {
-						setShowUserDetailsModal(false);
-						setShowSensitiveData(false);
-					  }}
-					  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
-					>
-					  Close
-					</button>
-				  </div>
-				</div>
-			  </div>
-			)}
+                                    <div className="col-md-6">
+                                        <h5>Identification Data</h5>
+                                        <div className="mb-3">
+                                            <label className="form-label">Passport Details</label>
+                                            <div className="input-group">
+                                                <input
+                                                    type={showSensitiveData ? "text" : "password"}
+                                                    className="form-control"
+                                                    value={
+                                                        showSensitiveData
+                                                            ? `${profileData.passportSeries} ${profileData.passportNumber}`
+                                                            : "•••• ••••••"
+                                                    }
+                                                    readOnly
+                                                />
+                                                <button
+                                                    className="btn btn-outline-secondary border w-40 h-7 me-2 border-black me-2"
+                                                    type="button"
+                                                    onClick={() => setShowSensitiveData(!showSensitiveData)}
+                                                >Show/hide details
+                                                    <i className={`bi bi-eye${showSensitiveData ? "-slash" : ""}`}></i>
+                                                </button>
+                                            </div>
+                                            <small className="text-muted">
+                                                {showSensitiveData ? "Visible" : "Masked"} - Access logged
+                                            </small>
+                                        </div>
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary border w-40 h-7 me-2 border-black me-2"
+                                    onClick={() => {
+                                        setShowUserDetailsModal(false);
+                                        setShowSensitiveData(false);
+                                    }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 			
 			{showTransactionHistoryModal && (
 				<TransactionHistoryModal 

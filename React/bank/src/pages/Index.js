@@ -74,7 +74,7 @@ const Index = () => {
             <h1 className="mb-4">It's Urbank{!username ? '' : ', ' + username}</h1>
             <button 
                 onClick={handleButtonClick}
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary btn-lg border w-80 h-7 me-2 border-black me-2"
                 disabled={isLoading}
             >
                 {isLoading ? (

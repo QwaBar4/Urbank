@@ -119,7 +119,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 mx-3">
       <style>
         {`
           .modal {
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
         <h1>Admin Dashboard</h1>
         <button
           onClick={() => navigate('/dashboard')}
-          className="btn btn-outline-warning"
+          className="btn btn-outline-warning border w-60 h-7 me-2 border-black me-2"
         >
           Back to Dashboard
         </button>
@@ -189,37 +189,37 @@ const AdminDashboard = () => {
                   </div>
                   <div className="btn-group">
                     <button
-                      className={`btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'}`}
+                      className={`btn btn-sm ${user.active ? 'btn-warning' : 'btn-success'} border w-36 h-8 me-2 border-black me-2`}
                       onClick={() => handleStatusChange(user.id, user.active)}
                     >
                       {user.active ? 'Deactivate' : 'Activate'}
                     </button>
                     <button
-                      className="btn btn-sm btn-info"
+                      className="btn btn-sm btn-info border w-36 h-8 me-2 border-black me-2"
                       onClick={() => viewUserDetails(user.id)}
                     >
                       View Details
                     </button>
                     <button
-                      className="btn btn-sm btn-info"
+                      className="btn btn-sm btn-info border w-36 h-8 me-2 border-black me-2"
                       onClick={() => navigate(`/edit-user/${user.id}`)}
                     >
                       Edit
                     </button>
                     <button
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-sm btn-primary border w-36 h-8 me-2 border-black me-2"
                       onClick={() => viewTransactions(user.id)}
                     >
                       Transactions
                     </button>
                     <button
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-sm btn-secondary border w-36 h-8 me-2 border-black me-2"
                       onClick={() => viewAuditLogs(user.id)}
                     >
                       Audit Logs
                     </button>
                     <button
-                      className="btn btn-sm btn-success"
+                      className="btn btn-sm btn-success border w-72 h-8 me-2 border-black me-2"
                       onClick={async () => {
                         try {
                           const response = await api.generateUserStatementByID(user.id, user.username);
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
                       Download Statement
                     </button>
                     <button
-                      className="btn btn-sm btn-danger"
+                      className="btn btn-sm btn-dange border w-36 h-8 me-2 border-black me-2r"
                       onClick={() => {
                         setSelectedUser(user);
                         setShowDeleteModal(true);

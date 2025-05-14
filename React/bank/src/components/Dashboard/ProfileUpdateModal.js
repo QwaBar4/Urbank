@@ -63,7 +63,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
 				    />
 				    <button 
 				      type="button"
-				      className="btn btn-outline-secondary"
+				      className="btn btn-outline-secondary border w-40 h-7 me-2 border-black me-2"
 				      onClick={() => setShowEmailModal(true)}
 				    >
 				      Change Email
@@ -115,10 +115,10 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
               </div>
 			  <p></p>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>
+                <button type="button" className="btn btn-secondary border w-20 h-7 me-2 border-black me-2" onClick={onClose}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary border w-40 h-7 me-2 border-black me-2">
                   Save Changes
                 </button>
               </div>

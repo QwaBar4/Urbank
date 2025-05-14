@@ -75,7 +75,7 @@ const Deposit = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container mt-4 mx-3">
             <div className="row justify-content-center">
                 <div className="col-md-8 col-lg-6">
                     <div className="card">
@@ -133,7 +133,7 @@ const Deposit = () => {
                                 <div className="d-grid gap-2">
                                     <button 
                                         type="submit" 
-                                        className="btn btn-primary"
+                                        className="btn btn-primary border w-60 h-7 me-5 border-black me-3"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -145,7 +145,7 @@ const Deposit = () => {
                                     </button>
                                     <button 
                                         type="button" 
-                                        className="btn btn-outline-secondary"
+                                        className="btn btn-outline-secondary border w-80 h-7 me-2 border-black me-2"
                                         onClick={() => navigate('/dashboard')}
                                     >
                                         Back to Dashboard

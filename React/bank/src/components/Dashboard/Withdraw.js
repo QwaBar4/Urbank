@@ -75,7 +75,7 @@ const Withdraw = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container mt-4 mx-3">
             <div className="row justify-content-center">
                 <div className="col-md-8 col-lg-6">
                     <div className="card">
@@ -134,7 +134,7 @@ const Withdraw = () => {
                                 <div className="d-grid gap-2">
                                     <button 
                                         type="submit" 
-                                        className="btn btn-success"
+                                        className="btn btn-success border w-80 h-7 me-2 border-black me-2"
                                         disabled={isLoading || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > accountInfo.balance}
                                     >
                                         {isLoading ? (
@@ -146,7 +146,7 @@ const Withdraw = () => {
                                     </button>
                                     <button 
                                         type="button" 
-                                        className="btn btn-outline-secondary"
+                                        className="btn btn-outline-secondary border w-80 h-7 me-2 border-black me-2"
                                         onClick={() => navigate('/dashboard')}
                                     >
                                         Back to Dashboard
