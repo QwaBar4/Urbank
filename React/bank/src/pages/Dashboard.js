@@ -5,7 +5,7 @@ import { getJwtToken, clearJwtToken } from '../utils/auth';
 import '../index.css'
 import Transfer from '../components/Dashboard/Transfer';
 import api from '../services/api';
-import TransactionHistory from '../components/Dashboard/TransactionHistory';
+import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
 import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
 
@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
+    const [showTransactionHistoryModal, setShowTransactionHistoryModal] = useState(false);
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const navigate = useNavigate();
 
@@ -230,10 +231,10 @@ const Dashboard = () => {
             <div className="dashboard-header row mb-4">
 
                 <div className="col-md-4">
-                    <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2">
+                    <button onClick={() => navigate('/')} className="btn btn-outline-primary border w-20 h-7 me-2 border-black me-2">
                         Go Home
                     </button>
-                    <button onClick={handleLogout} className="btn btn-outline-secondary me-2">
+                    <button onClick={handleLogout} className="btn btn-outline-secondary border w-20 h-7 me-2 border-black me-2">
                         Logout
                     </button>
                     <button
@@ -252,20 +253,20 @@ const Dashboard = () => {
                                 console.error('Error downloading statement:', error);
                             }
                         }}
-                        className="btn btn-outline-success"
+                        className="btn btn-outline-success border w-40 h-7 me-2 border-black me-2"
                     >
                         Download Statement
                     </button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
-                        className="btn btn-outline-danger"
+                        className="btn btn-outline-danger border w-40 h-7 me-2 border-black me-2"
                     >
                         Delete Account
                     </button>
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/admin')}
-                            className="btn btn-outline-warning me-2"
+                            className="btn btn-outline-warning border w-40 h-7 me-2 border-black me-2"
                         >
                             Admin Dashboard
                         </button>
@@ -281,13 +282,13 @@ const Dashboard = () => {
                             {profileData ? (
                                     <div className="d-flex gap-2">
                                         <button
-                                            className="btn btn-primary"
+                                            className="btn btn-primary border w-40 h-7 me-2 border-black me-2"
                                             onClick={() => setShowProfileModal(true)}
                                         >
                                             Update Profile
                                         </button>
                                         <button
-                                            className="btn btn-info"
+                                            className="btn btn-info border w-40 h-7 me-2 border-black me-2"
                                             onClick={() => {
                                                 if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
                                                 setShowUserDetailsModal(true);
@@ -311,16 +312,18 @@ const Dashboard = () => {
                         balance={userData.account.balance}
                         refreshBalance={refreshBalance}
                     />
-                    <Transfer
+                    <Transfer 
                         userAccount={userData.account}
                         refreshBalance={refreshBalance}
                     />
                 </div>
-                <div className="col-md-8">
-                    <TransactionHistory userAccount={userData.account} />
-                </div>
             </div>
-
+			<button 
+				onClick={() => setShowTransactionHistoryModal(true)}
+				className="btn btn-primary border w-70 h-7 me-2 border-black me-2"
+			>
+				View Full Transaction History
+			</button>
 			{showProfileModal && (
 			  <ProfileUpdateModal 
 				profileData={profileData}
@@ -445,6 +448,13 @@ const Dashboard = () => {
 				  </div>
 				</div>
 			  </div>
+			)}
+			
+			{showTransactionHistoryModal && (
+				<TransactionHistoryModal 
+					userAccount={userData.account}
+					onClose={() => setShowTransactionHistoryModal(false)}
+				/>
 			)}
         </div>
     );

@@ -32,7 +32,7 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                     <h5 className="card-title mb-0">Refresh data</h5>
                     <button 
                         onClick={handleRefresh}
-                        className="btn btn-sm btn-outline-secondary"
+                        className="btn btn-sm btn-outline-secondary border w-40 h-7 me-2 border-black me-2"
                         disabled={isRefreshing}
                         aria-label="Refresh balance"
                     >
@@ -61,13 +61,13 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                 <div className="d-grid gap-2">
                     <button 
                         onClick={handleDeposit}
-                        className="btn btn-primary"
+                        className="btn btn-primary border w-20 h-7 me-2 border-black me-2"
                     >
                         Deposit
                     </button>
                     <button 
                         onClick={handleWithdraw}
-                        className="btn btn-success"
+                        className="btn btn-success border w-20 h-7 me-2 border-black me-2"
                     >
                         Withdraw
                     </button>
