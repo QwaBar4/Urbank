@@ -21,7 +21,7 @@ const Login = () => {
 		try {
 		    const response = await login(credentials);
 		    console.log('Login response:', response);
-		    window.location.href = '/';
+		    window.location.href = '/dashboard';
 		    
 		} catch (error) {
 		    console.log('Login error:', error);

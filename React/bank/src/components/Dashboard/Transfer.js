@@ -106,7 +106,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
     };
 
     return (
-        <div className="transfer-container card border w-30 h-50 me-2 border-black me-2">
+        <div className="transfer-container card me-2 border-black me-2">
             <div className="card-body ml-2">
                 <h2 className="card-title ">Transfer Money</h2>
                 {error && (
