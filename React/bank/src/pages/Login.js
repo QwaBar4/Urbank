@@ -31,8 +31,8 @@ const Login = () => {
 	};
 
     return (
-        <div className="mt-2 ml-2">
-            <form onSubmit={handleSubmit}>
+        <div className="mt-2 ml-2 w-15 mr-80 border width-5 border-black ">
+            <form className="mt-2 ml-2"onSubmit={handleSubmit}>
                 <h1>Login</h1>
                 <input
                     type="text"
@@ -58,7 +58,7 @@ const Login = () => {
                     Don't have an account? <Link to="/signup">Sign Up</Link>
                 </p>
             </form>
-            <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2 border w-28 h-7 me-2 border-black me-2 mt-2">Go home</button>
+            <button onClick={() => navigate('/')} className="btn btn-outline-primary me-2 border w-28 h-7 me-2 border-black me-2 mt-2 mb-2 ml-2">Go home</button>
             {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
         </div>
     );
