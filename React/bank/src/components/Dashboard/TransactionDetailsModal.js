@@ -11,12 +11,11 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
 
   const getAmountDisplay = () => {
     const amount = Math.abs(transaction.amount).toFixed(2);
-    const isOutgoing = transaction.sourceAccountNumber === transaction.userAccountNumber;
     
     if (transaction.type === 'TRANSFER') {
     	if (transaction.targetAccountOwner === transaction.sourceAccountOwner){
         	return <span className="text-success">{amount}$</span>;
-    	} else if (transaction.sourceAccountOwner != transaction.targetAccountOwner) {
+    	} else if (transaction.sourceAccountOwner !== transaction.targetAccountOwner) {
 		 	return <span className="text-danger">-{amount}$</span>;
 		} else {
 			return <span className="text-danger">+{amount}$</span>;
