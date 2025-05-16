@@ -234,15 +234,15 @@ public class TransactionService {
         dto.setDescription(decryptedDescription);
 
         String sourceAccount = transaction.getSourceAccountNumber() != null ?
-                anonymizationService.deanonymize(transaction.getSourceAccountNumber()) : null;
+                accountNumberUtils.convertUuidToFormattedNumber(anonymizationService.deanonymize(transaction.getSourceAccountNumber())) : null;
         String targetAccount = transaction.getTargetAccountNumber() != null ?
-                anonymizationService.deanonymize(transaction.getTargetAccountNumber()) : null;
+                accountNumberUtils.convertUuidToFormattedNumber(anonymizationService.deanonymize(transaction.getTargetAccountNumber())) : null;
 
         dto.setSourceAccountNumber(sourceAccount);
         dto.setTargetAccountNumber(targetAccount);
 
-        dto.setSourceAccountOwner(getUsernameByAccountNumber(sourceAccount));
-        dto.setTargetAccountOwner(getUsernameByAccountNumber(targetAccount));
+        dto.setSourceAccountOwner(getUsernameByAccountNumber(anonymizationService.deanonymize(transaction.getSourceAccountNumber())));
+        dto.setTargetAccountOwner(getUsernameByAccountNumber(anonymizationService.deanonymize(transaction.getTargetAccountNumber())));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserModel currentUser = userRepo.findByUsername(authentication.getName())

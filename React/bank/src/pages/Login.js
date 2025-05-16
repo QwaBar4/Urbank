@@ -31,7 +31,7 @@ const Login = () => {
 	};
 
     return (
-        <div className="mt-2 ml-2 w-15 mr-80 border width-5 border-black ">
+        <div className="mt-2 ml-2 w-15 border width-5 max-w-md border-black ">
             <form className="mt-2 ml-2"onSubmit={handleSubmit}>
                 <h1>Login</h1>
                 <input

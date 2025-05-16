@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatAccountNumber} from '../../services/api'
 
 const TransactionDetailsModal = ({ transaction, onClose }) => {
   if (!transaction) return null;
@@ -80,13 +81,13 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
                 <div>
                   <p className="text-sm text-gray-500">From Account</p>
                   <p className="font-medium">
-                    {transaction.sourceAccountOwner} ({transaction.sourceAccountNumber})
+                    {transaction.sourceAccountOwner} ({formatAccountNumber(transaction.sourceAccountNumber)})
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">To Account</p>
                   <p className="font-medium">
-                    {transaction.targetAccountOwner} ({transaction.targetAccountNumber})
+                    {transaction.targetAccountOwner} ({formatAccountNumber(transaction.targetAccountNumber)})
                   </p>
                 </div>
               </div>

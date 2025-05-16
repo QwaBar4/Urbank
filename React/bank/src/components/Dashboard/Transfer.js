@@ -118,7 +118,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group mb-3">
-                        <label className="form-label">From Account:</label>
+                        <label className="form-label">From Account: </label>
                         <input
                             type="text"
                             name="sourceAccount"
