@@ -13,17 +13,19 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
     const amount = Math.abs(transaction.amount).toFixed(2);
     const isOutgoing = transaction.sourceAccountNumber === transaction.userAccountNumber;
     
-    if (transaction.type === 'DEPOSIT') {
-      return <span className="text-success">+{amount}$</span>;
-    } else if (transaction.type === 'WITHDRAWAL') {
-      return <span className="text-danger">-{amount}$</span>;
-    } else if (isOutgoing) {
-      return <span className="text-danger">-{amount}$</span>;
+    if (transaction.type === 'TRANSFER') {
+    	if (transaction.targetAccountOwner === transaction.sourceAccountOwner){
+        	return <span className="text-success">{amount}$</span>;
+    	} else if (transaction.sourceAccountOwner != transaction.targetAccountOwner) {
+		 	return <span className="text-danger">-{amount}$</span>;
+		} else {
+			return <span className="text-danger">+{amount}$</span>;
+		}
     } else {
-      return <span className="text-success">+{amount}$</span>;
+      return <span className="text-success">{amount}$</span>;
     }
   };
-
+	
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
