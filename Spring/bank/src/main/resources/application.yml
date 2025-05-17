@@ -45,7 +45,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        ddl-auto: validate
+        ddl-auto: update
         connection.provider_disables_autocommit: true
         generate_statistics: true
         dialect: org.hibernate.dialect.PostgreSQLDialect

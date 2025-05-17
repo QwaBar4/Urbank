@@ -35,9 +35,8 @@ public class AccountModel {
     @Column(name = "last_interest_calculation")
     private LocalDateTime lastInterestCalculation;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonIgnore 
+	@OneToOne
+	@JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserModel user;
 
     // Getters and Setters

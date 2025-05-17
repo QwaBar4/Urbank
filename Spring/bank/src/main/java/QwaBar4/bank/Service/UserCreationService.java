@@ -30,25 +30,22 @@ public class UserCreationService {
         this.accountRepo = accountRepo;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public UserModel createUserTransaction(String username, String email, String password) {
-        // Normalize inputs
-        String normalizedUsername = username.trim().toLowerCase();
-        String normalizedEmail = email.trim().toLowerCase();
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public UserModel createUserTransaction(String username, String email, String password) {
 
-        // Validate inputs
-        validateUserInputs(normalizedUsername, normalizedEmail, password);
+		String normalizedUsername = username.trim().toLowerCase();
+		String normalizedEmail = email.trim().toLowerCase();
+		validateUserInputs(normalizedUsername, normalizedEmail, password);
 
-        // Create account
-        AccountModel account = createAccount();
+		AccountModel account = new AccountModel();
+		account.setAccountNumber("ACC-" + UUID.randomUUID());
+		account.setBalance(BigDecimal.ZERO);
 
-        // Create user with only required fields
-        UserModel user = createBasicUser(normalizedUsername, normalizedEmail, password, account);
+		UserModel user = createBasicUser(normalizedUsername, normalizedEmail, password, account);
 
-        // Save entities
-        accountRepo.save(account);
-        return userRepo.save(user);
-    }
+		user = userRepo.save(user); 
+		return user;
+	}
 
     private void validateUserInputs(String username, String email, String password) {
         if (userRepo.existsByUsernameIgnoreCase(username)) {
@@ -75,26 +72,25 @@ public class UserCreationService {
         return account;
     }
 
-    private UserModel createBasicUser(String username, String email, String password, AccountModel account) {
-        UserModel user = new UserModel();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(encoder.encode(password));
-        user.setAccount(account);
-        user.setActive(true);
-        user.getRoles().add("USER");
-        
-        // Set all other fields to null (they're now nullable)
-        user.setFirstName(null);
-        user.setLastName(null);
-        user.setMiddleName(null);
-        user.setPassportSeries(null);
-        user.setPassportNumber(null);
-        user.setDateOfBirth(null);
-        
-        account.setUser(user); // Bidirectional link
-        return user;
-    }
+	private UserModel createBasicUser(String username, String email, String password, AccountModel account) {
+		UserModel user = new UserModel();
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setPassword(encoder.encode(password));
+		user.setActive(true);
+		user.getRoles().add("USER");
+		user.setAccount(account);
+		account.setUser(user);
+		
+		user.setFirstName(null);
+		user.setLastName(null);
+		user.setMiddleName(null); 
+		user.setPassportSeries(null);
+		user.setPassportNumber(null);
+		user.setDateOfBirth(null);
+		
+		return user;
+	}
 
     private boolean isValidEmail(String email) {
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
