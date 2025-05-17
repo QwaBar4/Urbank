@@ -124,14 +124,14 @@ const Signup = () => {
     };
 
     return (
-        <div className="signup-container">
-            <h1>Create Account</h1>
+        <div className="signup-container ml-2 mt-2 border border-black max-w-md">
+            <h1 className="ml-2">Create Account</h1>
             {error && <div className="error-message">{error}</div>}
             
             <form onSubmit={handleSubmit}>
                 {!codeSent ? (
                     <>
-                        <div className="form-group">
+                        <div className="form-group ml-2 mt-2">
                             <input
                                 type="text"
                                 name="username"
@@ -149,7 +149,7 @@ const Signup = () => {
                             )}
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group ml-2 mt-2">
                             <input
                                 type="email"
                                 name="email"
@@ -166,7 +166,7 @@ const Signup = () => {
                             )}
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group ml-2 mt-2">
                             <input
                                 type="password"
                                 name="password"
@@ -178,7 +178,7 @@ const Signup = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group ml-2 mt-2">
                             <input
                                 type="password"
                                 name="passwordcon"
@@ -189,7 +189,7 @@ const Signup = () => {
                             />
                         </div>
 
-                        <button type="submit" disabled={isDisabled || !usernameAvailable || !emailAvailable}>
+                        <button type="submit" className="mt-2 ml-2 border border-black max-w-md" disabled={isDisabled || !usernameAvailable || !emailAvailable}>
                             {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
                         </button>
                     </>
@@ -222,8 +222,8 @@ const Signup = () => {
                 )}
             </form>
 
-            <div className="login-link">
-                Already have an account? <Link to="/login">Log In</Link>
+            <div className="login-link ml-2 mt-2">
+                Already have an account? <Link to="/login" className="mt-2 ml-2 border border-black max-w-md">Log In</Link>
             </div>
         </div>
     );
