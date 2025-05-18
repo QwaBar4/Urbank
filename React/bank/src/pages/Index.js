@@ -70,7 +70,7 @@ const Index = () => {
     }
 
     return (
-        <div className="index-container text-center">
+        <div className="index-container text-center mt-2">
             <h1 className="mb-4">It's Urbank{!username ? '' : ', ' + username}</h1>
             <button 
                 onClick={handleButtonClick}
