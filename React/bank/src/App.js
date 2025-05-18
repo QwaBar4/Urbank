@@ -6,12 +6,12 @@ import Signup from './components/Auth/Signup';
 import Login from './pages/Login';
 import PasswordReset from './components/Auth/PasswordReset';
 import Dashboard from './pages/Dashboard';
+import NotFound from './pages/NotFound';
 import Deposit from './components/Dashboard/Deposit';
 import Withdraw from './components/Dashboard/Withdraw';
 import EditUser from './components/Dashboard/EditUser';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Proper private route component
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
 
@@ -66,11 +66,11 @@ function App() {
             </AdminRoute>
           } />
           
-			<Route path="/edit-user/:userId" element={
-			  <PrivateRoute>
-				<EditUser />
-			  </PrivateRoute>
-			} />
+          <Route path="/edit-user/:userId" element={
+            <PrivateRoute>
+              <EditUser />
+            </PrivateRoute>
+          } />
 
           {/* Transaction routes */}
           <Route path="/deposit" element={
@@ -83,6 +83,9 @@ function App() {
               <Withdraw />
             </PrivateRoute>
           } />
+          
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

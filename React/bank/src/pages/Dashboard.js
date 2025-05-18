@@ -194,15 +194,13 @@ const Dashboard = () => {
                     }
                 `}
             </style>
-			<div className="pt-[5vh] flex flex-col items-center">
-			  {/* Horizontal top dashes */}
+			<div className="mt-2 flex flex-col items-center">
 			  <div className="flex space-x-1 mb-2">
 				{[...Array(24)].map((_, i) => (
 				  <div key={i} className="w-2 h-px bg-gray-400"></div>
 				))}
 			  </div>
 
-			  {/* Button with vertical dashes */}
 			  <div className="flex items-center">
 				<div className="flex flex-col space-y-1 mr-2">
 				  {[...Array(6)].map((_, i) => (
@@ -220,7 +218,6 @@ const Dashboard = () => {
 				  ))}
 				</div>
 			  </div>
-			  {/* Horizontal bottom dashes */}
 			  <div className="flex space-x-1 mt-2">
 				{[...Array(24)].map((_, i) => (
 				  <div key={i} className="w-2 h-px bg-gray-400"></div>
