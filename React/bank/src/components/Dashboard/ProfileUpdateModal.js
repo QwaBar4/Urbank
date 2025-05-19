@@ -7,7 +7,9 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
     defaultValues: profileData
   });
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [error, setError] = useState('');
   const [currentEmail, setCurrentEmail] = useState(profileData.email);
+  const [setProfileData] = useState(null);
 
   const handleEmailUpdated = (newEmail) => {
     onSave({ ...profileData, email: newEmail });
@@ -15,6 +17,12 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
     setShowEmailModal(false);
   };
 
+  if (profileData.firstName === null || profileData.lastName === null || profileData.middleName	=== null || profileData.passportSeries === null || profileData.passportNumber === null || profileData.dateOfBirth === null){
+  	if(error == ''){
+  	  setError('You should update all user details');
+  	}
+  }
+	
   return (
     <>
       <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -22,6 +30,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Update Profile</h5>
+              {error ? (<div className="text-red-600">{error}</div>) : (<p>aa</p>)}
             </div>
             <form onSubmit={handleSubmit(onSave)}>
               <div className="modal-body">

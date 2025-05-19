@@ -29,37 +29,30 @@ const Dashboard = () => {
 		}
 
 
-		const fetchData = async () => {
-		    try {
-		        const data = await getDashboardData();
-		        setUserData({
-		            username: data.username,
-		            account: {
-		                accountNumber: data.account.accountNumber,
-		                balance: data.account.balance,
-		                dailyTransferLimit: data.account.dailyTransferLimit,
-		                dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-		            },
-		            role: data.roles
-		        });
-		        const profileModalShown = localStorage.getItem('profileModalShown_' + data.username);
-		        console.log(profileModalShown);
-				if (profileModalShown === "false") {
-					setShowProfileModal(true);
-					localStorage.setItem('profileModalShown_' + data.username, 'true');
-				}
-		    } catch (err) {
-		        if (err.response?.status === 401) {
-		            console.log('Session expired, redirecting to login');
-		            navigate('/');
-		        } else {
-		            setError(err.message);
-		        }
-		    } finally {
-		        setLoading(false);
-		    }
+	const fetchData = async () => {
+	    try {
+	        const data = await getDashboardData();
+	        setUserData({
+	            username: data.username,
+	            account: {
+	                accountNumber: data.account.accountNumber,
+	                balance: data.account.balance,
+	                dailyTransferLimit: data.account.dailyTransferLimit,
+	                dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+	            },
+	            role: data.roles
+	        });
+	    } catch (err) {
+	        if (err.response?.status === 401) {
+	            console.log('Session expired, redirecting to login');
+	            navigate('/');
+	        } else {
+	            setError(err.message);
+	        }
+	    } finally {
+	        setLoading(false);
+	    }
 		};
-
 		fetchData();
 	}, [navigate]);
 	
@@ -73,6 +66,9 @@ const Dashboard = () => {
     const fetchProfile = async () => {
         try {
             const response = await api.getUserProfile();
+            if (response.firstName === null || response.lastName === null || response.middleName=== null || response.passportSeries === null || response.passportNumber === null || response.dateOfBirth === null){
+            	setShowProfileModal(true);
+            }
             setProfileData(response);
         } catch (error) {
             console.error('Error loading profile:', error);
@@ -286,7 +282,6 @@ const Dashboard = () => {
                                         <button
                                             className="btn btn-info border w-40 h-7 me-2 border-black me-2"
                                             onClick={() => {
-                                                if (!window.confirm('You are about to view sensitive personal data. Confirm?')) return;
                                                 setShowUserDetailsModal(true);
                                             }}
                                         >

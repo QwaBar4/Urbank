@@ -107,8 +107,6 @@ const Signup = () => {
                 });
 
                 if (response.jwt) {
-                    localStorage.setItem('profileModalShown_' + formData.username.trim(), 'false');
-                    console.log(localStorage.getItem('profileModalShown_' + formData.username.trim()))
                     navigate('/dashboard');
                 } else {
                     // Account created but authentication failed
@@ -195,9 +193,9 @@ const Signup = () => {
                     </>
                 ) : (
                     <>
-                        <p>We sent a verification code to {formData.email}. Please enter it below:</p>
+                        <p className="ml-2">We sent a verification code to {formData.email}. Please enter it below:</p>
                         
-                        <div className="form-group">
+                        <div className="form-group ml-2">
                             <input
                                 type="text"
                                 placeholder="Verification Code"
@@ -207,14 +205,14 @@ const Signup = () => {
                             />
                         </div>
 
-                        <button type="submit" disabled={isDisabled}>
+                        <button type="submit" disabled={isDisabled} className="ml-2 border border-black">
                             {isDisabled ? 'Creating Account...' : 'Complete Registration'}
                         </button>
                         
                         <button 
                             type="button" 
                             onClick={() => setCodeSent(false)}
-                            className="secondary-button"
+                            className="secondary-button ml-2 border border-black"
                         >
                             Back
                         </button>
