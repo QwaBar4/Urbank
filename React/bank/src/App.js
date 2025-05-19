@@ -12,21 +12,25 @@ import Withdraw from './components/Dashboard/Withdraw';
 import EditUser from './components/Dashboard/EditUser';
 import AdminDashboard from './pages/AdminDashboard';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, showNotFound = false }) => {
   const { user } = useAuth();
 
   if (user?.loading) {
     return <div>Loading...</div>;
   }
 
+  if (showNotFound && !user) {
+    return <NotFound />;
+  }
+
   return user ? children : <Navigate to="/dashboard" replace />;
 };
 
-const AdminRoute = ({ children }) => {
+const AdminRoute = ({ children, showNotFound = false }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return showNotFound ? <NotFound /> : <Navigate to="/" replace />;
 
   const isAdmin = user.roles?.some(role => 
     role === 'ADMIN' || 
@@ -35,7 +39,7 @@ const AdminRoute = ({ children }) => {
   );
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return showNotFound ? <NotFound /> : <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -61,25 +65,25 @@ function App() {
 
           {/* Admin-only route */}
           <Route path="/admin" element={
-            <AdminRoute>
+            <AdminRoute showNotFound>
               <AdminDashboard />
             </AdminRoute>
           } />
           
           <Route path="/edit-user/:userId" element={
-            <PrivateRoute>
+            <PrivateRoute showNotFound>
               <EditUser />
             </PrivateRoute>
           } />
 
           {/* Transaction routes */}
           <Route path="/deposit" element={
-            <PrivateRoute>
+            <PrivateRoute showNotFound>
               <Deposit />
             </PrivateRoute>
           } />
           <Route path="/withdraw" element={
-            <PrivateRoute>
+            <PrivateRoute showNotFound>
               <Withdraw />
             </PrivateRoute>
           } />
