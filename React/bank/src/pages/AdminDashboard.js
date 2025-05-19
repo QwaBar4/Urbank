@@ -380,20 +380,20 @@ const AdminDashboard = () => {
 			  <div className="list-group">
 				<div className="list-group-item">
 				  <div className="row">
-				    <div className="col-md-6">
-				      <p><strong>Username:</strong> {selectedUserDetails.username}</p>
-				      <p><strong>Email:</strong> {selectedUserDetails.email}</p>
-				      <p><strong>Account Number:</strong> {selectedUserDetails.accountNumber}</p>
-				      <p><strong>Balance:</strong> {selectedUserDetails.balance.toFixed(2)} $</p>
-				      <p><strong>Status:</strong> {selectedUserDetails.active ? 'Active' : 'Inactive'}</p>
+				    <div className="col-md-6 mt-2">
+				      <p className="mt-2"><strong>Username:</strong> {selectedUserDetails.username}</p>
+				      <p className="mt-2"><strong>Email:</strong> {selectedUserDetails.email}</p>
+				      <p className="mt-2"><strong>Account Number:</strong> {selectedUserDetails.accountNumber}</p>
+				      <p className="mt-2"><strong>Balance:</strong> {selectedUserDetails.balance.toFixed(2)} $</p>
+				      <p className="mt-2"><strong>Status:</strong> {selectedUserDetails.active ? 'Active' : 'Inactive'}</p>
 				    </div>
 				    <div className="col-md-6">
-				      <p><strong>First Name:</strong> {selectedUserDetails.firstName}</p>
-				      <p><strong>Last Name:</strong> {selectedUserDetails.lastName}</p>
-				      <p><strong>Middle Name:</strong> {selectedUserDetails.middleName || 'N/A'}</p>
-				      <p><strong>Passport:</strong> {selectedUserDetails.passportSeries} {selectedUserDetails.passportNumber}</p>
-				      <p><strong>Date of Birth:</strong> {new Date(selectedUserDetails.dateOfBirth).toLocaleDateString()}</p>
-				      <p><strong>Roles: </strong> {selectedUserDetails.roles?.map((role, i) => (<li key={i}>{role}</li>))}</p>
+				      <p className="mt-2"><strong>First Name:</strong> {selectedUserDetails.firstName}</p>
+				      <p className="mt-2"><strong>Last Name:</strong> {selectedUserDetails.lastName}</p>
+				      <p className="mt-2"><strong>Middle Name:</strong> {selectedUserDetails.middleName || 'N/A'}</p>
+				      <p className="mt-2"><strong>Passport:</strong> {selectedUserDetails.passportSeries} {selectedUserDetails.passportNumber}</p>
+				      <p className="mt-2"><strong>Date of Birth:</strong> {new Date(selectedUserDetails.dateOfBirth).toLocaleDateString()}</p>
+				      <p className="mt-2"><strong>Roles: </strong> {selectedUserDetails.roles?.map((role, i) => (<li key={i}>{role}</li>))}</p>
 				    </div>
 				  </div>
 				</div>

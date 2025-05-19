@@ -88,12 +88,12 @@ const EditUser = () => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 ml-2">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Edit User: {userData.username}</h1>
         <button 
           onClick={() => navigate('/admin')}
-          className="btn btn-outline-secondary"
+          className="btn btn-outline-secondary border border-black"
         >
           Back to Admin Dashboard
         </button>
@@ -108,6 +108,7 @@ const EditUser = () => {
           <Form.Control
             type="text"
             name="username"
+            className="ml-2 border border-black"
             value={formData.username}
             onChange={handleChange}
             required
@@ -119,13 +120,14 @@ const EditUser = () => {
           <Form.Control
             type="email"
             name="email"
+            className="ml-2 border border-black"
             value={formData.email}
             onChange={handleChange}
             required
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3 border border-black w-20">
           <Form.Label>Role</Form.Label>
           <div>
             <Form.Check
@@ -149,10 +151,10 @@ const EditUser = () => {
           </div>
         </Form.Group>
 
-        <Button variant="primary" type="submit" className="me-2">
+        <Button variant="primary" type="submit" className="me-2 border border-black">
           Save Changes
         </Button>
-        <Button variant="secondary" onClick={() => navigate('/admin')}>
+        <Button variant="secondary" className="border border-black" onClick={() => navigate('/admin')}>
           Cancel
         </Button>
       </Form>
