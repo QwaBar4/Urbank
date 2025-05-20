@@ -33,6 +33,7 @@ const Dashboard = () => {
 	    try {
 	        const data = await getDashboardData();
 	        setUserData({
+	        	id: data.id,
 	            username: data.username,
 	            account: {
 	                accountNumber: data.account.accountNumber,
@@ -230,24 +231,24 @@ const Dashboard = () => {
                         Logout
                     </button>
                     <button
-                        onClick={async () => {
-                            try {
-                                const response = await api.generateUserStatement(userData.username);
-                                const blob = new Blob([response.data], { type: 'application/pdf' });
-                                const url = window.URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = response.filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                            } catch (error) {
-                                console.error('Error downloading statement:', error);
-                            }
-                        }}
-                        className="btn btn-outline-success border w-40 h-7 me-2 border-black me-2"
+                      className="btn btn-sm btn-success border w-72 h-8 me-2 border-black me-2"
+                      onClick={async () => {
+                        try {
+                          const response = await api.generateUserStatement(userData.username);
+                          const blob = new Blob([response.data], { type: 'application/pdf' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = response.filename;
+                          document.body.appendChild(a);
+                          a.click();
+                          a.remove();
+                        } catch (error) {
+                          console.error('Error downloading user statement:', error);
+                        }
+                      }}
                     >
-                        Download Statement
+                      Download Statement
                     </button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
