@@ -196,29 +196,21 @@ public class DashboardController {
 	}
 
 	@GetMapping("/api/user/statements")
-	public ResponseEntity<byte[]> generateUserStatement() {
+	public ResponseEntity<byte[]> generateUserStatement(@RequestParam Long userId) {
 		try {
-		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		    String username = authentication.getName();
-
-		    UserModel user = userModelRepository.findByUsername(username)
-		            .orElseThrow(() -> new RuntimeException("User not found"));
-
-		    StatementPDF statementPDF = statementService.generateStatement(user.getAccount().getId());
+		    StatementPDF statementPDF = statementService.generateStatement(userId);
 		    byte[] pdfContent = statementPDF.getContent();
 
 		    HttpHeaders headers = new HttpHeaders();
 		    headers.add("Content-Disposition", "attachment; filename=transaction_statement.pdf");
 		    headers.add("Content-Type", "application/pdf");
-			
-			auditLogService.logAction("STATEMENT_DOWNLOAD", authentication.getName(), "User downloaded statement");
+
 		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
 		} catch (Exception e) {
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 		            .body("Error generating PDF: ".getBytes());
 		}
 	}
-
 
 	@PostMapping("/api/logout")
 	public ResponseEntity<?> logout(@RequestParam String username, Authentication authentication) {

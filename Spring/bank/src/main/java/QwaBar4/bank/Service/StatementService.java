@@ -22,19 +22,25 @@ public class StatementService {
         this.pdfGenerator = pdfGenerator;
     }
 
-    public StatementPDF generateStatement(Long accountId) {
-        List<TransactionDTO> transactions = transactionService.getUserTransactionsById(accountId);
+	public StatementPDF generateStatement(Long accountId) {
+		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(accountId);
 
-        transactions.forEach(t -> {
-            t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
-            t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
-        });
+		// Check for empty transactions
+		if (transactions.isEmpty()) {
+		    throw new RuntimeException("No transactions found for the account");
+		}
 
-        try {
-            byte[] pdfContent = pdfGenerator.generate(transactions);
-            return new StatementPDF(pdfContent);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to generate PDF statement", e);
-        }
-    }
+		// Anonymize transaction data
+		transactions.forEach(t -> {
+		    t.setSourceAccountNumber(anonymizationService.anonymize(t.getSourceAccountNumber()));
+		    t.setTargetAccountNumber(anonymizationService.anonymize(t.getTargetAccountNumber()));
+		});
+
+		try {
+		    byte[] pdfContent = pdfGenerator.generate(transactions);
+		    return new StatementPDF(pdfContent);
+		} catch (IOException e) {
+		    throw new RuntimeException("Failed to generate PDF statement: " + e.getMessage(), e);
+		}
+	}
 }

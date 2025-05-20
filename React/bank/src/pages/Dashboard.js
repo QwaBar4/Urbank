@@ -234,7 +234,7 @@ const Dashboard = () => {
                       className="btn btn-sm btn-success border w-72 h-8 me-2 border-black me-2"
                       onClick={async () => {
                         try {
-                          const response = await api.generateUserStatement(userData.username);
+                          const response = await api.generateUserStatement(userData.id);
                           const blob = new Blob([response.data], { type: 'application/pdf' });
                           const url = window.URL.createObjectURL(blob);
                           const a = document.createElement('a');

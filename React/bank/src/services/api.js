@@ -326,7 +326,7 @@ export const getUserAuditLogs = async (userId) => {
   }
 };
 
-export const generateUserStatement = async (username) => {
+export const generateUserStatement = async (userId) => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/user/statements`, {
             method: 'GET',
@@ -337,13 +337,14 @@ export const generateUserStatement = async (username) => {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to generate user statement');
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to generate user statement');
         }
 
         const blob = await response.blob();
         return {
             data: blob,
-            filename: `${username}_transaction_statement.pdf`
+            filename: `${userId}_transaction_statement.pdf`
         };
     } catch (error) {
         console.error('Error generating user statement:', error);
