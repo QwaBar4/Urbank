@@ -11,6 +11,7 @@ import Deposit from './components/Dashboard/Deposit';
 import Withdraw from './components/Dashboard/Withdraw';
 import EditUser from './components/Dashboard/EditUser';
 import AdminDashboard from './pages/AdminDashboard';
+import Loading from './pages/Loading';
 
 const PrivateRoute = ({ children, showNotFound = false }) => {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ const PrivateRoute = ({ children, showNotFound = false }) => {
     return <NotFound />;
   }
 
-  return user ? children : <Navigate to="/dashboard" replace />;
+  return user ? children : <Navigate to="/" replace />;
 };
 
 const AdminRoute = ({ children, showNotFound = false }) => {
@@ -45,6 +46,25 @@ const AdminRoute = ({ children, showNotFound = false }) => {
   return children;
 };
 
+const DashboardRoute = ({ children, showLoading = false }) => {
+	const { user, loading } = useAuth();
+	
+  if (loading) return <div>Loading...</div>;
+  if (!user) return showLoading ? <Loading /> : <Navigate to="/dashboard" replace />;
+
+  const isUserLoaded = user.roles?.some(role => 
+    role === 'USER' || 
+    role === 'ROLE_ADMIN' ||
+    role.authority === 'ROLE_ADMIN'
+  );
+
+  if (!isUserLoaded) {
+    return showLoading ? <Loading /> : <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -58,9 +78,9 @@ function App() {
 
           {/* Protected user routes */}
           <Route path="/dashboard" element={
-            <PrivateRoute>
+            <DashboardRoute showLoading>
               <Dashboard />
-            </PrivateRoute>
+            </DashboardRoute>
           } />
 
           {/* Admin-only route */}
