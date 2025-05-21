@@ -231,7 +231,7 @@ const Dashboard = () => {
                         Logout
                     </button>
                     <button
-                      className="btn btn-sm btn-success border w-72 h-8 me-2 border-black me-2"
+                      className="btn btn-sm btn-success border w-10 h-20 me-2 border-black me-2"
                       onClick={async () => {
                         try {
                           const response = await api.generateUserStatement(userData.id);

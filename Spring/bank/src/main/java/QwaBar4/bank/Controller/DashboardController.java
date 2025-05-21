@@ -196,8 +196,16 @@ public class DashboardController {
 	}
 
 	@GetMapping("/api/user/statements")
-	public ResponseEntity<byte[]> generateUserStatement(@RequestParam Long userId) {
+	public ResponseEntity<byte[]> generateUserStatement() {
 		try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+
+            UserModel user = userModelRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User  not found"));
+            
+            long userId = user.getId();
+            
 		    StatementPDF statementPDF = statementService.generateStatement(userId);
 		    byte[] pdfContent = statementPDF.getContent();
 
