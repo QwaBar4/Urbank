@@ -222,7 +222,6 @@ const Dashboard = () => {
 			  </div>
 			</div>
             <div className="dashboard-header row mb-4 mt-2">
-
                 <div className="col-md-4">
                     <button onClick={() => navigate('/')} className="btn btn-outline-primary border w-20 h-7 me-2 border-black me-2">
                         Go Home
@@ -231,7 +230,7 @@ const Dashboard = () => {
                         Logout
                     </button>
                     <button
-                      className="btn btn-sm btn-success border w-10 h-20 me-2 border-black me-2"
+                      className="btn btn-sm btn-success border w-100 h-7 me-2 border-black me-2"
                       onClick={async () => {
                         try {
                           const response = await api.generateUserStatement(userData.id);
