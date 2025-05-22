@@ -175,7 +175,7 @@ const getCsrfToken = () => {
 
 export const login = async (credentials) => {
     const response = await fetch(`${API_BASE_URL}/req/login`, {
-        method: 'POST',
+        method: 'sPOST',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -326,7 +326,7 @@ export const getUserAuditLogs = async (userId) => {
   }
 };
 
-export const generateUserStatement = async (userId) => {
+export const generateUserStatement = async (username) => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/user/statements`, {
             method: 'GET',
@@ -344,7 +344,7 @@ export const generateUserStatement = async (userId) => {
         const blob = await response.blob();
         return {
             data: blob,
-            filename: `${userId}_transaction_statement.pdf`
+            filename: `${username}_transaction_statement.pdf`
         };
     } catch (error) {
         console.error('Error generating user statement:', error);
