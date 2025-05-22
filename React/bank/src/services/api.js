@@ -175,12 +175,12 @@ const getCsrfToken = () => {
 
 export const login = async (credentials) => {
     const response = await fetch(`${API_BASE_URL}/req/login`, {
-        method: 'sPOST',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(credentials),
-        credentials: 'include', // Add this line
+        credentials: 'include', 
     });
 
     const data = await handleResponse(response);

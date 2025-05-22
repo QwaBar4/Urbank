@@ -30,7 +30,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Update Profile</h5>
-              {error ? (<div className="text-red-600">{error}</div>) : (<p>aa</p>)}
+              {error ? (<div className="text-red-600">{error}</div>) : (<p></p>)}
             </div>
             <form onSubmit={handleSubmit(onSave)}>
               <div className="modal-body">

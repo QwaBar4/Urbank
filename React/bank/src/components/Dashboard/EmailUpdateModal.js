@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getJwtToken } from '../../utils/auth'
 
 const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
   const [step, setStep] = useState(1);
@@ -70,31 +71,36 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
     }
   };
 
-  const handleVerifyNewEmail = async () => {
-    setIsLoading(true);
-    try {
-      const verifyResponse = await fetch('/auth/verify-code', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ 
-          email: newEmail, 
-          code: newEmailCode 
-        }),
-      });
+	const handleVerifyNewEmail = async () => {
+	  setIsLoading(true);
+	  try {
+		const token = getJwtToken();
+		if (!token) {
+		  throw new Error('Authentication token not found. Please log in again.');
+		}
 
-      if (!verifyResponse.ok) {
-        const errorData = await verifyResponse.json();
-        throw new Error(errorData.message || 'Verification failed');
-      }
+		const verifyResponse = await fetch('/auth/verify-code', {
+		  method: 'POST',
+		  headers: { 
+		    'Content-Type': 'application/json',
+		    'Authorization': `Bearer ${token}`
+		  },
+		  body: JSON.stringify({ 
+		    email: newEmail, 
+		    code: newEmailCode 
+		  }),
+		});
+
+		if (!verifyResponse.ok) {
+		  const errorData = await verifyResponse.json();
+		  throw new Error(errorData.message || 'Verification failed');
+		}
 
       const updateResponse = await fetch('/api/user/update-email', {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getJwtToken()}`
         },
         body: JSON.stringify({ 
           oldEmail: currentEmail,
@@ -110,11 +116,11 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
 
       onEmailUpdated(newEmail);
       onClose();
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+	  } catch (error) {
+		setError(error.message);
+	  } finally {
+		setIsLoading(false);
+	  }
   };
 
   return (
@@ -126,14 +132,13 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
           </div>
           
           {error && <div className="alert alert-danger">{error}</div>}
-
           <div className="modal-body">
             {step === 1 && (
               <>
                 <p>We'll send a verification code to your current email: <strong>{currentEmail}</strong></p>
                 <button 
                   onClick={handleSendOldEmailCode} 
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-2 border w-60 h-7 me-2 border-black me-2"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Sending...' : 'Send Verification Code'}
@@ -154,7 +159,7 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
                 />
                 <button 
                   onClick={handleVerifyOldEmail} 
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-2 border w-40 h-7 me-2 border-black me-2"
                   disabled={oldEmailCode.length !== 6 || isLoading}
                 >
                   {isLoading ? 'Verifying...' : 'Verify Code'}
@@ -175,10 +180,10 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
                 />
                 <button 
                   onClick={handleSendNewEmailCode} 
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-2 border w-80 h-7 me-2 border-black me-2"
                   disabled={!newEmail || isLoading}
                 >
-                  {isLoading ? 'Sending...' : 'Send Verification Code'}
+                  {isLoading ? 'Sending code...' : 'Validate email'}
                 </button>
               </>
             )}
@@ -196,7 +201,7 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
                 />
                 <button 
                   onClick={handleVerifyNewEmail} 
-                  className="btn btn-primary"
+                  className="btn btn-primary mt-2 border w-80 h-7 me-2 border-black me-2"
                   disabled={newEmailCode.length !== 6 || isLoading}
                 >
                   {isLoading ? 'Updating...' : 'Verify and Update Email'}
