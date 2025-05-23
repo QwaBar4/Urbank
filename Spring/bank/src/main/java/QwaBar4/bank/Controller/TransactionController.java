@@ -66,6 +66,16 @@ public class TransactionController {
 		    .orElseThrow(() -> new RuntimeException("User not found"));
 
 		List<TransactionDTO> transactions = transactionService.getUserTransactions(user.getId());
+		
+		transactions.forEach(tx -> {
+		    if (tx.getSourceAccountOwner() == null) {
+		        tx.setSourceAccountOwner("Anonymous User");
+		    }
+		    if (tx.getTargetAccountOwner() == null) {
+		        tx.setTargetAccountOwner("Anonymous User");
+		    }
+		});
+		
 		return ResponseEntity.ok(transactions);
 	}
 

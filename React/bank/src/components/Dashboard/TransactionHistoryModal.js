@@ -116,19 +116,19 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                                             >
                                                 <td>{new Date(transaction.timestamp).toLocaleString()}</td>
                                                 <td>{transaction.type}</td>
-                                                <td>
-                                                    {transaction.type === 'TRANSFER' && (
-                                                        <>
-                                                            <div className="small text-muted">
-                                                                From: {transaction.sourceAccountOwner}
-                                                            </div>
-                                                            <div className="small text-muted">
-                                                                To: {transaction.targetAccountOwner}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                    {transaction.description && `Message: ${transaction.description}`}
-                                                </td>
+												<td>
+													{transaction.type === 'TRANSFER' && (
+														<>
+															<div className="small text-muted">
+																From: {transaction.sourceAccountOwner || 'Anonymous User'}
+															</div>
+															<div className="small text-muted">
+																To: {transaction.targetAccountOwner == 'Unknown' ? 'Anonymous User' : transaction.targetAccountOwner}
+															</div>
+														</>
+													)}
+													{transaction.description && `Message: ${transaction.description}`}
+												</td>
                                                 <td className={`text-end ${getAmountClass(transaction)}`}>
                                                     {formatAmount(transaction)}
                                                 </td>
