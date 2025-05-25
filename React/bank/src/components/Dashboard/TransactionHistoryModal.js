@@ -120,10 +120,10 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
 													{transaction.type === 'TRANSFER' && (
 														<>
 															<div className="small text-muted">
-																From: {transaction.sourceAccountOwner || 'Anonymous User'}
+																From: {transaction.sourceAccountOwner} 
 															</div>
 															<div className="small text-muted">
-																To: {transaction.targetAccountOwner == 'Unknown' ? 'Anonymous User' : transaction.targetAccountOwner}
+																To: {transaction.targetAccountOwner === 'Unknown' ? <span className="text-xs text-red-500">DELETED</span> : transaction.targetAccountOwner}
 															</div>
 														</>
 													)}

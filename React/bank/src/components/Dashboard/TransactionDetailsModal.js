@@ -90,6 +90,7 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
                   <p className="font-medium">
                     {transaction.targetAccountOwner == 'Unknown' ? 'Anonymous' : transaction.targetAccountOwner} ({formatAccountNumber(transaction.targetAccountNumber)})
                   </p>
+                  {transaction.targetAccountOwner == 'Unknown' ? <p className="text-xs text-red-500" >This account was deleted</p> : <p></p>}
                 </div>
               </div>
             </div>
@@ -99,7 +100,6 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
             <div className="border-t pt-4">
               <p className="text-sm text-gray-500">Description</p>
               <p className="font-medium">{transaction.description}</p>
-              {transaction.targetAccountOwner == 'Unknown' ? <p className="text-xs text-red-500" >This account was deleted</p> : <p></p>}
             </div>
           )}
           
