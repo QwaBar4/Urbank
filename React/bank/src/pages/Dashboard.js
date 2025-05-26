@@ -230,7 +230,7 @@ const Dashboard = () => {
                         Logout
                     </button>
                     <button
-                      className="btn btn-sm btn-success border w-100 h-7 me-2 border-black me-2"
+                      className="btn btn-sm btn-success border w-40 h-7 me-2 border-black"
                       onClick={async () => {
                         try {
                           const response = await api.generateUserStatement(userData.username);
@@ -370,40 +370,40 @@ const Dashboard = () => {
                             <div className="modal-header">
                                 <h5 className="modal-title">Your Full Details, {profileData.username}</h5>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body mt-2">
                                 <div className="alert alert-warning">
-                                    <i className="bi bi-shield-lock"></i> Sensitive Data - Access Logged
+                                    <i className="bi bi-shield-lock mt-2"></i> Sensitive Data - Access Logged
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6">
-                                        <h5>Personal Information</h5>
-                                        <p>
+                                        <h5 className="mt-2">Personal Information</h5>
+                                        <p className="mt-2">
                                             <strong>Name:</strong> {profileData.firstName}
                                         </p>
-                                        <p>
+                                        <p className="mt-2">
                                             <strong>Middle Name:</strong> {profileData.middleName || 'N/A'}
                                         </p>
-                                        <p>
+                                        <p className="mt-2">
                                             <strong>Last Name:</strong> {profileData.lastName || 'N/A'}
                                         </p>
-                                        <p>
+                                        <p className="mt-2">
                                             <strong>Date of Birth:</strong>{" "}
                                             {new Date(profileData.dateOfBirth).toLocaleDateString()}
                                         </p>
-                                        <p>
+                                        <p className="mt-2">
                                             <strong>Email:</strong>{" "}
                                             {(profileData.email)}
                                         </p>
-                                        <p>
+                                        <p className="mt-2">
                                             <strong>Account number:</strong>{" "}
                                             {(profileData.accountNumber)}
                                         </p>
                                     </div>
 
                                     <div className="col-md-6">
-                                        <h5>Identification Data</h5>
-                                        <div className="mb-3">
+                                        <h5 className="mt-2">Identification Data</h5>
+                                        <div className="mb-3 mt-2">
                                             <label className="form-label">Passport Details</label>
                                             <div className="input-group">
                                                 <input
