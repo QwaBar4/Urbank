@@ -74,7 +74,7 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto p-4">
-                <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl" style={{ maxHeight: "90vh", overflowY: "auto" }}>
                     <div className="p-4 border-b flex justify-between items-center">
                         <h3 className="text-lg font-semibold">Transaction History</h3>
                         <button 

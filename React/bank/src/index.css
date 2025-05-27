@@ -15,10 +15,6 @@ body {
   user-select: none;
 }
 
-.card, .btn, .modal-content {
-  cursor: default;
-}
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

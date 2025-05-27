@@ -46,9 +46,9 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                 
                 <div className="mb-3">
                     <small className="text-muted">Account Number</small>
-                    <p className="mb-0 font-monospace">
+                    <h3 className="mb-0">
                    	 {accountNumber ? formatAccountNumber(accountNumber) : 'Loading...'}
-                    </p>
+                    </h3>
                 </div>
                 
                 <div className="mb-4">
