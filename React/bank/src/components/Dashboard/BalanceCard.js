@@ -28,21 +28,6 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     return (
         <div className="card mb-4">
             <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5 className="card-title mb-0">Refresh data</h5>
-                    <button 
-                        onClick={handleRefresh}
-                        className="btn btn-sm btn-outline-secondary border w-40 h-7 me-2 border-black me-2"
-                        disabled={isRefreshing}
-                        aria-label="Refresh balance"
-                    >
-                        {isRefreshing ? (
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        ) : (
-                            <span>↻Refresh↻</span> 
-                        )}
-                    </button>
-                </div>
                 
                 <div className="mb-3">
                     <small className="text-muted">Account Number</small>

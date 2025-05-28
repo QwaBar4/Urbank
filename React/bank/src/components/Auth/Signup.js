@@ -107,7 +107,7 @@ const Signup = () => {
                 });
 
                 if (response.jwt) {
-                    navigate('/dashboard');
+                    navigate('/');
                 } else {
                     // Account created but authentication failed
                     setError('Account created! Please log in with your credentials.');
