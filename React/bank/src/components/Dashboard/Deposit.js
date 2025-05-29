@@ -123,7 +123,7 @@ const Deposit = () => {
                                     <input
                                         type="text"
                                         id="description"
-                                        className="form-control"
+                                        className="form-control ml-2"
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="e.g., Cash deposit, Check deposit"

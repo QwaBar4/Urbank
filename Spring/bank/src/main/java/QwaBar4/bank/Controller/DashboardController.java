@@ -216,7 +216,7 @@ public class DashboardController {
 		    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
 		} catch (Exception e) {
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		            .body("Error generating PDF: ".getBytes());
+		            .body("Error generating PDF: Maybe your transaction history is empty or data is corrupted".getBytes());
 		}
 	}
 

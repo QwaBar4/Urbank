@@ -14,6 +14,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [profileData, setProfileData] = useState(null);
+    const [showInfoModal, setShowInfoModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
@@ -49,6 +50,7 @@ const Dashboard = () => {
 	            navigate('/');
 	        } else {
 	            setError(err.message);
+	            setShowInfoModal(true);
 	        }
 	    } finally {
 	        setLoading(false);
@@ -143,7 +145,6 @@ const Dashboard = () => {
     };
 
     if (loading) return <div className="loading">Loading account information...</div>;
-    if (error) return <div className="error alert alert-danger">Error: {error}</div>;
     if (!userData) return null;
 
     const isAdmin = userData.role.includes("ROLE_ADMIN");
@@ -244,6 +245,8 @@ const Dashboard = () => {
                           a.remove();
                         } catch (error) {
                           console.error('Error downloading user statement:', error);
+                          setError(error.message)
+                          setShowInfoModal(true)
                         }
                       }}
                     >
@@ -454,6 +457,28 @@ const Dashboard = () => {
 					userAccount={userData.account}
 					onClose={() => setShowTransactionHistoryModal(false)}
 				/>
+			)}
+			
+			{showInfoModal && error && (
+                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <h1 className="modal-title text-2xl">An error appeared</h1>
+                            <h5 className="mt-2">{error}</h5>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary border w-40 h-7 me-2 border-black me-2 mt-5"
+                                    onClick={() => {
+                                        setShowInfoModal(false);
+                                    }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 			)}
         </div>
     );
