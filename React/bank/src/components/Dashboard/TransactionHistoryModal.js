@@ -94,7 +94,9 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                             </div>
                         ) : error ? (
                             <div className="alert alert-danger">{error}</div>
-                        ) : (
+                        ) : !transactions || transactions.length === 0 ? (
+                        	<h4 className = "font-semibold">Transaction history is empty</h4>
+                        	) : (
                             <div className="table-responsive">
                                 <table className="table table-hover">
                                     <thead className="table-light">
