@@ -59,7 +59,6 @@ const Dashboard = () => {
 		fetchData();
 	}, [navigate]);
 	
-	
     useEffect(() => {
         if (userData) {
             fetchProfile();
