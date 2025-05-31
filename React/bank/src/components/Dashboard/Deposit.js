@@ -85,7 +85,7 @@ const Deposit = () => {
                         <div className="card-body">
                             {error && <div className="alert alert-danger">{error}</div>}
                             {success && <div className="alert alert-success">{success}</div>}
-                            
+                           
                             <div className="mb-4">
                                 <h5>Account Information</h5>
                                 <div className="d-flex justify-content-between">
