@@ -103,10 +103,6 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
             </div>
           )}
           
-          <div className="border-t pt-4">
-            <p className="text-sm text-gray-500">Reference Number</p>
-            <p className="font-mono text-sm">{transaction.reference}</p>
-          </div>
         </div>
         
         <div className="p-4 border-t flex justify-end">

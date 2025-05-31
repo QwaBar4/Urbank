@@ -8,6 +8,7 @@ const Deposit = () => {
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showInfoModal, setShowInfoModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [accountInfo, setAccountInfo] = useState({ accountNumber: '', balance: 0 });
     const navigate = useNavigate();
@@ -63,6 +64,7 @@ const Deposit = () => {
 
 		const data = await response.json();
 		setSuccess(`Deposit successful! New balance: $${data.newBalance.toFixed(2)}`);
+		setShowInfoModal(true);
 		setAccountInfo(prev => ({ ...prev, balance: data.newBalance }));
             setAmount('');
             setDescription('');
@@ -84,7 +86,6 @@ const Deposit = () => {
                         </div>
                         <div className="card-body">
                             {error && <div className="alert alert-danger">{error}</div>}
-                            {success && <div className="alert alert-success">{success}</div>}
                            
                             <div className="mb-4">
                                 <h5>Account Information</h5>
@@ -159,6 +160,27 @@ const Deposit = () => {
                     </div>
                 </div>
             </div>
+            {showInfoModal && success && (
+		            <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+		                <div className="modal-dialog modal-lg">
+		                    <div className="modal-content">
+		                        <h1 className="modal-title text-2xl">Operation completed!</h1>
+		                        <h5 className="mt-2">{success}</h5>
+		                        <div className="modal-footer">
+		                            <button
+		                                type="button"
+		                                className="btn btn-secondary border w-40 h-7 me-2 border-black me-2 mt-5"
+		                                onClick={() => {
+		                                    setShowInfoModal(false);
+		                                }}
+		                            >
+		                                Close
+		                            </button>
+		                        </div>
+		                    </div>
+		                </div>
+		            </div>
+				)}
         </div>
     );
 };
