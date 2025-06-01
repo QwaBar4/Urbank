@@ -9,7 +9,6 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [error, setError] = useState('');
   const [currentEmail, setCurrentEmail] = useState(profileData.email);
-  const [setProfileData] = useState(null);
 
   const handleEmailUpdated = (newEmail) => {
     onSave({ ...profileData, email: newEmail });
@@ -18,7 +17,7 @@ const ProfileUpdateModal = ({ profileData, onClose, onSave }) => {
   };
 
   if (profileData.firstName === null || profileData.lastName === null || profileData.middleName	=== null || profileData.passportSeries === null || profileData.passportNumber === null || profileData.dateOfBirth === null){
-  	if(error == ''){
+  	if(error === ''){
   	  setError('You should update all user details');
   	}
   }

@@ -1,21 +1,8 @@
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatAccountNumber} from '../../services/api'
 
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
-    const [isRefreshing, setIsRefreshing] = useState(false);
     const navigate = useNavigate();
-
-    const handleRefresh = async (e) => {
-        e.preventDefault(); // Prevent any default navigation
-        e.stopPropagation(); // Stop event bubbling
-        setIsRefreshing(true);
-        try {
-            await refreshBalance();
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const handleDeposit = () => {
         navigate('/deposit');
