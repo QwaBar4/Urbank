@@ -261,17 +261,15 @@ const AdminDashboard = () => {
         <div className={`modal ${showTransactions !== null ? 'show' : ''}`}>
           <div className="modal-content">
             <span className="close" onClick={() => setShowTransactions(null)}>&times;</span>
-            <h2>Transactions</h2>
+            <h2 className="text-xl fw-bold mb-2 text-center">List of {user.username}'s transactions</h2>
             <div className="table-responsive">
-              <table className="table table-hover">
-                <thead className="table-light">
+              <table className="table table-hover table-center">
+                <thead className="table-light text-center">
                   <tr>
                     <th>Date</th>
                     <th>Type</th>
                     <th>Details</th>
                     <th className="text-end">Amount</th>
-                    <th>Status</th>
-                    <th>Reference</th>
                   </tr>
                 </thead>
                 <tbody>

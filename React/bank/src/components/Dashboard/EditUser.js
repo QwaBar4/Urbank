@@ -91,12 +91,6 @@ const EditUser = () => {
     <div className="container mt-4 ml-2">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Edit User: {userData.username}</h1>
-        <button 
-          onClick={() => navigate('/admin')}
-          className="btn btn-outline-secondary border border-black"
-        >
-          Back to Admin Dashboard
-        </button>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -155,7 +149,7 @@ const EditUser = () => {
           Save Changes
         </Button>
         <Button variant="secondary" className="border border-black" onClick={() => navigate('/admin')}>
-          Cancel
+          Back
         </Button>
       </Form>
     </div>
