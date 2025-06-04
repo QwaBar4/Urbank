@@ -257,74 +257,77 @@ const AdminDashboard = () => {
 
       {/* Modals */}
       <>
-        {/* Transactions Modal */}
-        <div className={`modal ${showTransactions !== null ? 'show' : ''}`}>
-          <div className="modal-content">
-            <span className="close" onClick={() => setShowTransactions(null)}>&times;</span>
-            <h2 className="text-xl fw-bold mb-2 text-center">List of {user.username}'s transactions</h2>
-            <div className="table-responsive">
-              <table className="table table-hover table-center">
-                <thead className="table-light text-center">
-                  <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Details</th>
-                    <th className="text-end">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactionsLoading ? (
-                    <tr>
-                      <td colSpan="6" className="text-center">
-                        <div className="spinner-border text-primary" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : showTransactions?.length > 0 ? (
-                    showTransactions.map((transaction) => (
-                      <tr key={transaction.id}>
-                        <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-                        <td>{transaction.type}</td>
-                        <td>
-                          {transaction.type === 'TRANSFER' && (
-                            <>
-                              <div className="small text-muted">
-                                From: {transaction.sourceAccountOwner || 'N/A'}
-                              </div>
-                              <div className="small text-muted">
-                                To: {transaction.targetAccountOwner || 'N/A'}
-                              </div>
-                            </>
-                          )}
-                          {transaction.description && `Message: ${transaction.description}`}
-                        </td>
-                        <td className={`text-end ${
-                          transaction.type === 'DEPOSIT' ? 'text-success' :
-                          transaction.sourceAccountOwner === selectedUser?.username ? 'text-danger' : 'text-success'
-                        }`}>
-                          {transaction.type === 'TRANSFER' && transaction.sourceAccountOwner === transaction.targetAccountOwner
-                            ? `${Math.abs(transaction.amount).toFixed(2)}$`
-                            : transaction.sourceAccountOwner === selectedUser?.username 
-                            ? `+${Math.abs(transaction.amount).toFixed(2)}$`
-                            : `-${Math.abs(transaction.amount).toFixed(2)}$`}
-                        </td>
-                        <td>{transaction.status}</td>
-                        <td className="text-muted small">{transaction.reference}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="text-center">
-                        <div className="alert alert-info m-3">No transactions found</div>
-                      </td>
-                    </tr>
+{/* Transactions Modal */}
+<div className={`modal d-flex align-items-center justify-content-center ${showTransactions !== null ? 'show' : ''}`} style={{ display: showTransactions !== null ? 'flex' : 'none' }}>
+  <div className="modal-content bg-white p-4" style={{ width: '90%', maxWidth: '800px', maxHeight: '80vh', overflowY: 'auto' }}>
+  <span className="close" onClick={() => setShowTransactions(null)}>&times;</span>
+    <div className="d-flex justify-content-between align-items-center mb-3">
+      <h2 className="text-xl fw-bold text-center">List of {user.username}'s transactions</h2>
+    </div>
+    <div className="table-responsive">
+      <table className="table table-hover" style={{ width: '100%' }}>
+        <thead className="bg-light">
+          <tr>
+            <th className="text-center p-3">Date</th>
+            <th className="text-center p-3">Type</th>
+            <th className="text-center p-3">Details</th>
+            <th className="text-center p-3">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactionsLoading ? (
+            <tr>
+              <td colSpan="4" className="text-center p-3">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          ) : showTransactions?.length > 0 ? (
+            showTransactions.map((transaction) => (
+              <tr key={transaction.id}>
+                <td className="text-center p-3">{new Date(transaction.timestamp).toLocaleString()}</td>
+                <td className="text-center p-3">{transaction.type}</td>
+                <td className="text-center p-3">
+                  {transaction.type === 'TRANSFER' && (
+                    <>
+                      <div className="small text-muted mb-1">
+                        From: {transaction.sourceAccountOwner || 'N/A'}
+                      </div>
+                      <div className="small text-muted">
+                        To: {transaction.targetAccountOwner || 'N/A'}
+                      </div>
+                    </>
                   )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                  {transaction.description && <div className="mt-1">Message: {transaction.description}</div>}
+                </td>
+                <td className={`text-center p-3 ${
+                  transaction.type === 'DEPOSIT' ? 'text-success' :
+                  transaction.sourceAccountOwner === selectedUser?.username ? 'text-danger' : 'text-success'
+                }`}>
+                  {transaction.type === 'TRANSFER' && transaction.sourceAccountOwner === transaction.targetAccountOwner
+                    ? `${Math.abs(transaction.amount).toFixed(2)}$`
+                    : transaction.sourceAccountOwner === selectedUser?.username
+                    ? `+${Math.abs(transaction.amount).toFixed(2)}$`
+                    : `-${Math.abs(transaction.amount).toFixed(2)}$`}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="text-center p-3">
+                <div className="alert alert-info">No transactions found</div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
 
         {/* Audit Logs Modal */}
         <div className={`modal ${showAuditLogsModal ? 'show' : ''}`}>
