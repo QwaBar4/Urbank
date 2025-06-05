@@ -73,19 +73,15 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto p-4">
-                <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl" style={{ maxHeight: "90vh", overflowY: "auto" }}>
-                    <div className="p-4 border-b flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Transaction History</h3>
-                        <button 
-                            onClick={onClose}
-                            className="text-gray-500 hover:text-gray-700"
-                        >
-                            ✕
-                        </button>
+            <div className="modal d-flex align-items-center justify-content-center" style={{ display: 'flex', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal-content bg-white p-4" style={{ width: '90%', maxWidth: '1000px', maxHeight: '80vh', overflowY: 'auto' }}>
+                    <span className="close" onClick={onClose} style={{ float: 'right', cursor: 'pointer', fontSize: '1.5rem' }}>&times;</span>
+                    
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="text-xl fw-bold text-center w-100">Transaction History</h2>
                     </div>
                     
-                    <div className="p-4">
+                    <div className="table-responsive">
                         {loading ? (
                             <div className="text-center p-4">
                                 <div className="spinner-border text-primary" role="status">
@@ -93,68 +89,66 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                                 </div>
                             </div>
                         ) : error ? (
-                            <div className="alert alert-danger">{error}</div>
+                            <div className="alert alert-danger text-center">{error}</div>
                         ) : !transactions || transactions.length === 0 ? (
-                        	<h4 className = "font-semibold">Transaction history is empty</h4>
-                        	) : (
-                            <div className="table-responsive">
-                                <table className="table table-hover">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Type</th>
-                                            <th>Details</th>
-                                            <th className="text-end">Amount</th>
-                                            <th>Status</th>
-                                            <th>Reference</th>
+                            <div className="alert alert-info text-center">No transactions found</div>
+                        ) : (
+                            <table className="table table-hover" style={{ width: '100%' }}>
+                                <thead className="bg-light">
+                                    <tr>
+                                        <th className="text-center p-3">Date</th>
+                                        <th className="text-center p-3">Type</th>
+                                        <th className="text-center p-3">Details</th>
+                                        <th className="text-center p-3">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {transactions.map((transaction) => (
+                                        <tr 
+                                            key={transaction.id}
+                                            onClick={() => handleRowClick(transaction)}
+                                            className="cursor-pointer hover:bg-gray-50"
+                                        >
+                                            <td className="text-center p-3">{new Date(transaction.timestamp).toLocaleString()}</td>
+                                            <td className="text-center p-3">{transaction.type}</td>
+                                            <td className="text-center p-3">
+                                                {transaction.type === 'TRANSFER' && (
+                                                    <>
+                                                        <div className="small text-muted mb-1">
+                                                            From: {transaction.sourceAccountOwner} 
+                                                        </div>
+                                                        <div className="small text-muted">
+                                                            To: {transaction.targetAccountOwner === 'Unknown' ? 
+                                                                <span className="text-xs text-danger">DELETED</span> : 
+                                                                transaction.targetAccountOwner}
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {transaction.description && <div className="mt-1">Message: {transaction.description}</div>}
+                                            </td>
+                                            <td className={`text-center p-3 ${getAmountClass(transaction)}`}>
+                                                {formatAmount(transaction)}
+                                            </td>
+                                            <td className="text-center p-3">
+                                                <span className={`badge ${
+                                                    transaction.status === 'COMPLETED' ? 'bg-success' : 
+                                                    transaction.status === 'FAILED' ? 'bg-danger' : 'bg-warning'
+                                                }`}>
+                                                    {transaction.status}
+                                                </span>
+                                            </td>
+                                            <td className="text-center p-3 small text-muted">{transaction.reference}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {transactions.map((transaction) => (
-                                            <tr 
-                                                key={transaction.id}
-                                                onClick={() => handleRowClick(transaction)}
-                                                className="cursor-pointer hover:bg-gray-50"
-                                            >
-                                                <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-                                                <td>{transaction.type}</td>
-												<td>
-													{transaction.type === 'TRANSFER' && (
-														<>
-															<div className="small text-muted">
-																From: {transaction.sourceAccountOwner} 
-															</div>
-															<div className="small text-muted">
-																To: {transaction.targetAccountOwner === 'Unknown' ? <span className="text-xs text-red-500">DELETED</span> : transaction.targetAccountOwner}
-															</div>
-														</>
-													)}
-													{transaction.description && `Message: ${transaction.description}`}
-												</td>
-                                                <td className={`text-end ${getAmountClass(transaction)}`}>
-                                                    {formatAmount(transaction)}
-                                                </td>
-                                                <td>
-                                                    <span className={`badge ${
-                                                        transaction.status === 'COMPLETED' ? 'bg-success' : 
-                                                        transaction.status === 'FAILED' ? 'bg-danger' : 'bg-warning'
-                                                    }`}>
-                                                        {transaction.status}
-                                                    </span>
-                                                </td>
-                                                <td className="text-muted small">{transaction.reference}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         )}
                     </div>
                     
-                    <div className="p-4 border-t flex justify-end">
+                    <div className="d-flex justify-content-center mt-4">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
                         >
                             Close
                         </button>
