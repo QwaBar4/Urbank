@@ -121,11 +121,16 @@ const Index = () => {
                 <h1 className="mb-4">It's Urbank{!username ? '' : ', ' + username}</h1>
                 <button 
                     onClick={handleButtonClick}
-                    className="btn btn-primary btn-lg border w-80 h-7 me-2 border-black"
+                    className="btn btn-primary btn-lg border w-80 me-2 border-black"
                     disabled={isLoading}
                     style={{
-                        backgroundColor: 'white',
-                        color: 'black'
+                            padding: '0.5rem',
+                            backgroundColor: 'white',
+                            color: 'black',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginBottom: '1rem'
                     }}
                 >
                     {isLoading ? (
