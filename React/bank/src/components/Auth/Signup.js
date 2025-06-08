@@ -122,106 +122,244 @@ const Signup = () => {
     };
 
     return (
-        <div className="signup-container ml-2 mt-2 border border-black max-w-md">
-            <h1 className="ml-2">Create Account</h1>
-            {error && <div className="error-message">{error}</div>}
-            
-            <form onSubmit={handleSubmit}>
-                {!codeSent ? (
-                    <>
-                        <div className="form-group ml-2 mt-2">
-                            <input
-                                type="text"
-                                name="username"
-                                placeholder="Username (min 3 characters)"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                                minLength="3"
-                            />
-                            {formData.username.length > 0 && (
-                                <div className={`availability-message ${usernameAvailable ? 'available' : 'unavailable'}`}>
-                                    {isChecking.username ? 'Checking...' : 
-                                     (usernameAvailable ? '✓ Available' : '✗ Unavailable')}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="form-group ml-2 mt-2">
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                            {formData.email.length > 0 && (
-                                <div className={`availability-message ${emailAvailable ? 'available' : 'unavailable'}`}>
-                                    {isChecking.email ? 'Checking...' : 
-                                     (emailAvailable ? '✓ Available' : '✗ Unavailable')}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="form-group ml-2 mt-2">
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="Password (min 6 characters)"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                minLength="6"
-                            />
-                        </div>
-
-                        <div className="form-group ml-2 mt-2">
-                            <input
-                                type="password"
-                                name="passwordcon"
-                                placeholder="Confirm Password"
-                                value={formData.passwordcon}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <button type="submit" className="mt-2 ml-2 border border-black max-w-md" disabled={isDisabled || !usernameAvailable || !emailAvailable}>
-                            {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <p className="ml-2">We sent a verification code to {formData.email}. Please enter it below:</p>
-                        
-                        <div className="form-group ml-2">
-                            <input
-                                type="text"
-                                placeholder="Verification Code"
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <button type="submit" disabled={isDisabled} className="ml-2 border border-black">
-                            {isDisabled ? 'Creating Account...' : 'Complete Registration'}
-                        </button>
-                        
-                        <button 
-                            type="button" 
-                            onClick={() => setCodeSent(false)}
-                            className="secondary-button ml-2 border border-black"
-                        >
-                            Back
-                        </button>
-                    </>
+        <div style={{
+            backgroundColor: 'black',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white'
+        }}>
+            <div style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                padding: '2rem',
+                borderRadius: '8px',
+                width: '100%',
+                maxWidth: '400px'
+            }}>
+                <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Create Account</h1>
+                
+                {error && (
+                    <div style={{
+                        color: 'red',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        padding: '0.75rem',
+                        borderRadius: '4px',
+                        marginBottom: '1rem',
+                        textAlign: 'center'
+                    }}>
+                        {error}
+                    </div>
                 )}
-            </form>
+                
+                <form onSubmit={handleSubmit}>
+                    {!codeSent ? (
+                        <>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    placeholder="Username (min 3 characters)"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    required
+                                    minLength="3"
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid #555',
+                                        color: 'white',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                                {formData.username.length > 0 && (
+                                    <div style={{
+                                        fontSize: '0.8rem',
+                                        marginTop: '0.25rem',
+                                        color: isChecking.username ? '#aaa' : 
+                                              (usernameAvailable ? '#4CAF50' : '#F44336')
+                                    }}>
+                                        {isChecking.username ? 'Checking...' : 
+                                         (usernameAvailable ? '✓ Available' : '✗ Unavailable')}
+                                    </div>
+                                )}
+                            </div>
 
-            <div className="login-link ml-2 mt-2">
-                Already have an account? <Link to="/login" className="mt-2 ml-2 border border-black max-w-md">Log In</Link>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid #555',
+                                        color: 'white',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                                {formData.email.length > 0 && (
+                                    <div style={{
+                                        fontSize: '0.8rem',
+                                        marginTop: '0.25rem',
+                                        color: isChecking.email ? '#aaa' : 
+                                              (emailAvailable ? '#4CAF50' : '#F44336')
+                                    }}>
+                                        {isChecking.email ? 'Checking...' : 
+                                         (emailAvailable ? '✓ Available' : '✗ Unavailable')}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password (min 6 characters)"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    minLength="6"
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid #555',
+                                        color: 'white',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <input
+                                    type="password"
+                                    name="passwordcon"
+                                    placeholder="Confirm Password"
+                                    value={formData.passwordcon}
+                                    onChange={handleChange}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid #555',
+                                        color: 'white',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={isDisabled || !usernameAvailable || !emailAvailable}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    backgroundColor: isDisabled || !usernameAvailable || !emailAvailable ? 
+                                        'rgba(255, 255, 255, 0.3)' : 'white',
+                                    color: 'black',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: isDisabled || !usernameAvailable || !emailAvailable ? 
+                                        'not-allowed' : 'pointer',
+                                    fontSize: '1rem',
+                                    marginBottom: '1rem'
+                                }}
+                            >
+                                {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <p style={{ 
+                                textAlign: 'center',
+                                marginBottom: '1.5rem',
+                                color: '#aaa'
+                            }}>
+                                We sent a verification code to {formData.email}. Please enter it below:
+                            </p>
+                            
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Verification Code"
+                                    value={verificationCode}
+                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid #555',
+                                        color: 'white',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={isDisabled}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    backgroundColor: isDisabled ? 
+                                        'rgba(255, 255, 255, 0.3)' : 'white',
+                                    color: 'black',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                    fontSize: '1rem',
+                                    marginBottom: '1rem'
+                                }}
+                            >
+                                {isDisabled ? 'Creating Account...' : 'Complete Registration'}
+                            </button>
+                            
+                            <button 
+                                type="button" 
+                                onClick={() => setCodeSent(false)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    backgroundColor: 'transparent',
+                                    color: 'white',
+                                    border: '1px solid white',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem'
+                                }}
+                            >
+                                Back
+                            </button>
+                        </>
+                    )}
+                </form>
+
+                <div style={{ 
+                    textAlign: 'center', 
+                    marginTop: '1.5rem',
+                    color: '#aaa'
+                }}>
+                    Already have an account?{' '}
+                    <Link 
+                        to="/login" 
+                        style={{ 
+                            color: 'white',
+                            textDecoration: 'none',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Log In
+                    </Link>
+                </div>
             </div>
         </div>
     );
