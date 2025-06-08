@@ -122,41 +122,20 @@ const Signup = () => {
     };
 
     return (
-        <div style={{
-            backgroundColor: 'black',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-        }}>
-            <div style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                padding: '2rem',
-                borderRadius: '8px',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Create Account</h1>
+        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
+            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md">
+                <h1 className="text-center text-2xl font-bold mb-6">Create Account</h1>
                 
                 {error && (
-                    <div style={{
-                        color: 'red',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        marginBottom: '1rem',
-                        textAlign: 'center'
-                    }}>
+                    <div className="text-red-500 bg-red-500 bg-opacity-10 p-3 rounded mb-4 text-center">
                         {error}
                     </div>
                 )}
                 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {!codeSent ? (
                         <>
-                            <div style={{ marginBottom: '1rem' }}>
+                            <div>
                                 <input
                                     type="text"
                                     name="username"
@@ -165,29 +144,20 @@ const Signup = () => {
                                     onChange={handleChange}
                                     required
                                     minLength="3"
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid #555',
-                                        color: 'white',
-                                        borderRadius: '4px'
-                                    }}
+                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                                 />
                                 {formData.username.length > 0 && (
-                                    <div style={{
-                                        fontSize: '0.8rem',
-                                        marginTop: '0.25rem',
-                                        color: isChecking.username ? '#aaa' : 
-                                              (usernameAvailable ? '#4CAF50' : '#F44336')
-                                    }}>
+                                    <div className={`text-xs mt-1 ${
+                                        isChecking.username ? 'text-gray-400' : 
+                                        (usernameAvailable ? 'text-green-500' : 'text-red-500')
+                                    }`}>
                                         {isChecking.username ? 'Checking...' : 
                                          (usernameAvailable ? '✓ Available' : '✗ Unavailable')}
                                     </div>
                                 )}
                             </div>
 
-                            <div style={{ marginBottom: '1rem' }}>
+                            <div>
                                 <input
                                     type="email"
                                     name="email"
@@ -195,29 +165,20 @@ const Signup = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid #555',
-                                        color: 'white',
-                                        borderRadius: '4px'
-                                    }}
+                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                                 />
                                 {formData.email.length > 0 && (
-                                    <div style={{
-                                        fontSize: '0.8rem',
-                                        marginTop: '0.25rem',
-                                        color: isChecking.email ? '#aaa' : 
-                                              (emailAvailable ? '#4CAF50' : '#F44336')
-                                    }}>
+                                    <div className={`text-xs mt-1 ${
+                                        isChecking.email ? 'text-gray-400' : 
+                                        (emailAvailable ? 'text-green-500' : 'text-red-500')
+                                    }`}>
                                         {isChecking.email ? 'Checking...' : 
                                          (emailAvailable ? '✓ Available' : '✗ Unavailable')}
                                     </div>
                                 )}
                             </div>
 
-                            <div style={{ marginBottom: '1rem' }}>
+                            <div>
                                 <input
                                     type="password"
                                     name="password"
@@ -226,18 +187,11 @@ const Signup = () => {
                                     onChange={handleChange}
                                     required
                                     minLength="6"
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid #555',
-                                        color: 'white',
-                                        borderRadius: '4px'
-                                    }}
+                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                                 />
                             </div>
 
-                            <div style={{ marginBottom: '1.5rem' }}>
+                            <div>
                                 <input
                                     type="password"
                                     name="passwordcon"
@@ -245,80 +199,47 @@ const Signup = () => {
                                     value={formData.passwordcon}
                                     onChange={handleChange}
                                     required
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid #555',
-                                        color: 'white',
-                                        borderRadius: '4px'
-                                    }}
+                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                                 />
                             </div>
 
                             <button 
                                 type="submit" 
                                 disabled={isDisabled || !usernameAvailable || !emailAvailable}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    backgroundColor: isDisabled || !usernameAvailable || !emailAvailable ? 
-                                        'rgba(255, 255, 255, 0.3)' : 'white',
-                                    color: 'black',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: isDisabled || !usernameAvailable || !emailAvailable ? 
-                                        'not-allowed' : 'pointer',
-                                    fontSize: '1rem',
-                                    marginBottom: '1rem'
-                                }}
+                                className={`w-full py-2 rounded font-medium ${
+                                    isDisabled || !usernameAvailable || !emailAvailable
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-white text-black hover:bg-gray-200'
+                                } transition-colors`}
                             >
                                 {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
                             </button>
                         </>
                     ) : (
                         <>
-                            <p style={{ 
-                                textAlign: 'center',
-                                marginBottom: '1.5rem',
-                                color: '#aaa'
-                            }}>
+                            <p className="text-center mb-6 text-gray-400">
                                 We sent a verification code to {formData.email}. Please enter it below:
                             </p>
                             
-                            <div style={{ marginBottom: '1.5rem' }}>
+                            <div>
                                 <input
                                     type="text"
                                     placeholder="Verification Code"
                                     value={verificationCode}
                                     onChange={(e) => setVerificationCode(e.target.value)}
                                     required
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        border: '1px solid #555',
-                                        color: 'white',
-                                        borderRadius: '4px'
-                                    }}
+                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                                 />
                             </div>
 
                             <button 
                                 type="submit" 
                                 disabled={isDisabled}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    backgroundColor: isDisabled ? 
-                                        'rgba(255, 255, 255, 0.3)' : 'white',
-                                    color: 'black',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: isDisabled ? 'not-allowed' : 'pointer',
-                                    fontSize: '1rem',
-                                    marginBottom: '1rem'
-                                }}
+                                className={`w-full py-2 rounded font-medium ${
+                                    isDisabled
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-white text-black hover:bg-gray-200'
+                                } transition-colors mb-4`}
                             >
                                 {isDisabled ? 'Creating Account...' : 'Complete Registration'}
                             </button>
@@ -326,16 +247,7 @@ const Signup = () => {
                             <button 
                                 type="button" 
                                 onClick={() => setCodeSent(false)}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    backgroundColor: 'transparent',
-                                    color: 'white',
-                                    border: '1px solid white',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem'
-                                }}
+                                className="w-full py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
                             >
                                 Back
                             </button>
@@ -343,19 +255,11 @@ const Signup = () => {
                     )}
                 </form>
 
-                <div style={{ 
-                    textAlign: 'center', 
-                    marginTop: '1.5rem',
-                    color: '#aaa'
-                }}>
+                <div className="text-center mt-6 text-gray-400">
                     Already have an account?{' '}
                     <Link 
                         to="/login" 
-                        style={{ 
-                            color: 'white',
-                            textDecoration: 'none',
-                            fontWeight: 'bold'
-                        }}
+                        className="text-white font-semibold hover:underline"
                     >
                         Log In
                     </Link>
