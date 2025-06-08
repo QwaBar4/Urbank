@@ -31,25 +31,12 @@ const Login = () => {
     };
 
     return (
-        <div style={{
-            backgroundColor: 'black',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-        }}>
-            <div style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                padding: '2rem',
-                borderRadius: '8px',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <form onSubmit={handleSubmit}>
-                    <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Login</h1>
-                    <div style={{ marginBottom: '1rem' }}>
+        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
+            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <h1 className="text-center text-2xl font-bold mb-6">Login</h1>
+                    
+                    <div>
                         <input
                             type="text"
                             name="username"
@@ -57,17 +44,11 @@ const Login = () => {
                             value={credentials.username}
                             onChange={handleChange}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                border: '1px solid #555',
-                                color: 'white',
-                                borderRadius: '4px'
-                            }}
+                            className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                         />
                     </div>
-                    <div style={{ marginBottom: '1.5rem' }}>
+                    
+                    <div>
                         <input
                             type="password"
                             name="password"
@@ -75,55 +56,34 @@ const Login = () => {
                             value={credentials.password}
                             onChange={handleChange}
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                border: '1px solid #555',
-                                color: 'white',
-                                borderRadius: '4px'
-                            }}
+                            className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                         />
                     </div>
+                    
                     <button 
                         type="submit" 
-                        style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            backgroundColor: 'white',
-                            color: 'black',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            marginBottom: '1rem'
-                        }}
+                        className="w-full py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
                     >
                         Log In
                     </button>
                     
-                    <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                        <Link to="/login/recovery" style={{ color: 'white' }}>Forgot password?</Link>
+                    <div className="text-center">
+                        <Link to="/login/recovery" className="text-white hover:underline">Forgot password?</Link>
                     </div>
-                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                        Don't have an account? <Link to="/signup" style={{ color: 'white' }}>Sign Up</Link>
+                    
+                    <div className="text-center">
+                        Don't have an account? <Link to="/signup" className="text-white hover:underline">Sign Up</Link>
                     </div>
                     
                     <button 
                         onClick={() => navigate('/')} 
-                        style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            backgroundColor: 'transparent',
-                            color: 'white',
-                            border: '1px solid white',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
+                        type="button"
+                        className="w-full py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
                     >
                         Go home
                     </button>
                     
-                    {error && <div style={{ color: 'red', marginTop: '1rem', textAlign: 'center' }}>{error}</div>}
+                    {error && <div className="text-red-500 mt-4 text-center">{error}</div>}
                 </form>
             </div>
         </div>
