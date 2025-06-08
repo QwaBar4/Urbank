@@ -139,68 +139,35 @@ const PasswordRecovery = () => {
     };
 
     return (
-        <div style={{
-            backgroundColor: 'black',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-        }}>
-            <div style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                padding: '2rem',
-                borderRadius: '8px',
-                width: '100%',
-                maxWidth: '400px'
-            }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Password Recovery</h2>
+        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
+            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md">
+                <h2 className="text-center text-2xl font-bold mb-6">Password Recovery</h2>
 
                 {error && (
-                    <div style={{
-                        color: 'red',
-                        marginBottom: '1rem',
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                        borderRadius: '4px'
-                    }}>
+                    <div className="text-red-500 bg-red-500 bg-opacity-10 p-3 rounded mb-4">
                         {error}
                     </div>
                 )}
                 
                 {success && (
-                    <div style={{
-                        color: 'lightgreen',
-                        marginBottom: '1rem',
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                        borderRadius: '4px'
-                    }}>
+                    <div className="text-green-400 bg-green-500 bg-opacity-10 p-3 rounded mb-4">
                         {success}
                     </div>
                 )}
 
                 {step === 1 && (
-                    <form onSubmit={handleRequestCode}>
-                        <div style={{ marginBottom: '1rem' }}>
+                    <form onSubmit={handleRequestCode} className="space-y-4">
+                        <div>
                             <input
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid #555',
-                                    color: 'white',
-                                    borderRadius: '4px'
-                                }}
+                                className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                             />
                             {!isEmailValid && email.length > 0 && (
-                                <div style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                                <div className="text-red-500 text-xs mt-1">
                                     Invalid email format
                                 </div>
                             )}
@@ -208,16 +175,11 @@ const PasswordRecovery = () => {
                         <button 
                             type="submit" 
                             disabled={isLoading || !isEmailValid}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                backgroundColor: isLoading || !isEmailValid ? 'rgba(255, 255, 255, 0.3)' : 'white',
-                                color: 'black',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: isLoading || !isEmailValid ? 'not-allowed' : 'pointer',
-                                fontSize: '1rem'
-                            }}
+                            className={`w-full py-2 rounded font-medium ${
+                                isLoading || !isEmailValid
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-white text-black hover:bg-gray-200'
+                            } transition-colors`}
                         >
                             {isLoading ? 'Sending...' : 'Send Verification Code'}
                         </button>
@@ -225,52 +187,33 @@ const PasswordRecovery = () => {
                 )}
 
                 {step === 2 && (
-                    <form onSubmit={handleVerifyCode}>
-                        <div style={{ marginBottom: '1rem' }}>
+                    <form onSubmit={handleVerifyCode} className="space-y-4">
+                        <div>
                             <input
                                 type="text"
                                 placeholder="Enter verification code"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid #555',
-                                    color: 'white',
-                                    borderRadius: '4px'
-                                }}
+                                className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                             />
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div className="flex gap-2">
                             <button 
                                 type="submit" 
                                 disabled={isLoading}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.75rem',
-                                    backgroundColor: isLoading ? 'rgba(255, 255, 255, 0.3)' : 'white',
-                                    color: 'black',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: isLoading ? 'not-allowed' : 'pointer'
-                                }}
+                                className={`flex-1 py-2 rounded font-medium ${
+                                    isLoading
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-white text-black hover:bg-gray-200'
+                                } transition-colors`}
                             >
                                 {isLoading ? 'Verifying...' : 'Verify Code'}
                             </button>
                             <button 
                                 type="button" 
                                 onClick={() => setStep(1)}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.75rem',
-                                    backgroundColor: 'transparent',
-                                    color: 'white',
-                                    border: '1px solid white',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                                className="flex-1 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
                             >
                                 Back
                             </button>
@@ -279,9 +222,9 @@ const PasswordRecovery = () => {
                 )}
 
                 {step === 3 && (
-                    <form onSubmit={handleResetPassword}>
+                    <form onSubmit={handleResetPassword} className="space-y-4">
                         <input type="hidden" value={resetToken} />
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div className="space-y-2">
                             <input
                                 type="password"
                                 placeholder="New Password (min 6 characters)"
@@ -289,15 +232,7 @@ const PasswordRecovery = () => {
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 required
                                 minLength="6"
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid #555',
-                                    color: 'white',
-                                    borderRadius: '4px',
-                                    marginBottom: '0.5rem'
-                                }}
+                                className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                             />
                             <input
                                 type="password"
@@ -306,29 +241,17 @@ const PasswordRecovery = () => {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 minLength="6"
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    border: '1px solid #555',
-                                    color: 'white',
-                                    borderRadius: '4px'
-                                }}
+                                className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                             />
                         </div>
                         <button 
                             type="submit" 
                             disabled={isLoading}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                backgroundColor: isLoading ? 'rgba(255, 255, 255, 0.3)' : 'white',
-                                color: 'black',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: isLoading ? 'not-allowed' : 'pointer',
-                                fontSize: '1rem'
-                            }}
+                            className={`w-full py-2 rounded font-medium ${
+                                isLoading
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-white text-black hover:bg-gray-200'
+                            } transition-colors`}
                         >
                             {isLoading ? 'Resetting...' : 'Reset Password'}
                         </button>
