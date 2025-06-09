@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Index from './pages/Index';
 import Signup from './components/Auth/Signup';
 import Login from './pages/Login';
-import PasswordReset from './components/Auth/PasswordReset';
+import PasswordRecovery from './components/Auth/PasswordRecovery';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import Deposit from './components/Dashboard/Deposit';
@@ -74,7 +74,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/login/recovery" element={<PasswordReset />} />
+          <Route path="/login/recovery" element={<PasswordRecovery />} />
 
           {/* Protected user routes */}
           <Route path="/dashboard" element={

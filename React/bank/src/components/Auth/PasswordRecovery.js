@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL, handleResponse } from '../../services/api';
+import { FiArrowLeft } from 'react-icons/fi';
 
 const PasswordRecovery = () => {
     const [email, setEmail] = useState('');
@@ -141,6 +142,13 @@ const PasswordRecovery = () => {
     return (
         <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
             <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md">
+            	<Link 
+                    to="/login" 
+                    className="absolute top-4 left-4 text-white hover:text-gray-300 transition-colors"
+                    title="Back to login"
+                >
+                    <FiArrowLeft className="w-6 h-6" />
+                </Link>
                 <h2 className="text-center text-2xl font-bold mb-6">Password Recovery</h2>
 
                 {error && (

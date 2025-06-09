@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL, getDashboardData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
-import '../index.css'
 import Transfer from '../components/Dashboard/Transfer';
 import api from '../services/api';
 import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
@@ -14,7 +13,6 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [profileData, setProfileData] = useState(null);
-    const [showInfoModal, setShowInfoModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
@@ -22,43 +20,41 @@ const Dashboard = () => {
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const navigate = useNavigate();
 
-	useEffect(() => {
-		const token = getJwtToken();
-		if (!token) {
-		    navigate('/');
-		    return;
-		}
+    useEffect(() => {
+        const token = getJwtToken();
+        if (!token) {
+            navigate('/');
+            return;
+        }
 
-
-	const fetchData = async () => {
-	    try {
-	        const data = await getDashboardData();
-	        setUserData({
-	        	id: data.id,
-	            username: data.username,
-	            account: {
-	                accountNumber: data.account.accountNumber,
-	                balance: data.account.balance,
-	                dailyTransferLimit: data.account.dailyTransferLimit,
-	                dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
-	            },
-	            role: data.roles
-	        });
-	    } catch (err) {
-	        if (err.response?.status === 401) {
-	            console.log('Session expired, redirecting to login');
-	            navigate('/');
-	        } else {
-	            setError(err.message);
-	            setShowInfoModal(true);
-	        }
-	    } finally {
-	        setLoading(false);
-	    }
-		};
-		fetchData();
-	}, [navigate]);
-	
+        const fetchData = async () => {
+            try {
+                const data = await getDashboardData();
+                setUserData({
+                    id: data.id,
+                    username: data.username,
+                    account: {
+                        accountNumber: data.account.accountNumber,
+                        balance: data.account.balance,
+                        dailyTransferLimit: data.account.dailyTransferLimit,
+                        dailyWithdrawalLimit: data.account.dailyWithdrawalLimit
+                    },
+                    role: data.roles
+                });
+            } catch (err) {
+                if (err.response?.status === 401) {
+                    console.log('Session expired, redirecting to login');
+                    navigate('/');
+                } else {
+                    setError(err.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [navigate]);
+    
     useEffect(() => {
         if (userData) {
             fetchProfile();
@@ -68,8 +64,9 @@ const Dashboard = () => {
     const fetchProfile = async () => {
         try {
             const response = await api.getUserProfile();
-            if (response.firstName === null || response.lastName === null || response.middleName=== null || response.passportSeries === null || response.passportNumber === null || response.dateOfBirth === null){
-            	setShowProfileModal(true);
+            if (response.firstName === null || response.lastName === null || response.middleName === null || 
+                response.passportSeries === null || response.passportNumber === null || response.dateOfBirth === null) {
+                setShowProfileModal(true);
             }
             setProfileData(response);
         } catch (error) {
@@ -77,26 +74,25 @@ const Dashboard = () => {
         }
     };
 
-	const handleLogout = async () => {
-		try {
-		    const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
-		        method: 'POST',
-		        headers: {
-		            'Authorization': `Bearer ${getJwtToken()}`
-		        }
-		    });
-		    console.log('Logging out...' + response);
-		    navigate('/');
-		    clearJwtToken();
-		} catch (error) {
-		    console.error('Logout error:', error);
-		    alert('Failed to log out: ' + error.message);
-		}
-	};
+    const handleLogout = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${getJwtToken()}`
+                }
+            });
+            console.log('Logging out...' + response);
+            navigate('/');
+            clearJwtToken();
+        } catch (error) {
+            console.error('Logout error:', error);
+            setError('Failed to log out: ' + error.message);
+        }
+    };
 
     const handleDeleteAccount = async () => {
         try {
-            console.log('Deleting account...');
             const response = await fetch(`${API_BASE_URL}/api/delete-user?username=${encodeURIComponent(userData.username)}`, {
                 method: 'DELETE',
                 headers: {
@@ -113,7 +109,7 @@ const Dashboard = () => {
             navigate('/');
         } catch (error) {
             console.error('Deletion error:', error);
-            alert('Failed to delete account: ' + error.message);
+            setError('Failed to delete account: ' + error.message);
         } finally {
             setShowDeleteConfirmation(false);
         }
@@ -121,7 +117,6 @@ const Dashboard = () => {
 
     const refreshBalance = async () => {
         try {
-            console.log('Refreshing balance...');
             const response = await fetch(`${API_BASE_URL}/api/transactions/balance`, {
                 headers: {
                     'Authorization': `Bearer ${getJwtToken()}`
@@ -140,166 +135,135 @@ const Dashboard = () => {
             }));
         } catch (err) {
             console.error("Balance refresh error:", err);
+            setError('Failed to refresh balance');
         }
     };
 
-    if (loading) return <div className="loading">Loading account information...</div>;
+    if (loading) return (
+        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
+            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md text-center">
+                Loading account information...
+            </div>
+        </div>
+    );
+
     if (!userData) return null;
 
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="mx-5 w-full">
-            <style>
-                {`
-                    .modal {
-                        display: none;
-                        position: fixed;
-                        z-index: 1;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
-                        height: 100%;
-                        overflow: auto;
-                        background-color: rgba(0,0,0,0.4);
-                    }
+        <div className="bg-black min-h-screen text-white p-4">
+            {/* Header Section */}
+            <div className="max-w-6xl mx-auto">
+                {/* Welcome Banner */}
+                <div className="flex flex-col items-center my-6">
+                    <div className="flex space-x-1 mb-2">
+                        {[...Array(24)].map((_, i) => (
+                            <div key={i} className="w-2 h-px bg-gray-400"></div>
+                        ))}
+                    </div>
 
-                    .modal.show {
-                        display: block;
-                    }
+                    <div className="flex items-center">
+                        <div className="flex flex-col space-y-1 mr-2">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="w-px h-2 bg-gray-400"></div>
+                            ))}
+                        </div>
+                        <div className="px-4 py-2 border border-white rounded">
+                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
+                                Welcome, {userData.username}!
+                            </h1>
+                        </div>
+                        <div className="flex flex-col space-y-1 ml-2">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="w-px h-2 bg-gray-400"></div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="flex space-x-1 mt-2">
+                        {[...Array(24)].map((_, i) => (
+                            <div key={i} className="w-2 h-px bg-gray-400"></div>
+                        ))}
+                    </div>
+                </div>
 
-                    .modal-content {
-                        background-color: #fefefe;
-                        margin: 5% auto;
-                        padding: 20px;
-                        border: 1px solid #888;
-                        width: 80%;
-                        max-width: 800px;
-                        border-radius: 5px;
-                    }
-
-                    .close {
-                        color: #aaaaaa;
-                        float: right;
-                        font-size: 28px;
-                        font-weight: bold;
-                        cursor: pointer;
-                    }
-
-                    .close:hover {
-                        color: #000;
-                    }
-                `}
-            </style>
-			<div className="mt-2 flex flex-col items-center">
-			  <div className="flex space-x-1 mb-2">
-				{[...Array(24)].map((_, i) => (
-				  <div key={i} className="w-2 h-px bg-gray-400"></div>
-				))}
-			  </div>
-
-			  <div className="flex items-center">
-				<div className="flex flex-col space-y-1 mr-2">
-				  {[...Array(6)].map((_, i) => (
-					<div key={i} className="w-px h-2 bg-gray-400"></div>
-				  ))}
-				</div>
-				<button className="px-4 py-2 border border-black">
-					<h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-					  Welcome, {userData.username}!
-					</h1>
-				</button>
-				<div className="flex flex-col space-y-1 ml-2">
-				  {[...Array(6)].map((_, i) => (
-					<div key={i} className="w-px h-2 bg-gray-400"></div>
-				  ))}
-				</div>
-			  </div>
-			  <div className="flex space-x-1 mt-2">
-				{[...Array(24)].map((_, i) => (
-				  <div key={i} className="w-2 h-px bg-gray-400"></div>
-				))}
-			  </div>
-			</div>
-            <div className="dashboard-header row mb-4 mt-2">
-                <div className="col-md-4">
-                    <button onClick={() => navigate('/')} className="btn btn-outline-primary border w-20 h-7 me-2 border-black me-2">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                    <button 
+                        onClick={() => navigate('/')} 
+                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                    >
                         Go Home
                     </button>
-                    <button onClick={handleLogout} className="btn btn-outline-secondary border w-20 h-7 me-2 border-black me-2">
+                    <button 
+                        onClick={handleLogout} 
+                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                    >
                         Logout
                     </button>
                     <button
-                      className="btn btn-sm btn-success border w-40 h-7 me-2 border-black"
-                      onClick={async () => {
-                        try {
-                          const response = await api.generateUserStatement(userData.username);
-                          const blob = new Blob([response.data], { type: 'application/pdf' });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = response.filename;
-                          document.body.appendChild(a);
-                          a.click();
-                          a.remove();
-                        } catch (error) {
-                          console.error('Error downloading user statement:', error);
-                          setError(error.message)
-                          setShowInfoModal(true)
-                        }
-                      }}
+                        onClick={async () => {
+                            try {
+                                const response = await api.generateUserStatement(userData.username);
+                                const blob = new Blob([response.data], { type: 'application/pdf' });
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = response.filename;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                            } catch (error) {
+                                console.error('Error downloading user statement:', error);
+                                setError(error.message);
+                            }
+                        }}
+                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
                     >
-                      Download Statement
+                        Download Statement
                     </button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
-                        className="btn btn-outline-danger border w-40 h-7 me-2 border-black me-2"
+                        className="px-4 py-2 bg-transparent text-red-500 border border-red-500 rounded hover:bg-red-500 hover:bg-opacity-10 transition-colors"
                     >
                         Delete Account
                     </button>
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/admin')}
-                            className="btn btn-outline-warning border w-40 h-7 me-2 border-black me-2"
+                            className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600 transition-colors font-medium"
                         >
                             Admin Dashboard
                         </button>
                     )}
                 </div>
-            </div>
-            
-            <h2>User data</h2>
-			<div className="row mt-4">
-                <div className="col-md-6">
-                    <div className="card shadow">
-                        <div className="card-body">
-                            {profileData ? (
-                                    <div className="d-flex gap-2">
-                                        <button
-                                            className="btn btn-primary border w-40 h-7 me-2 border-black me-2"
-                                            onClick={() => setShowProfileModal(true)}
-                                        >
-                                            Update Profile
-                                        </button>
-                                        <button
-                                            className="btn btn-info border w-40 h-7 me-2 border-black me-2"
-                                            onClick={() => {
-                                                setShowUserDetailsModal(true);
-                                            }}
-                                        >
-                                            View Full Details
-                                        </button>
-                                    </div>
-                            ) : (
-                                <div className="spinner-border text-primary"></div>
-                            )}
+
+                {/* User Data Section */}
+                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                    <h2 className="text-xl font-bold mb-4">User Data</h2>
+                    {profileData ? (
+                        <div className="flex gap-2">
+                            <button
+                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                onClick={() => setShowProfileModal(true)}
+                            >
+                                Update Profile
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
+                                onClick={() => setShowUserDetailsModal(true)}
+                            >
+                                View Full Details
+                            </button>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="text-center">Loading profile...</div>
+                    )}
                 </div>
-            </div>
-            
-            <div className="row">
-                <div className="col-md-4">
+
+                {/* Balance and Transfer Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <BalanceCard
                         accountNumber={userData.account.accountNumber}
                         balance={userData.account.balance}
@@ -310,175 +274,143 @@ const Dashboard = () => {
                         refreshBalance={refreshBalance}
                     />
                 </div>
+
+                {/* Transaction History Button */}
+                <button 
+                    onClick={() => setShowTransactionHistoryModal(true)}
+                    className="w-full md:w-auto px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium mb-6"
+                >
+                    View Full Transaction History
+                </button>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-500 bg-opacity-20 p-4 rounded-lg border border-red-500 mb-6">
+                        <p className="text-red-500">{error}</p>
+                    </div>
+                )}
             </div>
-			<button 
-				onClick={() => setShowTransactionHistoryModal(true)}
-				className="btn btn-primary border w-70 h-7 me-2 border-black me-2 mt-2"
-			>
-				View Full Transaction History
-			</button>
-			{showProfileModal && (
-			  <ProfileUpdateModal 
-				profileData={profileData}
-				onClose={() => setShowProfileModal(false)}
-				onSave={async (updatedData) => {
-				  try {
-					await api.updateUserProfile(updatedData);
-					setProfileData(updatedData);
-					setShowProfileModal(false);
-				  } catch (error) {
-					console.error('Profile update failed:', error);
-				  }
-				}}
-			  />
-			)}
+
+            {/* Modals */}
+            {showProfileModal && (
+                <ProfileUpdateModal 
+                    profileData={profileData}
+                    onClose={() => setShowProfileModal(false)}
+                    onSave={async (updatedData) => {
+                        try {
+                            await api.updateUserProfile(updatedData);
+                            setProfileData(updatedData);
+                            setShowProfileModal(false);
+                        } catch (error) {
+                            console.error('Profile update failed:', error);
+                            setError('Profile update failed');
+                        }
+                    }}
+                />
+            )}
 
             {showDeleteConfirmation && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Confirm Account Deletion</h5>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
-                                <p>All your account data and transaction history will be permanently erased.</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={() => setShowDeleteConfirmation(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-danger"
-                                    onClick={handleDeleteAccount}
-                                >
-                                    Confirm Delete
-                                </button>
-                            </div>
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+                        <h3 className="text-xl font-bold mb-4">Confirm Account Deletion</h3>
+                        <p className="mb-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+                        <p className="mb-6">All your account data and transaction history will be permanently erased.</p>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                onClick={() => setShowDeleteConfirmation(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                onClick={handleDeleteAccount}
+                            >
+                                Confirm Delete
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
             {showUserDetailsModal && profileData && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Your Full Details, {profileData.username}</h5>
-                            </div>
-                            <div className="modal-body mt-2">
-                                <div className="alert alert-warning">
-                                    <i className="bi bi-shield-lock mt-2"></i> Sensitive Data - Access Logged
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-3xl w-full border border-gray-700">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold">Your Full Details, {profileData.username}</h3>
+                            <button 
+                                onClick={() => {
+                                    setShowUserDetailsModal(false);
+                                    setShowSensitiveData(false);
+                                }}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="bg-yellow-500 bg-opacity-20 p-3 rounded-lg border border-yellow-500 mb-4">
+                            <p>⚠️ Sensitive Data - Access Logged</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 className="font-bold mb-3">Personal Information</h4>
+                                <div className="space-y-2">
+                                    <p><span className="font-semibold">Name:</span> {profileData.firstName}</p>
+                                    <p><span className="font-semibold">Middle Name:</span> {profileData.middleName || 'N/A'}</p>
+                                    <p><span className="font-semibold">Last Name:</span> {profileData.lastName || 'N/A'}</p>
+                                    <p><span className="font-semibold">Date of Birth:</span> {new Date(profileData.dateOfBirth).toLocaleDateString()}</p>
+                                    <p><span className="font-semibold">Email:</span> {profileData.email}</p>
+                                    <p><span className="font-semibold">Account number:</span> {profileData.accountNumber}</p>
                                 </div>
+                            </div>
 
-                                <div className="row">
-                                    <div className="col-md-6">
-                                        <h5 className="mt-2">Personal Information</h5>
-                                        <p className="mt-2">
-                                            <strong>Name:</strong> {profileData.firstName}
-                                        </p>
-                                        <p className="mt-2">
-                                            <strong>Middle Name:</strong> {profileData.middleName || 'N/A'}
-                                        </p>
-                                        <p className="mt-2">
-                                            <strong>Last Name:</strong> {profileData.lastName || 'N/A'}
-                                        </p>
-                                        <p className="mt-2">
-                                            <strong>Date of Birth:</strong>{" "}
-                                            {new Date(profileData.dateOfBirth).toLocaleDateString()}
-                                        </p>
-                                        <p className="mt-2">
-                                            <strong>Email:</strong>{" "}
-                                            {(profileData.email)}
-                                        </p>
-                                        <p className="mt-2">
-                                            <strong>Account number:</strong>{" "}
-                                            {(profileData.accountNumber)}
-                                        </p>
-                                    </div>
-
-                                    <div className="col-md-6">
-                                        <h5 className="mt-2">Identification Data</h5>
-                                        <div className="mb-3 mt-2">
-                                            <label className="form-label">Passport Details</label>
-                                            <div className="input-group">
-                                                <input
-                                                    type={showSensitiveData ? "text" : "password"}
-                                                    className="form-control"
-                                                    value={
-                                                        showSensitiveData
-                                                            ? `${profileData.passportSeries} ${profileData.passportNumber}`
-                                                            : "•••• ••••••"
-                                                    }
-                                                    readOnly
-                                                />
-                                                <button
-                                                    className="btn btn-outline-secondary border w-40 h-7 me-2 border-black me-2"
-                                                    type="button"
-                                                    onClick={() => setShowSensitiveData(!showSensitiveData)}
-                                                >Show/hide details
-                                                    <i className={`bi bi-eye${showSensitiveData ? "-slash" : ""}`}></i>
-                                                </button>
-                                            </div>
-                                            <small className="text-muted">
-                                                {showSensitiveData ? "Visible" : "Masked"} - Access logged
-                                            </small>
+                            <div>
+                                <h4 className="font-bold mb-3">Identification Data</h4>
+                                <div className="mb-4">
+                                    <label className="block mb-1 font-semibold">Passport Details</label>
+                                    <div className="flex">
+                                        <div className="flex-1 bg-white bg-opacity-10 border border-gray-500 rounded-l px-3 py-2">
+                                            {showSensitiveData 
+                                                ? `${profileData.passportSeries} ${profileData.passportNumber}`
+                                                : '•••• ••••••'}
                                         </div>
-                                        <p></p>
+                                        <button
+                                            className="px-3 bg-white bg-opacity-10 border border-l-0 border-gray-500 rounded-r hover:bg-opacity-20 transition-colors"
+                                            onClick={() => setShowSensitiveData(!showSensitiveData)}
+                                        >
+                                            {showSensitiveData ? 'Hide' : 'Show'}
+                                        </button>
                                     </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {showSensitiveData ? "Visible" : "Masked"} - Access logged
+                                    </p>
                                 </div>
                             </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary border w-40 h-7 me-2 border-black me-2"
-                                    onClick={() => {
-                                        setShowUserDetailsModal(false);
-                                        setShowSensitiveData(false);
-                                    }}
-                                >
-                                    Close
-                                </button>
-                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                onClick={() => {
+                                    setShowUserDetailsModal(false);
+                                    setShowSensitiveData(false);
+                                }}
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-			
-			{showTransactionHistoryModal && (
-				<TransactionHistoryModal 
-					userAccount={userData.account}
-					onClose={() => setShowTransactionHistoryModal(false)}
-				/>
-			)}
-			
-			{showInfoModal && error && (
-                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <h1 className="modal-title text-2xl">An error appeared</h1>
-                            <h5 className="mt-2">{error}</h5>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary border w-40 h-7 me-2 border-black me-2 mt-5"
-                                    onClick={() => {
-                                        setShowInfoModal(false);
-                                    }}
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			)}
+            
+            {showTransactionHistoryModal && (
+                <TransactionHistoryModal 
+                    userAccount={userData.account}
+                    onClose={() => setShowTransactionHistoryModal(false)}
+                />
+            )}
         </div>
     );
 };
