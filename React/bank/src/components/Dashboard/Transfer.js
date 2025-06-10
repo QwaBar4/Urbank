@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
-import { unformatAccountNumber, formatAccountNumber } from '../../services/api'
+import { unformatAccountNumber, formatAccountNumber } from '../../services/api';
 
 const Transfer = ({ userAccount, refreshBalance }) => {
     const [targetAccountDetails, setTargetAccountDetails] = useState(null);
@@ -24,7 +24,7 @@ const Transfer = ({ userAccount, refreshBalance }) => {
 
             setValidationLoading(true);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${unformatAccountNumber(formData.targetAccount)}`,  {
+                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${unformatAccountNumber(formData.targetAccount)}`, {
                     headers: { 'Authorization': `Bearer ${getJwtToken()}` }
                 });
 
@@ -53,26 +53,26 @@ const Transfer = ({ userAccount, refreshBalance }) => {
         });
     };
 
-		  const handleSubmit = async (e) => {
-			e.preventDefault();
-			setIsLoading(true);
-			setError('');
-			setSuccess('');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
 
-			try {
-			  const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
-				method: 'POST',
-				headers: {
-				  'Content-Type': 'application/json',
-				  'Authorization': `Bearer ${getJwtToken()}`
-				},
-				body: JSON.stringify({
-				  sourceAccount: unformatAccountNumber(formData.sourceAccount),
-				  targetAccount: unformatAccountNumber(formData.targetAccount),
-				  amount: parseFloat(formData.amount),
-				  description: formData.description
-				})
-			  });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getJwtToken()}`
+                },
+                body: JSON.stringify({
+                    sourceAccount: unformatAccountNumber(formData.sourceAccount),
+                    targetAccount: unformatAccountNumber(formData.targetAccount),
+                    amount: parseFloat(formData.amount),
+                    description: formData.description
+                })
+            });
 
             const responseText = await response.text();
             if (!response.ok) {
@@ -106,91 +106,111 @@ const Transfer = ({ userAccount, refreshBalance }) => {
     };
 
     return (
-        <div className="transfer-container card me-2 border-black me-2">
-            <div className="card-body ml-2">
-                <h2 className="card-title ">Transfer Money</h2>
-                {error && (
-                    <div className="alert alert-danger" style={{ color: 'red' }}>
-                        {error}
-                    </div>
-                )}
-                {success && <div className="alert alert-success">{success}</div>}
+        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
+            <div className="flex space-x-1 mb-2">
+                {[...Array(12)].map((_, i) => (
+                    <div key={i} className="w-2 h-px bg-gray-400"></div>
+                ))}
+            </div>
+            
+            <h2 className="text-xl font-bold mb-6">Transfer Money</h2>
+            
+            {error && (
+                <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
+                    <p className="text-red-500">{error}</p>
+                </div>
+            )}
+            
+            {success && (
+                <div className="bg-green-500 bg-opacity-20 p-3 rounded-lg border border-green-500 mb-4">
+                    <p className="text-green-500">{success}</p>
+                </div>
+            )}
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group mb-3">
-                        <label className="form-label">From Account: </label>
-                        <input
-                            type="text"
-                            name="sourceAccount"
-                            value={formatAccountNumber(formData.sourceAccount)}
-                            className="form-control"
-                            readOnly
-                        />
-                    </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-gray-400 mb-1">From Account</label>
+                    <input
+                        type="text"
+                        name="sourceAccount"
+                        value={formatAccountNumber(formData.sourceAccount)}
+                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        readOnly
+                    />
+                </div>
 
-                    <div className="form-group mb-3">
-                        <label className="form-label">To Account:</label>
-                        <input
-                            type="text"
-                            name="targetAccount"
-                            value={formData.targetAccount}
-                            onChange={handleChange}
-                            className="form-control"
-                            required
-                            placeholder="Enter recipient account number"
-                        />
-                        {validationLoading && (
-                            <div className="spinner-border spinner-border-sm" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                            </div>
-                        )}
-                        {targetAccountDetails && (
-                            <div className="mt-2 text-success" style={{ color: 'green' }}>
-                                Account Holder: {targetAccountDetails.ownerName}
-                            </div>
-                        )}
-                    </div>
+                <div>
+                    <label className="block text-gray-400 mb-1">To Account</label>
+                    <input
+                        type="text"
+                        name="targetAccount"
+                        value={formData.targetAccount}
+                        onChange={handleChange}
+                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        required
+                        placeholder="Enter recipient account number"
+                    />
+                    {validationLoading && (
+                        <div className="mt-2 flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                            <span className="text-gray-400 text-sm">Validating account...</span>
+                        </div>
+                    )}
+                    {targetAccountDetails && (
+                        <div className="mt-2 text-green-500">
+                            Account Holder: {targetAccountDetails.ownerName}
+                        </div>
+                    )}
+                </div>
 
-                    <div className="form-group mb-3">
-                        <label className="form-label">Amount ($):</label>
-                        <input
-                            type="number"
-                            name="amount"
-                            value={formData.amount}
-                            onChange={handleChange}
-                            className="form-control"
-                            min="0.01"
-                            step="0.01"
-                            required
-                            placeholder="0.00"
-                        />
-                    </div>
+                <div>
+                    <label className="block text-gray-400 mb-1">Amount ($)</label>
+                    <input
+                        type="number"
+                        name="amount"
+                        value={formData.amount}
+                        onChange={handleChange}
+                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        min="0.01"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                    />
+                </div>
 
-                    <div className="form-group mb-3">
-                        <label className="form-label">Description (Optional):</label>
-                        <input
-                            type="text"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="e.g., Rent payment"
-                        />
-                    </div>
+                <div>
+                    <label className="block text-gray-400 mb-1">Description (Optional)</label>
+                    <input
+                        type="text"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        placeholder="e.g., Rent payment"
+                    />
+                </div>
 
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary border w-20 h-7 mb-2 me-2 border-black me-2"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                Processing...
-                            </>
-                        ) : 'Transfer'}
-                    </button>
-                </form>
+                <button
+                    type="submit"
+                    className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
+                    disabled={isLoading}
+                >
+                    {isLoading ? (
+                        <div className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                        </div>
+                    ) : 'Transfer Money'}
+                </button>
+            </form>
+            
+            <div className="flex space-x-1 mt-6">
+                {[...Array(12)].map((_, i) => (
+                    <div key={i} className="w-2 h-px bg-gray-400"></div>
+                ))}
             </div>
         </div>
     );

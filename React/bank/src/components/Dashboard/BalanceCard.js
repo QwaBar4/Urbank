@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { formatAccountNumber} from '../../services/api'
+import { formatAccountNumber } from '../../services/api';
 
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     const navigate = useNavigate();
@@ -13,37 +13,56 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     };
 
     return (
-        <div className="card mb-4">
-            <div className="card-body">
+        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
+            <div className="mb-6">
+                <div className="flex space-x-1 mb-2">
+                    {[...Array(12)].map((_, i) => (
+                        <div key={i} className="w-2 h-px bg-gray-400"></div>
+                    ))}
+                </div>
                 
-                <div className="mb-3">
-                    <small className="text-muted">Account Number</small>
-                    <h3 className="mb-0">
-                   	 {accountNumber ? formatAccountNumber(accountNumber) : 'Loading...'}
+                <h2 className="text-xl font-bold mb-4">Account Balance</h2>
+                
+                <div className="mb-6">
+                    <small className="text-gray-400 block mb-1">Account Number</small>
+                    <h3 className="text-2xl font-mono">
+                        {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
                     </h3>
                 </div>
                 
-                <div className="mb-4">
-                    <small className="text-muted">Available Balance</small>
-                    <h3 className="mb-0">
+                <div className="mb-8">
+                    <small className="text-gray-400 block mb-1">Available Balance</small>
+                    <h3 className="text-3xl font-bold">
                         ${balance !== undefined ? balance.toFixed(2) : '0.00'}
                     </h3>
                 </div>
                 
-                <div className="d-grid gap-2">
-                    <button 
-                        onClick={handleDeposit}
-                        className="btn btn-primary border w-20 h-7 me-2 border-black me-2"
-                    >
-                        Deposit
-                    </button>
-                    <button 
-                        onClick={handleWithdraw}
-                        className="btn btn-success border w-20 h-7 me-2 border-black me-2"
-                    >
-                        Withdraw
-                    </button>
+                <div className="flex space-x-1 mt-2">
+                    {[...Array(12)].map((_, i) => (
+                        <div key={i} className="w-2 h-px bg-gray-400"></div>
+                    ))}
                 </div>
+            </div>
+            
+            <div className="flex flex-col space-y-4">
+                <button 
+                    onClick={handleDeposit}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
+                >
+                    Deposit Funds
+                </button>
+                <button 
+                    onClick={handleWithdraw}
+                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors font-medium"
+                >
+                    Withdraw Funds
+                </button>
+                <button 
+                    onClick={refreshBalance}
+                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors font-medium"
+                >
+                    Refresh Balance
+                </button>
             </div>
         </div>
     );

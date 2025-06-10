@@ -7,6 +7,7 @@ import api from '../services/api';
 import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
 import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
+import logotype from '../assets/logotype.jpg';
 
 const Dashboard = () => {
     const [userData, setUserData] = useState(null);
@@ -140,10 +141,8 @@ const Dashboard = () => {
     };
 
     if (loading) return (
-        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
-            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md text-center">
-                Loading account information...
-            </div>
+        <div className="flex items-center justify-center min-h-screen bg-black">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
         </div>
     );
 
@@ -152,9 +151,15 @@ const Dashboard = () => {
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="bg-black min-h-screen text-white p-4">
-            {/* Header Section */}
-            <div className="max-w-6xl mx-auto">
+        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
+            {/* Semi-transparent logo background */}
+            <div 
+                className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-0"
+                style={{ backgroundImage: `url(${logotype})` }}
+            />
+
+            {/* Main content */}
+            <div className="relative z-10 max-w-6xl mx-auto w-full">
                 {/* Welcome Banner */}
                 <div className="flex flex-col items-center my-6">
                     <div className="flex space-x-1 mb-2">
@@ -171,7 +176,7 @@ const Dashboard = () => {
                         </div>
                         <div className="px-4 py-2 border border-white rounded">
                             <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-                                Welcome, {userData.username}!
+                                It's Urbank, {userData.username}!
                             </h1>
                         </div>
                         <div className="flex flex-col space-y-1 ml-2">
