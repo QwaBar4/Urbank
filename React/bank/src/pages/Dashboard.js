@@ -234,14 +234,14 @@ const Dashboard = () => {
                     >
                         Delete Account
                     </button>
-                    {isAdmin && (
-                        <button
-                            onClick={() => navigate('/admin')}
-                            className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600 transition-colors font-medium"
-                        >
-                            Admin Dashboard
-                        </button>
-                    )}
+					{isAdmin && (
+						<button
+							onClick={() => navigate('/admin')}
+							className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+						>
+							Admin Dashboard
+						</button>
+					)}
                 </div>
 
                 {/* User Data Section */}
@@ -255,12 +255,12 @@ const Dashboard = () => {
                             >
                                 Update Profile
                             </button>
-                            <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
-                                onClick={() => setShowUserDetailsModal(true)}
-                            >
-                                View Full Details
-                            </button>
+							<button
+								className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+								onClick={() => setShowUserDetailsModal(true)}
+							>
+								View Full Details
+							</button>
                         </div>
                     ) : (
                         <div className="text-center">Loading profile...</div>
@@ -281,12 +281,12 @@ const Dashboard = () => {
                 </div>
 
                 {/* Transaction History Button */}
-                <button 
-                    onClick={() => setShowTransactionHistoryModal(true)}
-                    className="w-full md:w-auto px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium mb-6"
-                >
-                    View Full Transaction History
-                </button>
+				<button 
+					onClick={() => setShowTransactionHistoryModal(true)}
+					className="w-full md:w-auto px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium mb-6"
+				>
+					View Full Transaction History
+				</button>
 
                 {/* Error Display */}
                 {error && (
