@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getJwtToken } from '../../utils/auth'
+import { getJwtToken } from '../../utils/auth';
 
 const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
   const [step, setStep] = useState(1);
@@ -71,30 +71,30 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
     }
   };
 
-	const handleVerifyNewEmail = async () => {
-	  setIsLoading(true);
-	  try {
-		const token = getJwtToken();
-		if (!token) {
-		  throw new Error('Authentication token not found. Please log in again.');
-		}
+  const handleVerifyNewEmail = async () => {
+    setIsLoading(true);
+    try {
+      const token = getJwtToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
 
-		const verifyResponse = await fetch('/auth/verify-code', {
-		  method: 'POST',
-		  headers: { 
-		    'Content-Type': 'application/json',
-		    'Authorization': `Bearer ${token}`
-		  },
-		  body: JSON.stringify({ 
-		    email: newEmail, 
-		    code: newEmailCode 
-		  }),
-		});
+      const verifyResponse = await fetch('/auth/verify-code', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          email: newEmail, 
+          code: newEmailCode 
+        }),
+      });
 
-		if (!verifyResponse.ok) {
-		  const errorData = await verifyResponse.json();
-		  throw new Error(errorData.message || 'Verification failed');
-		}
+      if (!verifyResponse.ok) {
+        const errorData = await verifyResponse.json();
+        throw new Error(errorData.message || 'Verification failed');
+      }
 
       const updateResponse = await fetch('/api/user/update-email', {
         method: 'PUT',
@@ -116,99 +116,108 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
 
       onEmailUpdated(newEmail);
       onClose();
-	  } catch (error) {
-		setError(error.message);
-	  } finally {
-		setIsLoading(false);
-	  }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Update Email Address</h5>
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+      <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-xl font-bold">Update Email Address</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+        
+        {error && (
+          <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
+            <p>{error}</p>
           </div>
-          
-          {error && <div className="alert alert-danger">{error}</div>}
-          <div className="modal-body">
-            {step === 1 && (
-              <>
-                <p>We'll send a verification code to your current email: <strong>{currentEmail}</strong></p>
-                <button 
-                  onClick={handleSendOldEmailCode} 
-                  className="btn btn-primary mt-2 border w-60 h-7 me-2 border-black me-2"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Sending...' : 'Send Verification Code'}
-                </button>
-              </>
-            )}
+        )}
 
-            {step === 2 && (
-              <>
-                <p>Enter the 6-digit code sent to {currentEmail}</p>
-                <input
-                  type="text"
-                  value={oldEmailCode}
-                  onChange={(e) => setOldEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="form-control mb-3"
-                  placeholder="Verification code"
-                  disabled={isLoading}
-                />
-                <button 
-                  onClick={handleVerifyOldEmail} 
-                  className="btn btn-primary mt-2 border w-40 h-7 me-2 border-black me-2"
-                  disabled={oldEmailCode.length !== 6 || isLoading}
-                >
-                  {isLoading ? 'Verifying...' : 'Verify Code'}
-                </button>
-              </>
-            )}
+        <div className="space-y-4">
+          {step === 1 && (
+            <>
+              <p>We'll send a verification code to your current email: <strong>{currentEmail}</strong></p>
+              <button 
+                onClick={handleSendOldEmailCode} 
+                className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send Verification Code'}
+              </button>
+            </>
+          )}
 
-            {step === 3 && (
-              <>
-                <p>Enter your new email address:</p>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="form-control mb-3"
-                  placeholder="New email address"
-                  disabled={isLoading}
-                />
-                <button 
-                  onClick={handleSendNewEmailCode} 
-                  className="btn btn-primary mt-2 border w-80 h-7 me-2 border-black me-2"
-                  disabled={!newEmail || isLoading}
-                >
-                  {isLoading ? 'Sending code...' : 'Validate email'}
-                </button>
-              </>
-            )}
+          {step === 2 && (
+            <>
+              <p>Enter the 6-digit code sent to {currentEmail}</p>
+              <input
+                type="text"
+                value={oldEmailCode}
+                onChange={(e) => setOldEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full bg-white bg-opacity-10 border border-gray-500 rounded px-3 py-2"
+                placeholder="Verification code"
+                disabled={isLoading}
+              />
+              <button 
+                onClick={handleVerifyOldEmail} 
+                className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                disabled={oldEmailCode.length !== 6 || isLoading}
+              >
+                {isLoading ? 'Verifying...' : 'Verify Code'}
+              </button>
+            </>
+          )}
 
-            {step === 4 && (
-              <>
-                <p>Enter the 6-digit code sent to <strong>{newEmail}</strong></p>
-                <input
-                  type="text"
-                  value={newEmailCode}
-                  onChange={(e) => setNewEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="form-control mb-3"
-                  placeholder="Verification code"
-                  disabled={isLoading}
-                />
-                <button 
-                  onClick={handleVerifyNewEmail} 
-                  className="btn btn-primary mt-2 border w-80 h-7 me-2 border-black me-2"
-                  disabled={newEmailCode.length !== 6 || isLoading}
-                >
-                  {isLoading ? 'Updating...' : 'Verify and Update Email'}
-                </button>
-              </>
-            )}
-          </div>
+          {step === 3 && (
+            <>
+              <p>Enter your new email address:</p>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="w-full bg-white bg-opacity-10 border border-gray-500 rounded px-3 py-2"
+                placeholder="New email address"
+                disabled={isLoading}
+              />
+              <button 
+                onClick={handleSendNewEmailCode} 
+                className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                disabled={!newEmail || isLoading}
+              >
+                {isLoading ? 'Sending code...' : 'Validate email'}
+              </button>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <p>Enter the 6-digit code sent to <strong>{newEmail}</strong></p>
+              <input
+                type="text"
+                value={newEmailCode}
+                onChange={(e) => setNewEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full bg-white bg-opacity-10 border border-gray-500 rounded px-3 py-2"
+                placeholder="Verification code"
+                disabled={isLoading}
+              />
+              <button 
+                onClick={handleVerifyNewEmail} 
+                className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                disabled={newEmailCode.length !== 6 || isLoading}
+              >
+                {isLoading ? 'Updating...' : 'Verify and Update Email'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

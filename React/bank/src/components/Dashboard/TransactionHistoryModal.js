@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, getDashboardData } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 import TransactionDetailsModal from './TransactionDetailsModal';
+import { formatAccountNumber } from '../../services/api';
 
 const TransactionHistoryModal = ({ userAccount, onClose }) => {
     const [transactions, setTransactions] = useState([]);
@@ -12,21 +13,20 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const getAmountClass = (transaction) => {
-        if (transaction.type === 'DEPOSIT') return 'text-success';
-        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-danger';
-        if (transaction.targetAccountNumber === userAccount.accountNumber) return 'text-success';
-        return 'text-muted';
+        if (transaction.type === 'DEPOSIT') return 'text-green-500';
+        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-red-500';
+        if (transaction.targetAccountNumber === userAccount.accountNumber) return 'text-green-500';
+        return 'text-gray-400';
     };
 
     const formatAmount = (transaction) => {
         const amount = Math.abs(transaction.amount).toFixed(2);
         if (transaction.type === 'TRANSFER') {
-            if (transaction.targetAccountOwner === transaction.sourceAccountOwner){
+            if (transaction.targetAccountOwner === transaction.sourceAccountOwner) {
                 return `${amount}$`;
-            } else if (transaction.sourceAccountOwner === name){
+            } else if (transaction.sourceAccountOwner === name) {
                 return `-${amount}$`;
-            }
-            else{
+            } else {
                 return `+${amount}$`;
             }
         }
@@ -73,33 +73,40 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
 
     return (
         <>
-            <div className="modal d-flex align-items-center justify-content-center" style={{ display: 'flex', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <div className="modal-content bg-white p-4" style={{ width: '90%', maxWidth: '1000px', maxHeight: '80vh', overflowY: 'auto' }}>
-                    <span className="close" onClick={onClose} style={{ float: 'right', cursor: 'pointer', fontSize: '1.5rem' }}>&times;</span>
-                    
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2 className="text-xl fw-bold text-center w-100">Transaction History</h2>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto">
+                <div className="bg-black bg-opacity-90 p-6 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[80vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold">Transaction History</h2>
+                        <button 
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-white"
+                        >
+                            ✕
+                        </button>
                     </div>
                     
-                    <div className="table-responsive">
-                        {loading ? (
-                            <div className="text-center p-4">
-                                <div className="spinner-border text-primary" role="status">
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        ) : error ? (
-                            <div className="alert alert-danger text-center">{error}</div>
-                        ) : !transactions || transactions.length === 0 ? (
-                            <div className="alert alert-info text-center">No transactions found</div>
-                        ) : (
-                            <table className="table table-hover" style={{ width: '100%' }}>
-                                <thead className="bg-light">
-                                    <tr>
-                                        <th className="text-center p-3">Date</th>
-                                        <th className="text-center p-3">Type</th>
-                                        <th className="text-center p-3">Details</th>
-                                        <th className="text-center p-3">Amount</th>
+                    {loading ? (
+                        <div className="flex justify-center p-6">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="bg-red-500 bg-opacity-20 p-4 rounded-lg border border-red-500 text-center">
+                            {error}
+                        </div>
+                    ) : !transactions || transactions.length === 0 ? (
+                        <div className="bg-blue-500 bg-opacity-20 p-4 rounded-lg border border-blue-500 text-center">
+                            No transactions found
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-gray-700">
+                                        <th className="text-left p-3 text-gray-400">Date</th>
+                                        <th className="text-left p-3 text-gray-400">Type</th>
+                                        <th className="text-left p-3 text-gray-400">Details</th>
+                                        <th className="text-right p-3 text-gray-400">Amount</th>
+                                        <th className="text-center p-3 text-gray-400">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -107,48 +114,54 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                                         <tr 
                                             key={transaction.id}
                                             onClick={() => handleRowClick(transaction)}
-                                            className="cursor-pointer hover:bg-gray-50"
+                                            className="border-b border-gray-700 hover:bg-gray-800 cursor-pointer transition-colors"
                                         >
-                                            <td className="text-center p-3">{new Date(transaction.timestamp).toLocaleString()}</td>
-                                            <td className="text-center p-3">{transaction.type}</td>
-                                            <td className="text-center p-3">
+                                            <td className="p-3">
+                                                {new Date(transaction.timestamp).toLocaleString()}
+                                            </td>
+                                            <td className="p-3">
+                                                {transaction.type}
+                                            </td>
+                                            <td className="p-3">
                                                 {transaction.type === 'TRANSFER' && (
                                                     <>
-                                                        <div className="small text-muted mb-1">
+                                                        <div className="text-sm text-gray-400 mb-1">
                                                             From: {transaction.sourceAccountOwner} 
                                                         </div>
-                                                        <div className="small text-muted">
+                                                        <div className="text-sm text-gray-400">
                                                             To: {transaction.targetAccountOwner === 'Unknown' ? 
-                                                                <span className="text-xs text-danger">DELETED</span> : 
+                                                                <span className="text-xs text-red-500">DELETED</span> : 
                                                                 transaction.targetAccountOwner}
                                                         </div>
                                                     </>
                                                 )}
-                                                {transaction.description && <div className="mt-1">Message: {transaction.description}</div>}
+                                                {transaction.description && 
+                                                    <div className="mt-1 text-sm">Message: {transaction.description}</div>
+                                                }
                                             </td>
-                                            <td className={`text-center p-3 ${getAmountClass(transaction)}`}>
+                                            <td className={`p-3 text-right ${getAmountClass(transaction)}`}>
                                                 {formatAmount(transaction)}
                                             </td>
-                                            <td className="text-center p-3">
-                                                <span className={`badge ${
-                                                    transaction.status === 'COMPLETED' ? 'bg-success' : 
-                                                    transaction.status === 'FAILED' ? 'bg-danger' : 'bg-warning'
+                                            <td className="p-3 text-center">
+                                                <span className={`inline-block px-2 py-1 rounded text-xs ${
+                                                    transaction.status === 'COMPLETED' ? 'bg-green-500 bg-opacity-20 text-green-500' : 
+                                                    transaction.status === 'FAILED' ? 'bg-red-500 bg-opacity-20 text-red-500' : 
+                                                    'bg-yellow-500 bg-opacity-20 text-yellow-500'
                                                 }`}>
                                                     {transaction.status}
                                                 </span>
                                             </td>
-                                            <td className="text-center p-3 small text-muted">{transaction.reference}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                        )}
-                    </div>
+                        </div>
+                    )}
                     
-                    <div className="d-flex justify-content-center mt-4">
+                    <div className="flex justify-center mt-6">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+                            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
                         >
                             Close
                         </button>
