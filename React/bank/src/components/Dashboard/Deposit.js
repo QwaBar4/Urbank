@@ -62,10 +62,10 @@ const Deposit = () => {
                 throw new Error(errorData.message || 'Deposit failed');
             }
 
-		const data = await response.json();
-		setSuccess(`Deposit successful! New balance: $${data.newBalance.toFixed(2)}`);
-		setShowInfoModal(true);
-		setAccountInfo(prev => ({ ...prev, balance: data.newBalance }));
+            const data = await response.json();
+            setSuccess(`Deposit successful! New balance: $${data.newBalance.toFixed(2)}`);
+            setShowInfoModal(true);
+            setAccountInfo(prev => ({ ...prev, balance: data.newBalance }));
             setAmount('');
             setDescription('');
             
@@ -77,110 +77,130 @@ const Deposit = () => {
     };
 
     return (
-        <div className="container mt-4 mx-3">
-            <div className="row justify-content-center">
-                <div className="col-md-8 col-lg-6">
-                    <div className="card">
-                        <div className="card-header bg-primary text-white">
-                            <h3 className="mb-0">Make a Deposit</h3>
+        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
+            <div className="relative z-10 max-w-6xl mx-auto w-full">
+                <div className="flex flex-col items-center my-6">
+                    <div className="flex space-x-1 mb-2">
+                        {[...Array(24)].map((_, i) => (
+                            <div key={i} className="w-2 h-px bg-gray-400"></div>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center">
+                        <div className="flex flex-col space-y-1 mr-2">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="w-px h-2 bg-gray-400"></div>
+                            ))}
                         </div>
-                        <div className="card-body">
-                            {error && <div className="alert alert-danger">{error}</div>}
-                           
-                            <div className="mb-4">
-                                <h5>Account Information</h5>
-                                <div className="d-flex justify-content-between">
-                                    <span className="text-muted">Account Number:</span>
-                                    <span className="font-monospace">{accountInfo.accountNumber}</span>
-                                </div>
-                                <div className="d-flex justify-content-between">
-                                    <span className="text-muted">Current Balance:</span>
-                                    <span>${accountInfo.balance.toFixed(2)}</span>
-                                </div>
+                        <div className="px-4 py-2 border border-white rounded">
+                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
+                                Make a Deposit
+                            </h1>
+                        </div>
+                        <div className="flex flex-col space-y-1 ml-2">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="w-px h-2 bg-gray-400"></div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="flex space-x-1 mt-2">
+                        {[...Array(24)].map((_, i) => (
+                            <div key={i} className="w-2 h-px bg-gray-400"></div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                    {error && (
+                        <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
+                            <p>{error}</p>
+                        </div>
+                    )}
+
+                    <div className="mb-6">
+                        <h2 className="text-xl font-bold mb-4">Account Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p className="text-gray-400">Account Number</p>
+                                <p className="font-mono">{accountInfo.accountNumber}</p>
                             </div>
-                            
-                            <form onSubmit={handleSubmit}>
-                                <div className="form-group mb-3">
-                                    <label htmlFor="amount" className="form-label">Amount to Deposit</label>
-                                    <div className="input-group">
-                                        <span className="input-group-text">$</span>
-                                        <input
-                                            type="number"
-                                            id="amount"
-                                            className="form-control"
-                                            value={amount}
-                                            onChange={(e) => setAmount(e.target.value)}
-                                            min="0.01"
-                                            step="0.01"
-                                            required
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                    <small className="form-text text-muted">Minimum deposit: $0.01</small>
-                                </div>
-                                
-                                <div className="form-group mb-4">
-                                    <label htmlFor="description" className="form-label">Description (Optional)</label>
-                                    <input
-                                        type="text"
-                                        id="description"
-                                        className="form-control ml-2"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="e.g., Cash deposit, Check deposit"
-                                    />
-                                </div>
-                                
-                                <div className="d-grid gap-2">
-                                    <button 
-                                        type="submit" 
-                                        className="btn btn-primary border w-60 h-7 me-5 border-black me-3"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                Processing...
-                                            </>
-                                        ) : 'Complete Deposit'}
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-outline-secondary border w-80 h-7 me-2 border-black me-2"
-                                        onClick={() => navigate('/dashboard')}
-                                    >
-                                        Back to Dashboard
-                                    </button>
-                                </div>
-                            </form>
+                            <div>
+                                <p className="text-gray-400">Current Balance</p>
+                                <p>${accountInfo.balance.toFixed(2)}</p>
+                            </div>
                         </div>
-                        <div className="card-footer text-muted">
-                            <small>Deposits are processed immediately. For large deposits, additional verification may be required.</small>
+                    </div>
+
+                    <form onSubmit={handleSubmit}>
+                        <h2 className="text-xl font-bold mb-4">Deposit Details</h2>
+                        
+                        <div className="mb-4">
+                            <label className="block mb-2 font-medium">Amount to Deposit</label>
+                            <div className="flex">
+                                <span className="bg-white bg-opacity-10 border border-r-0 border-gray-500 rounded-l px-3 py-2">$</span>
+                                <input
+                                    type="number"
+                                    className="flex-1 bg-white bg-opacity-10 border border-gray-500 rounded-r px-3 py-2"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    min="0.01"
+                                    step="0.01"
+                                    required
+                                    placeholder="0.00"
+                                />
+                            </div>
+                            <p className="text-gray-400 text-sm mt-1">Minimum deposit: $0.01</p>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <label className="block mb-2 font-medium">Description (Optional)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white bg-opacity-10 border border-gray-500 rounded px-3 py-2"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="e.g., Cash deposit, Check deposit"
+                            />
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                            <button 
+                                type="submit" 
+                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Processing...' : 'Complete Deposit'}
+                            </button>
+                            <button 
+                                type="button" 
+                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                onClick={() => navigate('/dashboard')}
+                            >
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {showInfoModal && success && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+                        <h3 className="text-xl font-bold mb-4">Operation completed!</h3>
+                        <p className="mb-6">{success}</p>
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                onClick={() => setShowInfoModal(false)}
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-            {showInfoModal && success && (
-		            <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-		                <div className="modal-dialog modal-lg">
-		                    <div className="modal-content">
-		                        <h1 className="modal-title text-2xl">Operation completed!</h1>
-		                        <h5 className="mt-2">{success}</h5>
-		                        <div className="modal-footer">
-		                            <button
-		                                type="button"
-		                                className="btn btn-secondary border w-40 h-7 me-2 border-black me-2 mt-5"
-		                                onClick={() => {
-		                                    setShowInfoModal(false);
-		                                }}
-		                            >
-		                                Close
-		                            </button>
-		                        </div>
-		                    </div>
-		                </div>
-		            </div>
-				)}
+            )}
         </div>
     );
 };
