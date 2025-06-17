@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../services/api';
+import api from '../services/api';
+import StatementOptionsModal from '../components/Dashboard/StatementOptionsModal';
 import '../index.css';
 
 const AdminDashboard = () => {
@@ -17,6 +18,9 @@ const AdminDashboard = () => {
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [auditLogs, setAuditLogs] = useState(null);
   const [showAuditLogsModal, setShowAuditLogsModal] = useState(false);
+  const [showStatementOptions, setShowStatementOptions] = useState(false);
+  const [statementLoading, setStatementLoading] = useState(false);
+  const [selectedUserForStatement, setSelectedUserForStatement] = useState(null);  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,7 +93,32 @@ const AdminDashboard = () => {
       setTransactionsLoading(false);
     }
   };
-
+  const handleAdminDownloadStatement = async (theme) => {
+	  try {
+		setStatementLoading(true);
+		const response = await api.generateUserStatementByID(
+		selectedUserForStatement.id, 
+		selectedUserForStatement.username,
+		theme // Pass theme
+	  );
+		  
+	  const blob = new Blob([response.data], { type: 'application/pdf' });
+	  const url = window.URL.createObjectURL(blob);
+	  const a = document.createElement('a');
+	  a.href = url;
+	  a.download = `statement_${new Date().toISOString().slice(0,10)}.pdf`;
+	  document.body.appendChild(a);
+	  a.click();
+	  a.remove();
+		  
+	  setShowStatementOptions(false);
+	} catch (error) {
+	  console.error('Error downloading statement:', error);
+	  setError(error.message);
+	} finally {
+	  setStatementLoading(false);
+	}
+  };
   const viewAuditLogs = async (userId) => {
     try {
       setError(null);
@@ -259,7 +288,11 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
-
+	  <StatementOptionsModal
+		isOpen={showStatementOptions}
+		onClose={() => setShowStatementOptions(false)}
+		onDownload={handleAdminDownloadStatement}
+	  />
       {/* Modals */}
       {/* Transactions Modal */}
       {showTransactions !== null && (

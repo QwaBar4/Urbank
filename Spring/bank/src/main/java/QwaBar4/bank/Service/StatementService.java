@@ -22,7 +22,7 @@ public class StatementService {
         this.pdfGenerator = pdfGenerator;
     }
 
-	public StatementPDF generateStatement(Long accountId) {
+	public StatementPDF generateStatement(Long accountId, String theme) {
 		List<TransactionDTO> transactions = transactionService.getUserTransactionsById(accountId);
 
 		// Check for empty transactions
@@ -37,7 +37,7 @@ public class StatementService {
 		});
 
 		try {
-		    byte[] pdfContent = pdfGenerator.generate(transactions);
+		    byte[] pdfContent = pdfGenerator.generate(transactions, theme);
 		    return new StatementPDF(pdfContent);
 		} catch (IOException e) {
 		    throw new RuntimeException("Failed to generate PDF statement: " + e.getMessage(), e);

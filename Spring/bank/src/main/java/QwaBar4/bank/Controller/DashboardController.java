@@ -196,7 +196,7 @@ public class DashboardController {
 	}
 
 	@GetMapping("/api/user/statements")
-	public ResponseEntity<byte[]> generateUserStatement() {
+	public ResponseEntity<byte[]> generateUserStatement(@RequestParam(defaultValue = "dark") String theme) {
 		try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -206,7 +206,7 @@ public class DashboardController {
             
             long userId = user.getId();
             
-		    StatementPDF statementPDF = statementService.generateStatement(userId);
+		    StatementPDF statementPDF = statementService.generateStatement(userId, theme);
 		    byte[] pdfContent = statementPDF.getContent();
 
 		    HttpHeaders headers = new HttpHeaders();

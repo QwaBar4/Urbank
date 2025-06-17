@@ -188,9 +188,9 @@ public class AdminController {
 	}
 
 	@GetMapping("/users/{userId}/statements")
-	public ResponseEntity<byte[]> generateUserStatement(@PathVariable Long userId) {
+	public ResponseEntity<byte[]> generateUserStatement(@PathVariable Long userId, @RequestParam(defaultValue = "dark") String theme) {
 		try {
-		    StatementPDF statementPDF = statementService.generateStatement(userId);
+		    StatementPDF statementPDF = statementService.generateStatement(userId, theme);
 		    byte[] pdfContent = statementPDF.getContent();
 
 		    HttpHeaders headers = new HttpHeaders();

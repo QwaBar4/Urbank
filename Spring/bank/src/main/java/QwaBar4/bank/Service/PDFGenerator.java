@@ -30,12 +30,27 @@ public class PDFGenerator {
     private static final float HEADER_FONT_SIZE = 12;
     private static final float BOX_PADDING = 15;
     private static final float BOX_MARGIN = 10;
-    private static final Color BG_COLOR = new Color(0, 0, 0); // Black background
-    private static final Color TEXT_COLOR = new Color(255, 255, 255); // White text
-    private static final Color BOX_BORDER_COLOR = new Color(255, 255, 255); // White border
-    private static final Color BOX_BG_COLOR = new Color(0, 0, 0); // Changed to black
-
-    public byte[] generate(List<TransactionDTO> transactions) throws IOException {
+    private static final Color BG_COLOR = new Color(0, 0, 0);
+    private static final Color TEXT_COLOR = new Color(255, 255, 255);
+    private static final Color BOX_BORDER_COLOR = new Color(255, 255, 255);
+    private static final Color BOX_BG_COLOR = new Color(0, 0, 0);
+    private Color bgColor;
+    private Color textColor;
+    private Color boxBorderColor;
+    private Color boxBgColor;
+    
+    public byte[] generate(List<TransactionDTO> transactions, String theme) throws IOException {
+    	if ("light".equalsIgnoreCase(theme)) {
+            bgColor = new Color(255, 255, 255);
+            textColor = new Color(0, 0, 0); 
+            boxBorderColor = new Color(0, 0, 0);
+            boxBgColor = new Color(240, 240, 240);
+        } else {
+            bgColor = new Color(0, 0, 0);      
+            textColor = new Color(255, 255, 255);
+            boxBorderColor = new Color(255, 255, 255);
+            boxBgColor = new Color(0, 0, 0);
+        }
         try (PDDocument document = new PDDocument()) {
             PDPage currentPage = new PDPage(PDRectangle.A4);
             document.addPage(currentPage);
@@ -77,7 +92,7 @@ public class PDFGenerator {
     }
     
     private void setupPageBackground(PDPageContentStream contentStream, PDPage page) throws IOException {
-        contentStream.setNonStrokingColor(BG_COLOR);
+        contentStream.setNonStrokingColor(bgColor);
         contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
         contentStream.fill();
         contentStream.setNonStrokingColor(TEXT_COLOR);
@@ -134,7 +149,7 @@ public class PDFGenerator {
         float textY = boxY + boxHeight - BOX_PADDING - FONT_SIZE;
         
         // Set text color to white before drawing text
-        contentStream.setNonStrokingColor(TEXT_COLOR);
+        contentStream.setNonStrokingColor(textColor);
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, HEADER_FONT_SIZE);
         contentStream.beginText();
         contentStream.newLineAtOffset(textX, textY);
@@ -174,9 +189,8 @@ public class PDFGenerator {
     private void drawRoundedBox(PDPageContentStream contentStream, float x, float y, float width, float height) throws IOException {
         final float cornerRadius = 5;
         
-        // Set box background to black
-        contentStream.setNonStrokingColor(BOX_BG_COLOR);
-        contentStream.setStrokingColor(BOX_BORDER_COLOR);
+        contentStream.setNonStrokingColor(boxBgColor);
+        contentStream.setStrokingColor(boxBorderColor);
         contentStream.setLineWidth(1f);
         
         contentStream.moveTo(x + cornerRadius, y + height);
@@ -208,8 +222,7 @@ public class PDFGenerator {
         contentStream.fill();
         contentStream.stroke();
         
-        // Reset text color to white after drawing box
-        contentStream.setNonStrokingColor(TEXT_COLOR);
+        contentStream.setNonStrokingColor(textColor);
     }
     
     private float calculateTransactionHeight(TransactionDTO transaction) {

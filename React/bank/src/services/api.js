@@ -326,9 +326,9 @@ export const getUserAuditLogs = async (userId) => {
   }
 };
 
-export const generateUserStatement = async (username) => {
+export const generateUserStatement = async (username, theme) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/user/statements`, {
+        const response = await fetch(`${API_BASE_URL}/api/user/statements?theme=${theme}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${getJwtToken()}`,
@@ -352,9 +352,9 @@ export const generateUserStatement = async (username) => {
     }
 };
 
-export const generateUserStatementByID = async (userId, username) => {
+export const generateUserStatementByID = async (userId, username, theme) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/statements`, {
+        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/statements?theme=${theme}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${getJwtToken()}`,

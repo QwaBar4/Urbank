@@ -4,6 +4,7 @@ import { API_BASE_URL, getDashboardData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
 import Transfer from '../components/Dashboard/Transfer';
 import api from '../services/api';
+import StatementOptionsModal from '../components/Dashboard/StatementOptionsModal';
 import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
 import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
@@ -19,6 +20,8 @@ const Dashboard = () => {
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
     const [showTransactionHistoryModal, setShowTransactionHistoryModal] = useState(false);
     const [showSensitiveData, setShowSensitiveData] = useState(false);
+	const [showStatementOptions, setShowStatementOptions] = useState(false);
+	const [statementLoading, setStatementLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -91,6 +94,31 @@ const Dashboard = () => {
             setError('Failed to log out: ' + error.message);
         }
     };
+    const handleDownloadStatement = async (theme) => {
+		try {
+		  setStatementLoading(true);
+		  const response = await api.generateUserStatement(
+		    userData.username, 
+		    theme
+		  );
+		  
+		  const blob = new Blob([response.data], { type: 'application/pdf' });
+		  const url = window.URL.createObjectURL(blob);
+		  const a = document.createElement('a');
+		  a.href = url;
+		  a.download = `statement_${new Date().toISOString().slice(0,10)}.pdf`;
+		  document.body.appendChild(a);
+		  a.click();
+		  a.remove();
+		  
+		  setShowStatementOptions(false);
+		} catch (error) {
+		  console.error('Error downloading statement:', error);
+		  setError(error.message);
+		} finally {
+		  setStatementLoading(false);
+		}
+	  };
 
     const handleDeleteAccount = async () => {
         try {
@@ -207,27 +235,12 @@ const Dashboard = () => {
                     >
                         Logout
                     </button>
-                    <button
-                        onClick={async () => {
-                            try {
-                                const response = await api.generateUserStatement(userData.username);
-                                const blob = new Blob([response.data], { type: 'application/pdf' });
-                                const url = window.URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = response.filename;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                            } catch (error) {
-                                console.error('Error downloading user statement:', error);
-                                setError(error.message);
-                            }
-                        }}
-                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                    >
-                        Download Statement
-                    </button>
+					<button
+					  onClick={() => setShowStatementOptions(true)}
+					  className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+					>
+					  Download Statement
+					</button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
                         className="px-4 py-2 bg-transparent text-red-500 border border-red-500 rounded hover:bg-red-500 hover:bg-opacity-10 transition-colors"
@@ -416,6 +429,18 @@ const Dashboard = () => {
                     onClose={() => setShowTransactionHistoryModal(false)}
                 />
             )}
+            
+            {statementLoading && (
+		        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+				   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+			</div>
+			)}
+						
+			<StatementOptionsModal
+				isOpen={showStatementOptions}
+				onClose={() => setShowStatementOptions(false)}
+				onDownload={handleDownloadStatement}
+			/>
         </div>
     );
 };
