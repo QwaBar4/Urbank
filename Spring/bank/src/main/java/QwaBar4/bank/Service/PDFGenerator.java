@@ -12,10 +12,8 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -30,27 +28,25 @@ public class PDFGenerator {
     private static final float HEADER_FONT_SIZE = 12;
     private static final float BOX_PADDING = 15;
     private static final float BOX_MARGIN = 10;
-    private static final Color BG_COLOR = new Color(0, 0, 0);
-    private static final Color TEXT_COLOR = new Color(255, 255, 255);
-    private static final Color BOX_BORDER_COLOR = new Color(255, 255, 255);
-    private static final Color BOX_BG_COLOR = new Color(0, 0, 0);
+    
     private Color bgColor;
     private Color textColor;
     private Color boxBorderColor;
     private Color boxBgColor;
-    
+
     public byte[] generate(List<TransactionDTO> transactions, String theme) throws IOException {
-    	if ("light".equalsIgnoreCase(theme)) {
+        if ("light".equalsIgnoreCase(theme)) {
             bgColor = new Color(255, 255, 255);
             textColor = new Color(0, 0, 0); 
-            boxBorderColor = new Color(0, 0, 0);
-            boxBgColor = new Color(240, 240, 240);
+            boxBorderColor = new Color(200, 200, 200);
+            boxBgColor = new Color(255, 255, 255);
         } else {
-            bgColor = new Color(0, 0, 0);      
+            bgColor = new Color(0, 0, 0);
             textColor = new Color(255, 255, 255);
             boxBorderColor = new Color(255, 255, 255);
-            boxBgColor = new Color(0, 0, 0);
+            boxBgColor = new Color(0, 0, 0); 
         }
+
         try (PDDocument document = new PDDocument()) {
             PDPage currentPage = new PDPage(PDRectangle.A4);
             document.addPage(currentPage);
@@ -95,11 +91,12 @@ public class PDFGenerator {
         contentStream.setNonStrokingColor(bgColor);
         contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
         contentStream.fill();
-        contentStream.setNonStrokingColor(TEXT_COLOR);
+        contentStream.setNonStrokingColor(textColor);
     }
     
     private float drawTitle(PDPageContentStream contentStream, float yPosition, float pageWidth) throws IOException {
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, TITLE_FONT_SIZE);
+        contentStream.setNonStrokingColor(textColor);
         
         String title = "Transaction Statement";
         float titleWidth = PDType1Font.HELVETICA_BOLD.getStringWidth(title) / 1000 * TITLE_FONT_SIZE;
@@ -107,7 +104,7 @@ public class PDFGenerator {
         
         float lineY = yPosition - 8;
         contentStream.setLineWidth(0.5f);
-        contentStream.setStrokingColor(BOX_BORDER_COLOR);
+        contentStream.setStrokingColor(boxBorderColor);
         contentStream.moveTo(titleX - 110, lineY);
         contentStream.lineTo(titleX - 10, lineY);
         contentStream.stroke();
@@ -125,6 +122,7 @@ public class PDFGenerator {
     
     private float drawAccountInfoHeader(PDPageContentStream contentStream, float yPosition, float pageWidth) throws IOException {
         contentStream.setFont(PDType1Font.HELVETICA, FONT_SIZE);
+        contentStream.setNonStrokingColor(textColor);
         
         String dateInfo = "Generated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         float dateWidth = PDType1Font.HELVETICA.getStringWidth(dateInfo) / 1000 * FONT_SIZE;
@@ -148,7 +146,7 @@ public class PDFGenerator {
         float textX = boxX + BOX_PADDING;
         float textY = boxY + boxHeight - BOX_PADDING - FONT_SIZE;
         
-        // Set text color to white before drawing text
+        // Set text color
         contentStream.setNonStrokingColor(textColor);
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, HEADER_FONT_SIZE);
         contentStream.beginText();
@@ -221,7 +219,7 @@ public class PDFGenerator {
         
         contentStream.fill();
         contentStream.stroke();
-        
+
         contentStream.setNonStrokingColor(textColor);
     }
     
