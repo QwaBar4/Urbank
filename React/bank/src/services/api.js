@@ -352,31 +352,32 @@ export const generateUserStatement = async (username, theme) => {
     }
 };
 
-export const generateUserStatementByID = async (userId, username, theme) => {
+export const generateUserStatementByID = async (userId, theme) => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/statements?theme=${theme}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${getJwtToken()}`,
-                'Content-Type': 'application/pdf'
+                'Accept': 'application/pdf'
             }
         });
 
         if (!response.ok) {
-            throw new Error('Failed to generate user statement');
+            // Get the full error message from response
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
-        const blob = await response.blob();
-        return {
-            data: blob,
-            filename: `${username}-id${userId}_transaction_statement.pdf`
-        };
+        return await response.blob();
     } catch (error) {
-        console.error('Error generating user statement:', error);
-        throw error;
+        console.error('PDF Generation Error:', {
+            userId,
+            error: error.message,
+            stack: error.stack
+        });
+        throw new Error(`Failed to generate statement: ${error.message}`);
     }
 };
-
 export const formatAccountNumber = (accountNumber) => {
   if (!accountNumber) return '';
   

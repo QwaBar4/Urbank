@@ -21,6 +21,7 @@ const AdminDashboard = () => {
   const [showStatementOptions, setShowStatementOptions] = useState(false);
   const [statementLoading, setStatementLoading] = useState(false);
   const [selectedUserForStatement, setSelectedUserForStatement] = useState(null);  
+  const [selectedTheme, setSelectedTheme] = useState('dark'); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,32 +94,58 @@ const AdminDashboard = () => {
       setTransactionsLoading(false);
     }
   };
-  const handleAdminDownloadStatement = async (theme) => {
-	  try {
-		setStatementLoading(true);
-		const response = await api.generateUserStatementByID(
-		selectedUserForStatement.id, 
-		selectedUserForStatement.username,
-		theme // Pass theme
-	  );
-		  
-	  const blob = new Blob([response.data], { type: 'application/pdf' });
-	  const url = window.URL.createObjectURL(blob);
-	  const a = document.createElement('a');
-	  a.href = url;
-	  a.download = `statement_${new Date().toISOString().slice(0,10)}.pdf`;
-	  document.body.appendChild(a);
-	  a.click();
-	  a.remove();
-		  
-	  setShowStatementOptions(false);
-	} catch (error) {
-	  console.error('Error downloading statement:', error);
-	  setError(error.message);
-	} finally {
-	  setStatementLoading(false);
-	}
-  };
+  
+const handleAdminDownloadStatement = async (theme) => {
+  try {
+    setStatementLoading(true);
+    setError(null);
+    
+    if (!selectedUserForStatement?.id) {
+      throw new Error('No user selected for statement');
+    }
+
+    const pdfBlob = await api.generateUserStatementByID(
+      selectedUserForStatement.id,
+      selectedTheme
+    );
+    
+    // Additional validation
+    if (!pdfBlob || pdfBlob.size === 0) {
+      throw new Error('Received empty PDF file from server');
+    }
+
+    const url = window.URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `statement_${selectedUserForStatement.username}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 100);
+    
+    setShowStatementOptions(false);
+  } catch (error) {
+    console.error('Statement Download Failed:', {
+      user: selectedUserForStatement,
+      error: error.toString()
+    });
+    
+    // More user-friendly error message
+    let displayError = error.message;
+    if (error.message.includes('500')) {
+      displayError = `Server error generating PDF for user ${selectedUserForStatement.username}. 
+                     Please check if this user has valid account data.`;
+    }
+    
+    setError(displayError);
+  } finally {
+    setStatementLoading(false);
+  }
+};
+
   const viewAuditLogs = async (userId) => {
     try {
       setError(null);
@@ -254,20 +281,9 @@ const AdminDashboard = () => {
                     </button>
                     <button
                       className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                      onClick={async () => {
-                        try {
-                          const response = await api.generateUserStatementByID(user.id, user.username);
-                          const blob = new Blob([response.data], { type: 'application/pdf' });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = response.filename;
-                          document.body.appendChild(a);
-                          a.click();
-                          a.remove();
-                        } catch (error) {
-                          console.error('Error downloading user statement:', error);
-                        }
+                      onClick={() => {
+                        setSelectedUserForStatement(user);
+                        setShowStatementOptions(true);
                       }}
                     >
                       Download Statement
@@ -288,11 +304,48 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
-	  <StatementOptionsModal
-		isOpen={showStatementOptions}
-		onClose={() => setShowStatementOptions(false)}
-		onDownload={handleAdminDownloadStatement}
-	  />
+      
+      {/* Simplified Statement Options Modal - Only dark theme */}
+		{showStatementOptions && (
+		  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+			<div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+			  <h3 className="text-xl font-bold mb-4">Download Statement</h3>
+			  <p className="mb-4">Select theme for the statement:</p>
+			  
+			  <div className="flex gap-4 mb-6">
+				<button
+				  className={`px-4 py-2 rounded border ${selectedTheme === 'dark' ? 'bg-white text-black border-white' : 'bg-transparent text-white border-gray-500'}`}
+				  onClick={() => setSelectedTheme('dark')}
+				>
+				  Dark Theme
+				</button>
+				<button
+				  className={`px-4 py-2 rounded border ${selectedTheme === 'light' ? 'bg-white text-black border-white' : 'bg-transparent text-white border-gray-500'}`}
+				  onClick={() => setSelectedTheme('light')}
+				>
+				  Light Theme
+				</button>
+			  </div>
+			  
+			  <div className="flex justify-end gap-2">
+				<button
+				  className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10"
+				  onClick={() => setShowStatementOptions(false)}
+				>
+				  Cancel
+				</button>
+				<button
+				  className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 font-medium"
+				  onClick={() => handleAdminDownloadStatement()}
+				  disabled={statementLoading}
+				>
+				  {statementLoading ? 'Generating...' : 'Download Statement'}
+				</button>
+			  </div>
+			</div>
+		  </div>
+		)}
+
       {/* Modals */}
       {/* Transactions Modal */}
       {showTransactions !== null && (
