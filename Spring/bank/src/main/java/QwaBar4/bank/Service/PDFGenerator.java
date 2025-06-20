@@ -6,11 +6,14 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,24 +31,18 @@ public class PDFGenerator {
     private static final float HEADER_FONT_SIZE = 12;
     private static final float BOX_PADDING = 15;
     private static final float BOX_MARGIN = 10;
+    private static final float LOGO_WIDTH = 50;
+    private static final float LOGO_MARGIN = 20;
     
     private Color bgColor;
     private Color textColor;
     private Color boxBorderColor;
     private Color boxBgColor;
+    private PDImageXObject logoImage;
 
     public byte[] generate(List<TransactionDTO> transactions, String theme) throws IOException {
-        if ("light".equalsIgnoreCase(theme)) {
-            bgColor = new Color(255, 255, 255);
-            textColor = new Color(0, 0, 0); 
-            boxBorderColor = new Color(200, 200, 200);
-            boxBgColor = new Color(255, 255, 255);
-        } else {
-            bgColor = new Color(0, 0, 0);
-            textColor = new Color(255, 255, 255);
-            boxBorderColor = new Color(255, 255, 255);
-            boxBgColor = new Color(0, 0, 0); 
-        }
+        loadLogoImage();
+        setThemeColors(theme);
 
         try (PDDocument document = new PDDocument()) {
             PDPage currentPage = new PDPage(PDRectangle.A4);
@@ -56,7 +53,7 @@ public class PDFGenerator {
             float pageWidth = currentPage.getMediaBox().getWidth();
             
             setupPageBackground(contentStream, currentPage);
-            yPosition = drawTitle(contentStream, yPosition, pageWidth);
+            yPosition = drawHeader(contentStream, yPosition, pageWidth);
             yPosition -= SECTION_SPACING;
             yPosition = drawAccountInfoHeader(contentStream, yPosition, pageWidth);
             yPosition -= SECTION_SPACING/2;
@@ -70,7 +67,8 @@ public class PDFGenerator {
                     document.addPage(currentPage);
                     contentStream = new PDPageContentStream(document, currentPage);
                     setupPageBackground(contentStream, currentPage);
-                    yPosition = TOP_MARGIN;
+                    yPosition = drawHeader(contentStream, TOP_MARGIN, pageWidth);
+                    yPosition -= SECTION_SPACING;
                     yPosition = drawAccountInfoHeader(contentStream, yPosition, pageWidth);
                     yPosition -= SECTION_SPACING/2;
                 }
@@ -86,15 +84,42 @@ public class PDFGenerator {
             return outputStream.toByteArray();
         }
     }
-    
-    private void setupPageBackground(PDPageContentStream contentStream, PDPage page) throws IOException {
-        contentStream.setNonStrokingColor(bgColor);
-        contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
-        contentStream.fill();
-        contentStream.setNonStrokingColor(textColor);
+
+    private void loadLogoImage() throws IOException {
+        try {
+            InputStream is = new ClassPathResource("static/images/logotype.jpg").getInputStream();
+            byte[] logoBytes = new ClassPathResource("static/images/logotype.jpg").getContentAsByteArray();
+            this.logoImage = PDImageXObject.createFromByteArray(PDDocument.load(is), logoBytes, "logo");
+        } catch (IOException e) {
+            System.err.println("Warning: Could not load logo image. PDF will be generated without logo.");
+            this.logoImage = null;
+        }
+    }
+
+    private void setThemeColors(String theme) {
+        if ("light".equalsIgnoreCase(theme)) {
+            bgColor = new Color(255, 255, 255);
+            textColor = new Color(0, 0, 0); 
+            boxBorderColor = new Color(200, 200, 200);
+            boxBgColor = new Color(255, 255, 255);
+        } else {
+            bgColor = new Color(0, 0, 0);
+            textColor = new Color(255, 255, 255);
+            boxBorderColor = new Color(255, 255, 255);
+            boxBgColor = new Color(0, 0, 0); 
+        }
     }
     
-    private float drawTitle(PDPageContentStream contentStream, float yPosition, float pageWidth) throws IOException {
+    private float drawHeader(PDPageContentStream contentStream, float yPosition, float pageWidth) throws IOException {
+        // Draw logo if available
+        if (logoImage != null) {
+            float logoHeight = LOGO_WIDTH * ((float)logoImage.getHeight() / logoImage.getWidth());
+            float logoX = MARGIN;
+            float logoY = yPosition - logoHeight/2;
+            contentStream.drawImage(logoImage, logoX, logoY, LOGO_WIDTH, logoHeight);
+        }
+
+        // Draw title
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, TITLE_FONT_SIZE);
         contentStream.setNonStrokingColor(textColor);
         
@@ -102,15 +127,10 @@ public class PDFGenerator {
         float titleWidth = PDType1Font.HELVETICA_BOLD.getStringWidth(title) / 1000 * TITLE_FONT_SIZE;
         float titleX = (pageWidth - titleWidth) / 2;
         
-        float lineY = yPosition - 8;
-        contentStream.setLineWidth(0.5f);
-        contentStream.setStrokingColor(boxBorderColor);
-        contentStream.moveTo(titleX - 110, lineY);
-        contentStream.lineTo(titleX - 10, lineY);
-        contentStream.stroke();
-        contentStream.moveTo(titleX + titleWidth + 10, lineY);
-        contentStream.lineTo(titleX + titleWidth + 110, lineY);
-        contentStream.stroke();
+        // Adjust title position if logo is present
+        if (logoImage != null) {
+            titleX = Math.max(titleX, MARGIN + LOGO_WIDTH + LOGO_MARGIN);
+        }
         
         contentStream.beginText();
         contentStream.newLineAtOffset(titleX, yPosition);
@@ -118,6 +138,13 @@ public class PDFGenerator {
         contentStream.endText();
         
         return yPosition - LINE_HEIGHT;
+    }
+    
+    private void setupPageBackground(PDPageContentStream contentStream, PDPage page) throws IOException {
+        contentStream.setNonStrokingColor(bgColor);
+        contentStream.addRect(0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+        contentStream.fill();
+        contentStream.setNonStrokingColor(textColor);
     }
     
     private float drawAccountInfoHeader(PDPageContentStream contentStream, float yPosition, float pageWidth) throws IOException {
@@ -146,7 +173,6 @@ public class PDFGenerator {
         float textX = boxX + BOX_PADDING;
         float textY = boxY + boxHeight - BOX_PADDING - FONT_SIZE;
         
-        // Set text color
         contentStream.setNonStrokingColor(textColor);
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, HEADER_FONT_SIZE);
         contentStream.beginText();
