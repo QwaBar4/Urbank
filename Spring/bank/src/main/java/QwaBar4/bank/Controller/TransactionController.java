@@ -21,7 +21,7 @@ public class TransactionController {
     private final TransactionModelRepository transactionRepo;
     private final UserModelRepository userRepo;
     private final TransactionService transactionService;
-	private final AccountNumberUtils accountNumberUtils;
+    private final AccountNumberUtils accountNumberUtils;
 
     @Autowired
     public TransactionController(AccountModelRepository accountRepo,
@@ -42,42 +42,46 @@ public class TransactionController {
         Authentication authentication
     ) {
         try {
-        	String srcAcc = accountNumberUtils.convertFormattedNumberToUuid(request.getSourceAccount());
-        	String tgtACc = accountNumberUtils.convertFormattedNumberToUuid(request.getTargetAccount());
-        	if (srcAcc.equals(tgtACc)) {
-        		return ResponseEntity.badRequest().body("You cant send money to yourself");
-        	}
+            String srcAcc = accountNumberUtils.convertFormattedNumberToUuid(request.getSourceAccount());
+            String tgtAcc = accountNumberUtils.convertFormattedNumberToUuid(request.getTargetAccount());
+            
+            if (srcAcc.equals(tgtAcc)) {
+                return ResponseEntity.badRequest().body("You can't send money to yourself");
+            }
+            
             TransactionDTO transaction = transactionService.processTransfer(
                 srcAcc,
-                tgtACc,
+                tgtAcc,
                 request.getAmount(),
                 request.getDescription(),
+                request.getStatus(),
                 authentication.getName()
             );
+            
             return ResponseEntity.ok("Transfer completed");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-	@GetMapping("/history")
-	public ResponseEntity<List<TransactionDTO>> getTransactionHistory(Authentication authentication) {
-		UserModel user = userRepo.findByUsername(authentication.getName())
-		    .orElseThrow(() -> new RuntimeException("User not found"));
+    @GetMapping("/history")
+    public ResponseEntity<List<TransactionDTO>> getTransactionHistory(Authentication authentication) {
+        UserModel user = userRepo.findByUsername(authentication.getName())
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-		List<TransactionDTO> transactions = transactionService.getUserTransactions(user.getId());
-		
-		transactions.forEach(tx -> {
-		    if (tx.getSourceAccountOwner() == null) {
-		        tx.setSourceAccountOwner("Anonymous User");
-		    }
-		    if (tx.getTargetAccountOwner() == null) {
-		        tx.setTargetAccountOwner("Anonymous User");
-		    }
-		});
-		
-		return ResponseEntity.ok(transactions);
-	}
+        List<TransactionDTO> transactions = transactionService.getUserTransactions(user.getId());
+        
+        transactions.forEach(tx -> {
+            if (tx.getSourceAccountOwner() == null) {
+                tx.setSourceAccountOwner("Anonymous User");
+            }
+            if (tx.getTargetAccountOwner() == null) {
+                tx.setTargetAccountOwner("Anonymous User");
+            }
+        });
+        
+        return ResponseEntity.ok(transactions);
+    }
 
     @GetMapping("/balance")
     public ResponseEntity<BigDecimal> getAccountBalance(Authentication authentication) {
@@ -85,33 +89,33 @@ public class TransactionController {
         return ResponseEntity.ok(balance);
     }
 
-	@PostMapping("/deposit")
-	public ResponseEntity<?> depositFunds(
-		@RequestBody DepositWithdrawRequestDTO request,
-		Authentication authentication
-	) {
-		try {
-		    String accNumber = accountNumberUtils.convertFormattedNumberToUuid(request.getAccountNumber());
+    @PostMapping("/deposit")
+    public ResponseEntity<?> depositFunds(
+        @RequestBody DepositWithdrawRequestDTO request,
+        Authentication authentication
+    ) {
+        try {
+            String accNumber = accountNumberUtils.convertFormattedNumberToUuid(request.getAccountNumber());
 
-		    TransactionDTO transaction = transactionService.processDeposit(
-		        accNumber,
-		        request.getAmount(),
-		        request.getDescription(),
-		        authentication.getName()
-		    );
+            TransactionDTO transaction = transactionService.processDeposit(
+                accNumber,
+                request.getAmount(),
+                request.getDescription(),
+                authentication.getName()
+            );
 
-		    BigDecimal newBalance = accountRepo.findByAccountNumber(accNumber)
-		        .orElseThrow(() -> new RuntimeException("Account not found")).getBalance();
+            BigDecimal newBalance = accountRepo.findByAccountNumber(accNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found")).getBalance();
 
-		    Map<String, Object> response = new HashMap<>();
-		    response.put("transaction", transaction);
-		    response.put("newBalance", newBalance);
+            Map<String, Object> response = new HashMap<>();
+            response.put("transaction", transaction);
+            response.put("newBalance", newBalance);
 
-		    return ResponseEntity.ok(response);
-		} catch (RuntimeException e) {
-		    return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawFunds(
@@ -119,8 +123,8 @@ public class TransactionController {
         Authentication authentication
     ) {
         try {
-        	String accNumber = accountNumberUtils.convertFormattedNumberToUuid(request.getAccountNumber());
-        	
+            String accNumber = accountNumberUtils.convertFormattedNumberToUuid(request.getAccountNumber());
+            
             Map<String, Object> result = transactionService.processWithdrawal(
                 accNumber,
                 request.getAmount(),
@@ -134,22 +138,22 @@ public class TransactionController {
         }
     }
 
-	@GetMapping("/accounts/{accountNumber}")
-	public ResponseEntity<Map<String, Object>> getAccountDetails(@PathVariable String accountNumber) {
-		try {
-		    String encodedAccountNumber = accountNumberUtils.convertFormattedNumberToUuid(accountNumber);
-		    
-		    AccountModel account = accountRepo.findByAccountNumber(encodedAccountNumber)
-		        .orElseThrow(() -> new RuntimeException("Account not found"));
+    @GetMapping("/accounts/{accountNumber}")
+    public ResponseEntity<Map<String, Object>> getAccountDetails(@PathVariable String accountNumber) {
+        try {
+            String encodedAccountNumber = accountNumberUtils.convertFormattedNumberToUuid(accountNumber);
+            
+            AccountModel account = accountRepo.findByAccountNumber(encodedAccountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
 
-		    Map<String, Object> response = new HashMap<>();
-		    response.put("accountNumber", account.getAccountNumber());
-		    response.put("ownerName", account.getUser ().getUsername());
+            Map<String, Object> response = new HashMap<>();
+            response.put("accountNumber", account.getAccountNumber());
+            response.put("ownerName", account.getUser().getUsername());
 
-		    return ResponseEntity.ok(response);
-		} catch (Exception e) {
-		    System.err.println("Error retrieving account: " + e.getMessage());
-		    return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-		}
-	}
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error retrieving account: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

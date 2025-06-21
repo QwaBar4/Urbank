@@ -27,6 +27,7 @@ public class TransactionModel {
 
     @Column(name = "target_account_number")
     private String targetAccountNumber;
+    private String status;
 
     // Getters and Setters
     public Long getId() {
@@ -83,5 +84,13 @@ public class TransactionModel {
     
     public void setTargetAccountNumber(String targetAccountNumber) { 
         this.targetAccountNumber = targetAccountNumber; 
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

@@ -16,6 +16,7 @@ public class TransactionDTO {
     private String targetAccountOwner;
     private String transferDescription;
 	private String encryptedDescription;
+	private String status;
 	
     @Override
     public String toString() {
@@ -74,7 +75,15 @@ public class TransactionDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+    
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
     public String getUser () {
         return user;
     }

@@ -20,6 +20,7 @@ public class TransferRequestDTO {
     @DecimalMin(value = "1.00", message = "Minimum transfer amount is $1.00")
     @DecimalMax(value = "10000.00", message = "Maximum transfer amount is $10,000.00")
     private BigDecimal amount; 
+    private String status;
 
     private String description;
 
@@ -54,5 +55,13 @@ public class TransferRequestDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
