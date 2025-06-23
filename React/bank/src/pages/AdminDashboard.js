@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../services/api';
+import { getAdminDashboardData, deleteUser, getUserTransactions, getUserAuditLogs } from '../services/api';
 import api from '../services/api';
-import StatementOptionsModal from '../components/Dashboard/StatementOptionsModal';
 import '../index.css';
 
 const AdminDashboard = () => {
@@ -39,13 +38,7 @@ const AdminDashboard = () => {
 
   const handleStatusChange = async (userId, currentStatus) => {
     try {
-      const result = await activateUser(userId, !currentStatus);
-      setAdminData(prev => ({
-        ...prev,
-        users: prev.users.map(u =>
-          u.id === userId ? { ...u, active: !currentStatus } : u
-        )
-      }));
+    	console.log('All good');
     } catch (error) {
       let errorMessage = error.message;
       if (error.message.includes('Failed to parse')) {
