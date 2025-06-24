@@ -16,7 +16,6 @@ public class JpaConfig {
     
     @Bean
     public EncryptionConverter encryptionConverter() {
-        // Pass the encryptionService to the constructor
         return new EncryptionConverter(encryptionService);
     }
 }

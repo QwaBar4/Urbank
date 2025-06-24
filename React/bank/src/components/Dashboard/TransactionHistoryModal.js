@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, getDashboardData } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 import TransactionDetailsModal from './TransactionDetailsModal';
-import { formatAccountNumber } from '../../services/api';
 
 const TransactionHistoryModal = ({ userAccount, onClose }) => {
     const [transactions, setTransactions] = useState([]);

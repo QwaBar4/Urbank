@@ -11,6 +11,8 @@ import Deposit from './components/Dashboard/Deposit';
 import Withdraw from './components/Dashboard/Withdraw';
 import EditUser from './components/Dashboard/EditUser';
 import AdminDashboard from './pages/AdminDashboard';
+import LoanApplication from './components/Dashboard/LoanApplication';
+import AdminLoanManagement from './components/Dashboard/AdminLoanManagement';
 import Loading from './pages/Loading';
 
 const PrivateRoute = ({ children, showNotFound = false }) => {
@@ -95,6 +97,17 @@ function App() {
               <EditUser />
             </PrivateRoute>
           } />
+          <Route path="/apply-loan" element={
+			  <PrivateRoute showNotFound>
+				<LoanApplication />
+			  </PrivateRoute>
+			} />
+
+		  <Route path="/admin/loans" element={
+			  <AdminRoute showNotFound>
+				<AdminLoanManagement />
+			  </AdminRoute>
+		  } />
 
           {/* Transaction routes */}
           <Route path="/deposit" element={

@@ -273,6 +273,12 @@ const handleAdminDownloadStatement = async (theme) => {
                       Audit Logs
                     </button>
                     <button
+						onClick={() => navigate('/admin/loans')}
+						className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+					>
+						Manage Loans
+					</button>
+                    <button
                       className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
                       onClick={() => {
                         setSelectedUserForStatement(user);

@@ -247,6 +247,12 @@ const Dashboard = () => {
                     >
                         Delete Account
                     </button>
+                    <button 
+						onClick={() => navigate('/apply-loan')}
+						className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+					>
+						Apply for Loan
+					</button>
 					{isAdmin && (
 						<button
 							onClick={() => navigate('/admin')}

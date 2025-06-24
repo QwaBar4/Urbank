@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
 public class LoanApplicationDTO {
+
+	private Long id;
     
     @NotNull(message = "Principal amount is required")
     @Positive(message = "Principal amount must be positive")
@@ -20,18 +22,30 @@ public class LoanApplicationDTO {
     @NotNull(message = "Term in months is required")
     @Positive(message = "Term in months must be positive")
     private Integer termMonths;
-
+	
+	@NotNull @Positive
+	private Long accountId;
+	
+	
     // Constructors
     public LoanApplicationDTO() {}
 
-    public LoanApplicationDTO(Double principal, Double interestRate, LocalDate startDate, Integer termMonths) {
+    public LoanApplicationDTO(Long id, Double principal, Double interestRate, LocalDate startDate, Integer termMonths, Long accountId) {
+        this.id = id;
         this.principal = principal;
         this.interestRate = interestRate;
         this.startDate = startDate;
         this.termMonths = termMonths;
+        this.accountId = accountId;
+    }
+    
+    public Long getId() { 
+    	return id; 
+    }
+    public void setId(Long id) { 
+   		this.id = id; 
     }
 
-    // Getters and setters
     public Double getPrincipal() {
         return principal;
     }
@@ -62,5 +76,13 @@ public class LoanApplicationDTO {
 
     public void setTermMonths(Integer termMonths) {
         this.termMonths = termMonths;
+    }
+    
+    public Long getAccountId() {
+        return accountId;
+    }
+    
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 }

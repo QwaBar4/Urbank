@@ -391,6 +391,79 @@ export const unformatAccountNumber = (formattedNumber) => {
   return formattedNumber.replace(/-/g, '');
 };
 
+const applyForLoan = async (loanData) => {
+    try {
+        const response = await fetch('/api/loans/apply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getJwtToken()}`
+            },
+            body: JSON.stringify(loanData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Loan application failed');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Loan application error:', error);
+        throw error;
+    }
+};
+
+
+const getAllLoans = async () => {
+  try {
+    const response = await fetch('/api/loans/admin', {
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Get loans error:', error);
+    throw error;
+  }
+};
+
+const approveLoan = async (loanId) => {
+  try {
+    const response = await fetch(`/api/loans/${loanId}/approve`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getJwtToken()}`
+      },
+      body: JSON.stringify({})
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Loan approval error:', error);
+    throw error;
+  }
+};
+
+const rejectLoan = async (loanId) => {
+  try {
+    const response = await fetch(`/api/loans/${loanId}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getJwtToken()}`
+      },
+      body: JSON.stringify({})
+    });
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Loan rejection error:', error);
+    throw error;
+  }
+};
+
+
 const api = {
     API_BASE_URL,
     deleteUser,
@@ -415,6 +488,10 @@ const api = {
     generateUserStatementByID,
     formatAccountNumber,
     getUserProfile,
-    unformatAccountNumber
+    unformatAccountNumber,
+	applyForLoan,
+	getAllLoans,
+	approveLoan,
+	rejectLoan
 };
 export default api;
