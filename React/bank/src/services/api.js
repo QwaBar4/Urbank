@@ -422,7 +422,13 @@ const getAllLoans = async () => {
         'Authorization': `Bearer ${getJwtToken()}`
       }
     });
-    return handleResponse(response);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch loans');
+    }
+    
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Get loans error:', error);
     throw error;
@@ -436,8 +442,7 @@ const approveLoan = async (loanId) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getJwtToken()}`
-      },
-      body: JSON.stringify({})
+      }
     });
     return handleResponse(response);
   } catch (error) {
@@ -453,8 +458,7 @@ const rejectLoan = async (loanId) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getJwtToken()}`
-      },
-      body: JSON.stringify({})
+      }
     });
     return handleResponse(response);
   } catch (error) {

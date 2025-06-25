@@ -19,10 +19,20 @@ public class LoanModel {
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentSchedule> paymentSchedule;
+    
+    @Column(length = 20)
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
     private AccountModel account;
+    
+    @PrePersist
+    public void setDefaultStatus() {
+        if (status == null) {
+            status = "PENDING";
+        }
+    }
 
     public LoanModel() {
     }
@@ -83,7 +93,15 @@ public class LoanModel {
     public void setPaymentSchedule(List<PaymentSchedule> paymentSchedule) {
         this.paymentSchedule = paymentSchedule;
     }
-
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
     public AccountModel getAccount() {
         return account;
     }

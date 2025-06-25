@@ -4,8 +4,9 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-import QwaBar4.bank.DTO.LoanApplicationDTO;
+import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.LoanService;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,5 +33,26 @@ public class LoanController {
                 )
             );
         }
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<LoanResponseDTO>> getAllLoans() {
+        List<LoanResponseDTO> loans = loanService.getAllLoans();
+        return ResponseEntity.ok(loans);
+    }
+
+    @PutMapping("/{loanId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<LoanResponseDTO> approveLoan(@PathVariable Long loanId) {
+        LoanResponseDTO approvedLoan = loanService.approveLoan(loanId);
+        return ResponseEntity.ok(approvedLoan);
+    }
+
+    @PutMapping("/{loanId}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<LoanResponseDTO> rejectLoan(@PathVariable Long loanId) {
+        LoanResponseDTO rejectedLoan = loanService.rejectLoan(loanId);
+        return ResponseEntity.ok(rejectedLoan);
     }
 }

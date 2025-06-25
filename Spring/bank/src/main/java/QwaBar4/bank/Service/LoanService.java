@@ -5,9 +5,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import QwaBar4.bank.DTO.LoanApplicationDTO;
+import QwaBar4.bank.DTO.LoanResponseDTO;
 import QwaBar4.bank.Model.*;
 import QwaBar4.bank.Model.LoanModelRepository;
 import QwaBar4.bank.Model.AccountModelRepository;
+import java.util.stream.Collectors;
+
+import java.util.List;
 
 @Service
 public class LoanService {
@@ -45,7 +49,46 @@ public class LoanService {
             savedLoan.getInterestRate(),
             savedLoan.getStartDate(),
             savedLoan.getTermMonths(),
-            savedLoan.getAccountId()
+            savedLoan.getAccountId(),
+            savedLoan.getStatus()
         );
+    }
+    
+    public List<LoanResponseDTO> getAllLoans() {
+        return loanRepository.findAll().stream()
+            .map(this::convertToResponseDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public LoanResponseDTO approveLoan(Long loanId) {
+        LoanModel loan = loanRepository.findById(loanId)
+            .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+        
+        loan.setStatus("APPROVED");
+        LoanModel updatedLoan = loanRepository.save(loan);
+        return convertToResponseDTO(updatedLoan);
+    }
+
+    @Transactional
+    public LoanResponseDTO rejectLoan(Long loanId) {
+        LoanModel loan = loanRepository.findById(loanId)
+            .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+        
+        loan.setStatus("REJECTED");
+        LoanModel updatedLoan = loanRepository.save(loan);
+        return convertToResponseDTO(updatedLoan);
+    }
+
+    private LoanResponseDTO convertToResponseDTO(LoanModel loan) {
+        LoanResponseDTO dto = new LoanResponseDTO();
+        dto.setId(loan.getId());
+        dto.setPrincipal(loan.getPrincipal());
+        dto.setInterestRate(loan.getInterestRate());
+        dto.setStartDate(loan.getStartDate());
+        dto.setTermMonths(loan.getTermMonths());
+        dto.setStatus(loan.getStatus());
+        dto.setUsername(loan.getAccount().getUser().getUsername());
+        return dto;
     }
 }

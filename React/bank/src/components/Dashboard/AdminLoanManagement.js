@@ -13,11 +13,12 @@ const AdminLoanManagement = () => {
         const fetchLoans = async () => {
             try {
                 const response = await api.getAllLoans();
-                setLoans(response.data);
+                const loansData = Array.isArray(response) ? response : [];
+                setLoans(loansData);
                 setError('');
             } catch (err) {
                 console.error('Error fetching loans:', err);
-                setError('Failed to load loan applications');
+                setError(err.message || 'Failed to load loan applications');
             } finally {
                 setLoading(false);
             }

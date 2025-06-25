@@ -26,17 +26,18 @@ public class LoanApplicationDTO {
 	@NotNull @Positive
 	private Long accountId;
 	
+	private String status;
 	
-    // Constructors
     public LoanApplicationDTO() {}
 
-    public LoanApplicationDTO(Long id, Double principal, Double interestRate, LocalDate startDate, Integer termMonths, Long accountId) {
+    public LoanApplicationDTO(Long id, Double principal, Double interestRate, LocalDate startDate, Integer termMonths, Long accountId, String status) {
         this.id = id;
         this.principal = principal;
         this.interestRate = interestRate;
         this.startDate = startDate;
         this.termMonths = termMonths;
         this.accountId = accountId;
+        this.status = status;
     }
     
     public Long getId() { 
@@ -68,6 +69,14 @@ public class LoanApplicationDTO {
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public String getStatus() {
+        return status;
     }
 
     public Integer getTermMonths() {
