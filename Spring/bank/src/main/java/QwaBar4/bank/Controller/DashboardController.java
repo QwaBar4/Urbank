@@ -74,11 +74,11 @@ public class DashboardController {
 
             AccountModel account = user.getAccount();
             AccountDTO accountDTO = new AccountDTO(
-                account.getId(),
+                null,
                 account.getAccountNumber(),
                 account.getBalance(),
-                account.getDailyTransferLimit(),
-                account.getDailyWithdrawalLimit()
+                null,
+                null
             );
 
             Map<String, Object> response = new HashMap<>();

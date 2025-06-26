@@ -122,7 +122,7 @@ const AdminLoanManagement = () => {
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b border-gray-700">
-                                            <th className="text-left p-3">User</th>
+                                            <th className="text-left p-3">Loan number</th>
                                             <th className="text-left p-3">Amount</th>
                                             <th className="text-left p-3">Interest</th>
                                             <th className="text-left p-3">Term</th>
@@ -133,7 +133,7 @@ const AdminLoanManagement = () => {
                                     <tbody>
                                         {loans.map(loan => (
                                             <tr key={loan.id} className="border-b border-gray-700">
-                                                <td className="p-3">{loan.user?.username || 'N/A'}</td>
+                                                <td className="p-3">{loan.id}</td>
                                                 <td className="p-3">${loan.principal.toFixed(2)}</td>
                                                 <td className="p-3">{loan.interestRate}%</td>
                                                 <td className="p-3">{loan.termMonths} months</td>
@@ -147,7 +147,7 @@ const AdminLoanManagement = () => {
                                                     </span>
                                                 </td>
                                                 <td className="p-3">
-                                                    {loan.status === 'PENDING' && (
+                                                    {loan.status === 'PENDING' ? (
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => handleApprove(loan.id)}
@@ -162,7 +162,7 @@ const AdminLoanManagement = () => {
                                                                 Reject
                                                             </button>
                                                         </div>
-                                                    )}
+                                                    ) : <div>N/A</div>}
                                                 </td>
                                             </tr>
                                         ))}
