@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import LoanDetails from './LoanDetails';
 import logotype from '../../assets/logotype.jpg';
 
 const AdminLoanManagement = () => {
     const [loans, setLoans] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [selectedLoan, setSelectedLoan] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -132,7 +134,11 @@ const AdminLoanManagement = () => {
                                     </thead>
                                     <tbody>
                                         {loans.map(loan => (
-                                            <tr key={loan.id} className="border-b border-gray-700">
+                                            <tr 
+                                            key={loan.id}
+                                            className="border-b border-gray-700 hover:bg-gray-900 cursor-pointer"
+                                            onClick={() => setSelectedLoan(loan)}
+                                            >
                                                 <td className="p-3">{loan.id}</td>
                                                 <td className="p-3">${loan.principal.toFixed(2)}</td>
                                                 <td className="p-3">{loan.interestRate}%</td>
@@ -173,6 +179,12 @@ const AdminLoanManagement = () => {
                     </div>
                 )}
             </div>
+            {selectedLoan && (
+				<LoanDetails 
+					loan={selectedLoan} 
+					onClose={() => setSelectedLoan(null)} 
+			/>
+		)}
         </div>
     );
 };

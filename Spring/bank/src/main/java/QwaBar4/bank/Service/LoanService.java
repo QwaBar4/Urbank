@@ -9,6 +9,7 @@ import QwaBar4.bank.DTO.LoanResponseDTO;
 import QwaBar4.bank.Model.*;
 import QwaBar4.bank.Model.LoanModelRepository;
 import QwaBar4.bank.Model.AccountModelRepository;
+import QwaBar4.bank.DTO.LoanResponseDTO.PaymentScheduleDTO;
 import java.util.stream.Collectors;
 
 import java.util.List;
@@ -59,7 +60,16 @@ public class LoanService {
             .map(this::convertToResponseDTO)
             .collect(Collectors.toList());
     }
-
+	
+	public List<LoanResponseDTO> getLoansForCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        return loanRepository.findByAccount_User_Username(username).stream()
+            .map(this::convertToResponseDTO)
+            .collect(Collectors.toList());
+    }
+	
     @Transactional
     public LoanResponseDTO approveLoan(Long loanId) {
         LoanModel loan = loanRepository.findById(loanId)
@@ -89,6 +99,26 @@ public class LoanService {
         dto.setTermMonths(loan.getTermMonths());
         dto.setStatus(loan.getStatus());
         dto.setUsername(loan.getAccount().getUser().getUsername());
+        
+        if (loan.getPaymentSchedule() != null) {
+            List<PaymentScheduleDTO> scheduleDTOs = loan.getPaymentSchedule().stream()
+                .map(this::convertPaymentScheduleToDTO)
+                .collect(Collectors.toList());
+            dto.setPaymentSchedule(scheduleDTOs);
+        }
+        
+        return dto;
+    }
+    
+    private PaymentScheduleDTO convertPaymentScheduleToDTO(PaymentSchedule payment) {
+        PaymentScheduleDTO dto = new PaymentScheduleDTO();
+        dto.setPaymentNumber(payment.getPaymentNumber());
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setPrincipalAmount(payment.getPrincipalAmount());
+        dto.setInterestAmount(payment.getInterestAmount());
+        dto.setTotalPayment(payment.getTotalPayment());
+        dto.setRemainingBalance(payment.getRemainingBalance());
+        dto.setPaid(payment.isPaid());
         return dto;
     }
 }

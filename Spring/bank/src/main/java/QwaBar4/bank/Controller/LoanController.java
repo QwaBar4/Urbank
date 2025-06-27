@@ -55,4 +55,11 @@ public class LoanController {
         LoanResponseDTO rejectedLoan = loanService.rejectLoan(loanId);
         return ResponseEntity.ok(rejectedLoan);
     }
+    
+    @GetMapping("/my-loans")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<LoanResponseDTO>> getUserLoans() {
+        List<LoanResponseDTO> loans = loanService.getLoansForCurrentUser();
+        return ResponseEntity.ok(loans);
+    }
 }

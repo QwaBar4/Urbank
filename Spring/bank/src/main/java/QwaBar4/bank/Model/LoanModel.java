@@ -2,6 +2,7 @@ package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,8 +18,8 @@ public class LoanModel {
     private LocalDate startDate;
     private Integer termMonths;
 
-    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PaymentSchedule> paymentSchedule;
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<PaymentSchedule> paymentSchedule = new ArrayList<>();
     
     @Column(length = 20)
     private String status;
@@ -44,7 +45,36 @@ public class LoanModel {
         this.termMonths = termMonths;
     }
 
-    // Getters and Setters
+    public void generatePaymentSchedule() {
+        this.paymentSchedule.clear(); // Now safe since list is initialized
+        
+        double monthlyInterestRate = interestRate / 100 / 12;
+        double monthlyPayment = principal * 
+            (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, termMonths)) / 
+            (Math.pow(1 + monthlyInterestRate, termMonths) - 1);
+        
+        LocalDate paymentDate = startDate;
+        double remainingPrincipal = principal;
+        
+        for (int i = 1; i <= termMonths; i++) {
+            double interestPayment = remainingPrincipal * monthlyInterestRate;
+            double principalPayment = monthlyPayment - interestPayment;
+            
+            PaymentSchedule schedule = new PaymentSchedule();
+            schedule.setPaymentNumber(i);
+            schedule.setPaymentDate(paymentDate);
+            schedule.setPrincipalAmount(principalPayment);
+            schedule.setInterestAmount(interestPayment);
+            schedule.setTotalPayment(monthlyPayment);
+            schedule.setRemainingBalance(remainingPrincipal - principalPayment);
+            schedule.setLoan(this);
+            
+            this.paymentSchedule.add(schedule);
+            
+            remainingPrincipal -= principalPayment;
+            paymentDate = paymentDate.plusMonths(1);
+        }
+    }
 
     public Long getId() {
         return id;
@@ -112,9 +142,5 @@ public class LoanModel {
 
     public void setAccount(AccountModel account) {
         this.account = account;
-    }
-    
-	public void generatePaymentSchedule() {
-
     }
 }

@@ -467,6 +467,51 @@ const rejectLoan = async (loanId) => {
   }
 };
 
+const getLoanDetails = async (loanId) => {
+    try {
+        const response = await fetch(`/api/loans/${loanId}/details`, {
+            headers: {
+                'Authorization': `Bearer ${getJwtToken()}`
+            }
+        });
+        return handleResponse(response);
+    } catch (error) {
+        console.error('Get loan details error:', error);
+        throw error;
+    }
+};
+
+const recordPayment = async (loanId, paymentData) => {
+    try {
+        const response = await fetch(`/api/loans/${loanId}/payments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getJwtToken()}`
+            },
+            body: JSON.stringify(paymentData)
+        });
+        return handleResponse(response);
+    } catch (error) {
+        console.error('Record payment error:', error);
+        throw error;
+    }
+};
+
+const getUserLoans = async () => {
+    try {
+        const response = await fetch('/api/loans/my-loans', {
+            headers: {
+                'Authorization': `Bearer ${getJwtToken()}`
+            }
+        });
+        return handleResponse(response);
+    } catch (error) {
+        console.error('Get user loans error:', error);
+        throw error;
+    }
+};
+
 
 const api = {
     API_BASE_URL,
@@ -496,6 +541,9 @@ const api = {
 	applyForLoan,
 	getAllLoans,
 	approveLoan,
-	rejectLoan
+	rejectLoan,
+	getLoanDetails,
+	recordPayment,
+	getUserLoans
 };
 export default api;

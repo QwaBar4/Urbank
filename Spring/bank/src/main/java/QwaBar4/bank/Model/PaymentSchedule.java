@@ -4,45 +4,63 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "payment_schedules")
 public class PaymentSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private LocalDate dueDate;
-    private Double paymentAmount;
-    private Double principalAmount;
-    private Double interestAmount;
-    private Boolean isPaid = false;
+    private int paymentNumber;
+    private LocalDate paymentDate;
+    private double principalAmount;
+    private double interestAmount;
+    private double totalPayment;
+    private double remainingBalance;
+    private boolean isPaid = false;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_id")
     private LoanModel loan;
 
-    // Constructors, getters, and setters
+    // Constructors
     public PaymentSchedule() {}
-
-    public PaymentSchedule(LocalDate dueDate, Double paymentAmount, 
-                         Double principalAmount, Double interestAmount) {
-        this.dueDate = dueDate;
-        this.paymentAmount = paymentAmount;
+    
+    public PaymentSchedule(int paymentNumber, LocalDate paymentDate, 
+                         double principalAmount, double interestAmount,
+                         double totalPayment, double remainingBalance) {
+        this.paymentNumber = paymentNumber;
+        this.paymentDate = paymentDate;
         this.principalAmount = principalAmount;
         this.interestAmount = interestAmount;
+        this.totalPayment = totalPayment;
+        this.remainingBalance = remainingBalance;
     }
 
-    // Getters and setters for all fields
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
-    public Double getPaymentAmount() { return paymentAmount; }
-    public void setPaymentAmount(Double paymentAmount) { this.paymentAmount = paymentAmount; }
-    public Double getPrincipalAmount() { return principalAmount; }
-    public void setPrincipalAmount(Double principalAmount) { this.principalAmount = principalAmount; }
-    public Double getInterestAmount() { return interestAmount; }
-    public void setInterestAmount(Double interestAmount) { this.interestAmount = interestAmount; }
-    public Boolean getIsPaid() { return isPaid; }
-    public void setIsPaid(Boolean paid) { isPaid = paid; }
+    
+    public int getPaymentNumber() { return paymentNumber; }
+    public void setPaymentNumber(int paymentNumber) { this.paymentNumber = paymentNumber; }
+    
+    public LocalDate getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(LocalDate paymentDate) { this.paymentDate = paymentDate; }
+    
+    public double getPrincipalAmount() { return principalAmount; }
+    public void setPrincipalAmount(double principalAmount) { this.principalAmount = principalAmount; }
+    
+    public double getInterestAmount() { return interestAmount; }
+    public void setInterestAmount(double interestAmount) { this.interestAmount = interestAmount; }
+    
+    public double getTotalPayment() { return totalPayment; }
+    public void setTotalPayment(double totalPayment) { this.totalPayment = totalPayment; }
+    
+    public double getRemainingBalance() { return remainingBalance; }
+    public void setRemainingBalance(double remainingBalance) { this.remainingBalance = remainingBalance; }
+    
+    public boolean isPaid() { return isPaid; }
+    public void setPaid(boolean paid) { isPaid = paid; }
+    
     public LoanModel getLoan() { return loan; }
     public void setLoan(LoanModel loan) { this.loan = loan; }
 }

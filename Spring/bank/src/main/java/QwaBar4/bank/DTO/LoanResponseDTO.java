@@ -2,7 +2,9 @@ package QwaBar4.bank.DTO;
 
 import java.time.LocalDate;
 import lombok.Data;
+import java.util.List;
 
+@Data
 public class LoanResponseDTO {
     private Long id;
     private Double principal;
@@ -11,7 +13,19 @@ public class LoanResponseDTO {
     private Integer termMonths;
     private String status;
     private String username;
-
+    private List<PaymentScheduleDTO> paymentSchedule;
+	
+	@Data
+    public static class PaymentScheduleDTO {
+        private int paymentNumber;
+        private LocalDate paymentDate;
+        private double principalAmount;
+        private double interestAmount;
+        private double totalPayment;
+        private double remainingBalance;
+        private boolean isPaid;
+    }
+	
     public Long getId() {
         return id;
     }

@@ -8,6 +8,7 @@ import StatementOptionsModal from '../components/Dashboard/StatementOptionsModal
 import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
 import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
+import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard'; // New component
 import logotype from '../assets/logotype.jpg';
 
 const Dashboard = () => {
@@ -20,8 +21,10 @@ const Dashboard = () => {
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
     const [showTransactionHistoryModal, setShowTransactionHistoryModal] = useState(false);
     const [showSensitiveData, setShowSensitiveData] = useState(false);
-	const [showStatementOptions, setShowStatementOptions] = useState(false);
-	const [statementLoading, setStatementLoading] = useState(false);
+    const [showStatementOptions, setShowStatementOptions] = useState(false);
+    const [statementLoading, setStatementLoading] = useState(false);
+    const [userLoans, setUserLoans] = useState([]);
+    const [loansLoading, setLoansLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -45,6 +48,7 @@ const Dashboard = () => {
                     },
                     role: data.roles
                 });
+                fetchUserLoans(); // Fetch loans after user data is loaded
             } catch (err) {
                 if (err.response?.status === 401) {
                     console.log('Session expired, redirecting to login');
@@ -78,6 +82,19 @@ const Dashboard = () => {
         }
     };
 
+    const fetchUserLoans = async () => {
+        setLoansLoading(true);
+        try {
+            const loans = await api.getUserLoans();
+            setUserLoans(loans.filter(loan => loan.status === 'APPROVED')); // Only show approved loans
+        } catch (error) {
+            console.error('Error loading loans:', error);
+            setError('Failed to load your loans');
+        } finally {
+            setLoansLoading(false);
+        }
+    };
+
     const handleLogout = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/logout?username=${encodeURIComponent(userData.username)}`, {
@@ -94,31 +111,32 @@ const Dashboard = () => {
             setError('Failed to log out: ' + error.message);
         }
     };
+
     const handleDownloadStatement = async (theme) => {
-		try {
-		  setStatementLoading(true);
-		  const response = await api.generateUserStatement(
-		    userData.username, 
-		    theme
-		  );
-		  
-		  const blob = new Blob([response.data], { type: 'application/pdf' });
-		  const url = window.URL.createObjectURL(blob);
-		  const a = document.createElement('a');
-		  a.href = url;
-		  a.download = `statement_${new Date().toISOString().slice(0,10)}.pdf`;
-		  document.body.appendChild(a);
-		  a.click();
-		  a.remove();
-		  
-		  setShowStatementOptions(false);
-		} catch (error) {
-		  console.error('Error downloading statement:', error);
-		  setError(error.message);
-		} finally {
-		  setStatementLoading(false);
-		}
-	  };
+        try {
+            setStatementLoading(true);
+            const response = await api.generateUserStatement(
+                userData.username, 
+                theme
+            );
+            
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `statement_${new Date().toISOString().slice(0,10)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            
+            setShowStatementOptions(false);
+        } catch (error) {
+            console.error('Error downloading statement:', error);
+            setError(error.message);
+        } finally {
+            setStatementLoading(false);
+        }
+    };
 
     const handleDeleteAccount = async () => {
         try {
@@ -166,6 +184,11 @@ const Dashboard = () => {
             console.error("Balance refresh error:", err);
             setError('Failed to refresh balance');
         }
+    };
+
+    const handlePaymentSuccess = async () => {
+        await refreshBalance();
+        await fetchUserLoans(); // Refresh loan data after payment
     };
 
     if (loading) return (
@@ -235,12 +258,12 @@ const Dashboard = () => {
                     >
                         Logout
                     </button>
-					<button
-					  onClick={() => setShowStatementOptions(true)}
-					  className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-					>
-					  Download Statement
-					</button>
+                    <button
+                        onClick={() => setShowStatementOptions(true)}
+                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                    >
+                        Download Statement
+                    </button>
                     <button
                         onClick={() => setShowDeleteConfirmation(true)}
                         className="px-4 py-2 bg-transparent text-red-500 border border-red-500 rounded hover:bg-red-500 hover:bg-opacity-10 transition-colors"
@@ -248,19 +271,19 @@ const Dashboard = () => {
                         Delete Account
                     </button>
                     <button 
-						onClick={() => navigate('/apply-loan')}
-						className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-					>
-						Apply for Loan
-					</button>
-					{isAdmin && (
-						<button
-							onClick={() => navigate('/admin')}
-							className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-						>
-							Admin Dashboard
-						</button>
-					)}
+                        onClick={() => navigate('/apply-loan')}
+                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                    >
+                        Apply for Loan
+                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => navigate('/admin')}
+                            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                        >
+                            Admin Dashboard
+                        </button>
+                    )}
                 </div>
 
                 {/* User Data Section */}
@@ -274,12 +297,12 @@ const Dashboard = () => {
                             >
                                 Update Profile
                             </button>
-							<button
-								className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-								onClick={() => setShowUserDetailsModal(true)}
-							>
-								View Full Details
-							</button>
+                            <button
+                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                onClick={() => setShowUserDetailsModal(true)}
+                            >
+                                View Full Details
+                            </button>
                         </div>
                     ) : (
                         <div className="text-center">Loading profile...</div>
@@ -299,13 +322,45 @@ const Dashboard = () => {
                     />
                 </div>
 
+                {/* Loan Payments Section */}
+                {userLoans.length > 0 && (
+                    <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">Your Active Loans</h2>
+                            <button 
+                                onClick={fetchUserLoans}
+                                className="px-3 py-1 bg-white bg-opacity-10 rounded hover:bg-opacity-20"
+                                disabled={loansLoading}
+                            >
+                                {loansLoading ? 'Refreshing...' : 'Refresh'}
+                            </button>
+                        </div>
+                        
+                        {loansLoading ? (
+                            <div className="flex justify-center p-4">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {userLoans.map(loan => (
+                                    <LoanPaymentCard 
+                                        key={loan.id}
+                                        loan={loan}
+                                        onPaymentSuccess={handlePaymentSuccess}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Transaction History Button */}
-				<button 
-					onClick={() => setShowTransactionHistoryModal(true)}
-					className="w-full md:w-auto px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium mb-6"
-				>
-					View Full Transaction History
-				</button>
+                <button 
+                    onClick={() => setShowTransactionHistoryModal(true)}
+                    className="w-full md:w-auto px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium mb-6"
+                >
+                    View Full Transaction History
+                </button>
 
                 {/* Error Display */}
                 {error && (
@@ -437,16 +492,16 @@ const Dashboard = () => {
             )}
             
             {statementLoading && (
-		        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-				   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-			</div>
-			)}
-						
-			<StatementOptionsModal
-				isOpen={showStatementOptions}
-				onClose={() => setShowStatementOptions(false)}
-				onDownload={handleDownloadStatement}
-			/>
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                </div>
+            )}
+                        
+            <StatementOptionsModal
+                isOpen={showStatementOptions}
+                onClose={() => setShowStatementOptions(false)}
+                onDownload={handleDownloadStatement}
+            />
         </div>
     );
 };
