@@ -4,25 +4,34 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import QwaBar4.bank.DTO.LoanApplicationDTO;
-import QwaBar4.bank.DTO.LoanResponseDTO;
-import QwaBar4.bank.Model.*;
-import QwaBar4.bank.Model.LoanModelRepository;
-import QwaBar4.bank.Model.AccountModelRepository;
-import QwaBar4.bank.DTO.LoanResponseDTO.PaymentScheduleDTO;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import QwaBar4.bank.DTO.*;
+import QwaBar4.bank.DTO.LoanResponseDTO.PaymentScheduleDTO;
+import QwaBar4.bank.Model.*;
+
+import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
+@Transactional
 public class LoanService {
     private final LoanModelRepository loanRepository;
     private final AccountModelRepository accountRepository;
+    private final PaymentModelRepository paymentRepository;
+    private final TransactionService transactionService;
 
+    @Autowired
     public LoanService(LoanModelRepository loanRepository,
-                     AccountModelRepository accountRepository) {
+                     AccountModelRepository accountRepository,
+                     PaymentModelRepository paymentRepository,
+                     TransactionService transactionService) {
         this.loanRepository = loanRepository;
         this.accountRepository = accountRepository;
+        this.paymentRepository = paymentRepository;
+        this.transactionService = transactionService;
     }
 
     @Transactional
@@ -38,6 +47,7 @@ public class LoanService {
         loan.setInterestRate(loanDTO.getInterestRate());
         loan.setStartDate(loanDTO.getStartDate());
         loan.setTermMonths(loanDTO.getTermMonths());
+        loan.setRemainingBalance(loanDTO.getPrincipal());
         loan.setAccount(account);
         
         loan.generatePaymentSchedule();
@@ -89,6 +99,66 @@ public class LoanService {
         LoanModel updatedLoan = loanRepository.save(loan);
         return convertToResponseDTO(updatedLoan);
     }
+		
+	@Transactional
+	public PaymentResponseDTO recordPayment(Long loanId, LoanPaymentDTO paymentDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String username = auth.getName();
+		AccountModel account = accountRepository.findByUserUsername(username)
+		    .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+		LoanModel loan = loanRepository.findById(loanId)
+		    .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+
+		if (!loan.getStatus().equals("APPROVED")) {
+		    throw new IllegalArgumentException("Loan is not approved for payments");
+		}
+
+		if (account.getBalance().compareTo(paymentDTO.getAmount()) < 0) {
+		    throw new IllegalArgumentException("Insufficient account balance");
+		}
+
+		try {
+		    transactionService.processWithdrawal(
+		        account.getAccountNumber(),
+		        paymentDTO.getAmount(),
+		        "Loan payment for loan #" + loanId,
+		        username
+		    );
+
+		    PaymentModel payment = new PaymentModel();
+		    payment.setLoan(loan);
+		    payment.setPaymentNumber(paymentDTO.getPaymentNumber());
+		    payment.setAmount(paymentDTO.getAmount());
+		    payment.setPaymentDate(LocalDateTime.now());
+		    paymentRepository.save(payment);
+
+		    BigDecimal newBalance = loan.getRemainingBalance().subtract(paymentDTO.getAmount());
+		    loan.setRemainingBalance(newBalance);
+
+		    loan.getPaymentSchedule().stream()
+		        .filter(p -> p.getPaymentNumber() == paymentDTO.getPaymentNumber())
+		        .findFirst()
+		        .ifPresent(p -> p.setPaid(true));
+
+		    if (newBalance.compareTo(BigDecimal.ZERO) <= 0) {
+		        loan.setStatus("PAID");
+		    }
+
+		    loanRepository.save(loan);
+
+		    return new PaymentResponseDTO(
+		        loanId,
+		        paymentDTO.getPaymentNumber(),
+		        paymentDTO.getAmount(),
+		        LocalDateTime.now(),
+		        "COMPLETED",
+		        newBalance
+		    );
+		} catch (Exception e) {
+		    throw new IllegalArgumentException("Payment processing failed: " + e.getMessage());
+		}
+	}
 
     private LoanResponseDTO convertToResponseDTO(LoanModel loan) {
         LoanResponseDTO dto = new LoanResponseDTO();

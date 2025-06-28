@@ -3,12 +3,13 @@ package QwaBar4.bank.DTO;
 import java.time.LocalDate;
 import lombok.Data;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Data
 public class LoanResponseDTO {
     private Long id;
-    private Double principal;
-    private Double interestRate;
+    private BigDecimal principal;
+    private double interestRate;
     private LocalDate startDate;
     private Integer termMonths;
     private String status;
@@ -19,10 +20,10 @@ public class LoanResponseDTO {
     public static class PaymentScheduleDTO {
         private int paymentNumber;
         private LocalDate paymentDate;
-        private double principalAmount;
-        private double interestAmount;
-        private double totalPayment;
-        private double remainingBalance;
+        private BigDecimal principalAmount;
+        private BigDecimal interestAmount;
+        private BigDecimal totalPayment;
+        private BigDecimal remainingBalance;
         private boolean isPaid;
     }
 	
@@ -34,19 +35,19 @@ public class LoanResponseDTO {
         this.id = id;
     }
 
-    public Double getPrincipal() {
+    public BigDecimal getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(Double principal) {
+    public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
 
-    public Double getInterestRate() {
+    public double getInterestRate() {
         return interestRate;
     }
 
-    public void setInterestRate(Double interestRate) {
+    public void setInterestRate(double interestRate) {
         this.interestRate = interestRate;
     }
 

@@ -33,7 +33,7 @@ const LoanPaymentCard = ({ loan, onPaymentSuccess }) => {
     };
 
     return (
-        <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <div className="bg-black p-4 rounded-lg border border-gray-700">
             <div className="flex justify-between items-start mb-2">
                 <div>
                     <h3 className="font-medium">Loan #{loan.id}</h3>

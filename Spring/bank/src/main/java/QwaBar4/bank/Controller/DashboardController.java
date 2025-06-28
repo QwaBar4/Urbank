@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.CacheControl;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import java.util.Collections;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 
 import QwaBar4.bank.DTO.ProfileDTO;
 import QwaBar4.bank.DTO.UserDetailsDTO;
@@ -18,11 +18,9 @@ import QwaBar4.bank.Model.UserModel;
 import QwaBar4.bank.DTO.AccountDTO;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.AccountModel;
-import QwaBar4.bank.Service.AuditLogService;
-import QwaBar4.bank.Service.UserModelService;
-import QwaBar4.bank.Service.StatementService;
-import QwaBar4.bank.Service.StatementPDF;
+import QwaBar4.bank.Service.*;
 import QwaBar4.bank.Model.UserModelRepository;
+import QwaBar4.bank.DTO.LoanResponseDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +43,9 @@ public class DashboardController {
 
     @Autowired
     private StatementService statementService;
+    
+    @Autowired
+    private LoanService loanService;
 
     private ProfileDTO profileDTO;
 
@@ -63,35 +64,38 @@ public class DashboardController {
             .build();
     }
 
-    @GetMapping("/api/user/dashboard")
-    public ResponseEntity<Map<String, Object>> getDashboardData() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
+	@GetMapping("/api/user/dashboard")
+	public ResponseEntity<Map<String, Object>> getDashboardData() {
+		try {
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		    String username = authentication.getName();
 
-            UserModel user = userModelRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User  not found"));
+		    UserModel user = userModelRepository.findByUsername(username)
+		            .orElseThrow(() -> new RuntimeException("User not found"));
 
-            AccountModel account = user.getAccount();
-            AccountDTO accountDTO = new AccountDTO(
-                null,
-                account.getAccountNumber(),
-                account.getBalance(),
-                null,
-                null
-            );
+		    AccountModel account = user.getAccount();
+		    AccountDTO accountDTO = new AccountDTO(
+		        null,
+		        account.getAccountNumber(),
+		        account.getBalance(),
+		        null,
+		        null
+		    );
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("username", user.getUsername());
-            response.put("account", accountDTO);
-            response.put("roles", user.getRoles()); 
+		    List<LoanResponseDTO> loans = loanService.getLoansForCurrentUser();
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("error", e.getMessage()));
-        }
-    }
+		    Map<String, Object> response = new HashMap<>();
+		    response.put("username", user.getUsername());
+		    response.put("account", accountDTO);
+		    response.put("loans", loans);
+		    response.put("roles", user.getRoles()); 
+
+		    return ResponseEntity.ok(response);
+		} catch (Exception e) {
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Collections.singletonMap("error", e.getMessage()));
+		}
+	}
     
     @GetMapping("/api/user/profile")
     public ResponseEntity<UserDetailsDTO> getProfile() {

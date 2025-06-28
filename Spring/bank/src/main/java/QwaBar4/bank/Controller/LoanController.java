@@ -3,19 +3,26 @@ package QwaBar4.bank.Controller;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
 import QwaBar4.bank.DTO.*;
-import QwaBar4.bank.Service.LoanService;
+import QwaBar4.bank.Service.*;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
+import java.util.HashMap;
+
 
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
     private final LoanService loanService;
+    private final TransactionService transactionService;
 
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService, TransactionService transactionService) {
         this.loanService = loanService;
+        this.transactionService = transactionService;
     }
 
     @PostMapping("/apply")
@@ -61,5 +68,41 @@ public class LoanController {
     public ResponseEntity<List<LoanResponseDTO>> getUserLoans() {
         List<LoanResponseDTO> loans = loanService.getLoansForCurrentUser();
         return ResponseEntity.ok(loans);
+    }
+    
+    @PostMapping("/{loanId}/payments")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> recordPayment(
+        @PathVariable Long loanId,
+        @Valid @RequestBody LoanPaymentDTO paymentDTO
+    ) {
+        try {
+            PaymentResponseDTO payment = loanService.recordPayment(loanId, paymentDTO);
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            BigDecimal balance = transactionService.getAccountBalance(auth.getName());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("payment", payment);
+            response.put("newBalance", balance);
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                Map.of(
+                    "error", "PAYMENT_FAILED",
+                    "message", e.getMessage(),
+                    "timestamp", System.currentTimeMillis()
+                )
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of(
+                    "error", "PAYMENT_PROCESSING_ERROR",
+                    "message", "An error occurred while processing payment",
+                    "timestamp", System.currentTimeMillis()
+                )
+            );
+        }
     }
 }

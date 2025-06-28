@@ -68,17 +68,30 @@ CREATE TABLE loans (
     start_date DATE NOT NULL,
     term_months INT NOT NULL,
     account_id INT NOT NULL,
+    remaining_balance DECIMAL(19,2),
+    status VARCHAR(20) DEFAULT 'PENDING';
     FOREIGN KEY (account_id) REFERENCES accounts(id)
 );
 
-CREATE TABLE payment_schedule (
-    id SERIAL PRIMARY KEY,
-    due_date DATE NOT NULL,
-    payment_amount NUMERIC(19,2) NOT NULL,
+CREATE TABLE payment_schedules (
+    id BIGSERIAL PRIMARY KEY,
+    payment_number INTEGER NOT NULL,
+    payment_date DATE NOT NULL,
     principal_amount NUMERIC(19,2) NOT NULL,
     interest_amount NUMERIC(19,2) NOT NULL,
-    is_paid BOOLEAN DEFAULT false,
-    loan_id INT NOT NULL,
+    total_payment NUMERIC(19,2) NOT NULL,
+    remaining_balance NUMERIC(19,2) NOT NULL,
+    paid BOOLEAN DEFAULT FALSE,
+    loan_id BIGINT NOT NULL,
+    FOREIGN KEY (loan_id) REFERENCES loans(id)
+);
+
+CREATE TABLE payments (
+    id BIGSERIAL PRIMARY KEY,
+    payment_number INTEGER NOT NULL,
+    amount NUMERIC(19,2) NOT NULL,
+    payment_date TIMESTAMP NOT NULL,
+    loan_id BIGINT NOT NULL,
     FOREIGN KEY (loan_id) REFERENCES loans(id)
 );
 

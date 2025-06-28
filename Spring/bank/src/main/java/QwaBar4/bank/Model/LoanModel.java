@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "loans")
@@ -13,13 +15,16 @@ public class LoanModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double principal;
+    private BigDecimal principal;
     private Double interestRate;
     private LocalDate startDate;
     private Integer termMonths;
 
     @OneToMany(mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PaymentSchedule> paymentSchedule = new ArrayList<>();
+
+    @Column(name = "remaining_balance")
+    private BigDecimal remainingBalance;
     
     @Column(length = 20)
     private String status;
@@ -38,43 +43,45 @@ public class LoanModel {
     public LoanModel() {
     }
 
-    public LoanModel(Double principal, Double interestRate, LocalDate startDate, Integer termMonths) {
+    public LoanModel(BigDecimal principal, Double interestRate, LocalDate startDate, Integer termMonths) {
         this.principal = principal;
         this.interestRate = interestRate;
         this.startDate = startDate;
         this.termMonths = termMonths;
     }
 
-    public void generatePaymentSchedule() {
-        this.paymentSchedule.clear(); // Now safe since list is initialized
-        
-        double monthlyInterestRate = interestRate / 100 / 12;
-        double monthlyPayment = principal * 
-            (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, termMonths)) / 
-            (Math.pow(1 + monthlyInterestRate, termMonths) - 1);
-        
-        LocalDate paymentDate = startDate;
-        double remainingPrincipal = principal;
-        
-        for (int i = 1; i <= termMonths; i++) {
-            double interestPayment = remainingPrincipal * monthlyInterestRate;
-            double principalPayment = monthlyPayment - interestPayment;
-            
-            PaymentSchedule schedule = new PaymentSchedule();
-            schedule.setPaymentNumber(i);
-            schedule.setPaymentDate(paymentDate);
-            schedule.setPrincipalAmount(principalPayment);
-            schedule.setInterestAmount(interestPayment);
-            schedule.setTotalPayment(monthlyPayment);
-            schedule.setRemainingBalance(remainingPrincipal - principalPayment);
-            schedule.setLoan(this);
-            
-            this.paymentSchedule.add(schedule);
-            
-            remainingPrincipal -= principalPayment;
-            paymentDate = paymentDate.plusMonths(1);
-        }
-    }
+	public void generatePaymentSchedule() {
+		this.paymentSchedule.clear();
+		this.remainingBalance = this.principal;
+
+		BigDecimal monthlyInterestRate = BigDecimal.valueOf(this.interestRate).divide(BigDecimal.valueOf(100 * 12), 10, RoundingMode.HALF_UP);
+		BigDecimal monthlyPayment = this.principal.multiply(monthlyInterestRate)
+		    .multiply(BigDecimal.valueOf(Math.pow(1 + monthlyInterestRate.doubleValue(), this.termMonths)))
+		    .divide(BigDecimal.valueOf(Math.pow(1 + monthlyInterestRate.doubleValue(), this.termMonths) - 1), RoundingMode.HALF_UP);
+
+		LocalDate paymentDate = this.startDate;
+		BigDecimal remainingPrincipal = this.principal;
+
+		for (int i = 1; i <= this.termMonths; i++) {
+		    BigDecimal interestPayment = remainingPrincipal.multiply(monthlyInterestRate);
+		    BigDecimal principalPayment = monthlyPayment.subtract(interestPayment);
+
+		    PaymentSchedule schedule = new PaymentSchedule();
+		    schedule.setPaymentNumber(i);
+		    schedule.setPaymentDate(paymentDate);
+		    schedule.setPrincipalAmount(principalPayment);
+		    schedule.setInterestAmount(interestPayment);
+		    schedule.setTotalPayment(monthlyPayment);
+		    schedule.setRemainingBalance(remainingPrincipal.subtract(principalPayment));
+		    schedule.setLoan(this);
+
+		    this.paymentSchedule.add(schedule);
+
+		    remainingPrincipal = remainingPrincipal.subtract(principalPayment);
+		    paymentDate = paymentDate.plusMonths(1);
+		}
+	}
+
 
     public Long getId() {
         return id;
@@ -84,11 +91,11 @@ public class LoanModel {
         this.id = id;
     }
 
-    public Double getPrincipal() {
+    public BigDecimal getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(Double principal) {
+    public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
 
@@ -103,7 +110,7 @@ public class LoanModel {
     public LocalDate getStartDate() {
         return startDate;
     }
-
+    
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
@@ -143,4 +150,12 @@ public class LoanModel {
     public void setAccount(AccountModel account) {
         this.account = account;
     }
+    
+    public BigDecimal getRemainingBalance() {
+    return remainingBalance;
+	}
+
+	public void setRemainingBalance(BigDecimal remainingBalance) {
+		this.remainingBalance = remainingBalance;
+	}
 }

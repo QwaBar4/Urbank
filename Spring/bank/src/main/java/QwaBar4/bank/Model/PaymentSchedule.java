@@ -2,6 +2,7 @@ package QwaBar4.bank.Model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "payment_schedules")
@@ -12,10 +13,10 @@ public class PaymentSchedule {
     
     private int paymentNumber;
     private LocalDate paymentDate;
-    private double principalAmount;
-    private double interestAmount;
-    private double totalPayment;
-    private double remainingBalance;
+    private BigDecimal principalAmount;
+    private BigDecimal interestAmount;
+    private BigDecimal totalPayment;
+    private BigDecimal remainingBalance;
     private boolean isPaid = false;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,8 +27,8 @@ public class PaymentSchedule {
     public PaymentSchedule() {}
     
     public PaymentSchedule(int paymentNumber, LocalDate paymentDate, 
-                         double principalAmount, double interestAmount,
-                         double totalPayment, double remainingBalance) {
+                         BigDecimal principalAmount, BigDecimal interestAmount,
+                         BigDecimal totalPayment, BigDecimal remainingBalance) {
         this.paymentNumber = paymentNumber;
         this.paymentDate = paymentDate;
         this.principalAmount = principalAmount;
@@ -46,17 +47,17 @@ public class PaymentSchedule {
     public LocalDate getPaymentDate() { return paymentDate; }
     public void setPaymentDate(LocalDate paymentDate) { this.paymentDate = paymentDate; }
     
-    public double getPrincipalAmount() { return principalAmount; }
-    public void setPrincipalAmount(double principalAmount) { this.principalAmount = principalAmount; }
+    public BigDecimal getPrincipalAmount() { return principalAmount; }
+    public void setPrincipalAmount(BigDecimal principalAmount) { this.principalAmount = principalAmount; }
     
-    public double getInterestAmount() { return interestAmount; }
-    public void setInterestAmount(double interestAmount) { this.interestAmount = interestAmount; }
+    public BigDecimal getInterestAmount() { return interestAmount; }
+    public void setInterestAmount(BigDecimal interestAmount) { this.interestAmount = interestAmount; }
     
-    public double getTotalPayment() { return totalPayment; }
-    public void setTotalPayment(double totalPayment) { this.totalPayment = totalPayment; }
+    public BigDecimal getTotalPayment() { return totalPayment; }
+    public void setTotalPayment(BigDecimal totalPayment) { this.totalPayment = totalPayment; }
     
-    public double getRemainingBalance() { return remainingBalance; }
-    public void setRemainingBalance(double remainingBalance) { this.remainingBalance = remainingBalance; }
+    public BigDecimal getRemainingBalance() { return remainingBalance; }
+    public void setRemainingBalance(BigDecimal remainingBalance) { this.remainingBalance = remainingBalance; }
     
     public boolean isPaid() { return isPaid; }
     public void setPaid(boolean paid) { isPaid = paid; }

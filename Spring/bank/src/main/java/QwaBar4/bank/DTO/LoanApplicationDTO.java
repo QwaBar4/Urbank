@@ -3,6 +3,7 @@ package QwaBar4.bank.DTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 public class LoanApplicationDTO {
 
@@ -10,7 +11,7 @@ public class LoanApplicationDTO {
     
     @NotNull(message = "Principal amount is required")
     @Positive(message = "Principal amount must be positive")
-    private Double principal;
+    private BigDecimal principal;
 
     @NotNull(message = "Interest rate is required")
     @Positive(message = "Interest rate must be positive")
@@ -30,7 +31,7 @@ public class LoanApplicationDTO {
 	
     public LoanApplicationDTO() {}
 
-    public LoanApplicationDTO(Long id, Double principal, Double interestRate, LocalDate startDate, Integer termMonths, Long accountId, String status) {
+    public LoanApplicationDTO(Long id, BigDecimal principal, Double interestRate, LocalDate startDate, Integer termMonths, Long accountId, String status) {
         this.id = id;
         this.principal = principal;
         this.interestRate = interestRate;
@@ -47,11 +48,11 @@ public class LoanApplicationDTO {
    		this.id = id; 
     }
 
-    public Double getPrincipal() {
+    public BigDecimal getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(Double principal) {
+    public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
 
