@@ -82,52 +82,52 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
                 </button>
             </div>
 
-            {/* Loan Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-3">Loan Terms</h3>
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Principal:</span>
-                            <span>${loan.principal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Interest Rate:</span>
-                            <span>{loan.interestRate}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Term:</span>
-                            <span>{loan.termMonths} months</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Start Date:</span>
-                            <span>{new Date(loan.startDate).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                </div>
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+				<div className="bg-black p-4 rounded-lg border border-gray-700">
+					<h3 className="font-semibold mb-3 text-gray-200">Loan Terms</h3>
+					<div className="space-y-2 text-gray-100">
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Principal:</span>
+						    <span>${loan.principal.toFixed(2)}</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Interest Rate:</span>
+						    <span>{loan.interestRate}%</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Term:</span>
+						    <span>{loan.termMonths} months</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Start Date:</span>
+						    <span>{new Date(loan.startDate).toLocaleDateString()}</span>
+						</div>
+					</div>
+				</div>
 
-                <div className="bg-gray-900 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-3">Payment Summary</h3>
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Paid Principal:</span>
-                            <span className="text-green-500">${totals.paidPrincipal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Paid Interest:</span>
-                            <span className="text-green-500">${totals.paidInterest.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Pending Principal:</span>
-                            <span className="text-yellow-500">${totals.pendingPrincipal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Pending Interest:</span>
-                            <span className="text-yellow-500">${totals.pendingInterest.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+				{/* Payment Summary with black background */}
+				<div className="bg-black p-4 rounded-lg border border-gray-700">
+					<h3 className="font-semibold mb-3 text-gray-200">Payment Summary</h3>
+					<div className="space-y-2 text-gray-100">
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Paid Principal:</span>
+						    <span className="text-green-400">${totals.paidPrincipal.toFixed(2)}</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Paid Interest:</span>
+						    <span className="text-green-400">${totals.paidInterest.toFixed(2)}</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Pending Principal:</span>
+						    <span className="text-yellow-400">${totals.pendingPrincipal.toFixed(2)}</span>
+						</div>
+						<div className="flex justify-between">
+						    <span className="text-gray-400">Pending Interest:</span>
+						    <span className="text-yellow-400">${totals.pendingInterest.toFixed(2)}</span>
+						</div>
+					</div>
+				</div>
+			</div>
 
             {/* Tabs */}
             <div className="flex border-b border-gray-700 mb-4">
