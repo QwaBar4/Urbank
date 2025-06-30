@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.*;
+import QwaBar4.bank.Utils.AccountNumberUtils;
 import java.util.List;
 import java.util.Map;
 import java.math.BigDecimal;
@@ -19,10 +20,12 @@ import java.util.HashMap;
 public class LoanController {
     private final LoanService loanService;
     private final TransactionService transactionService;
+    private final AccountNumberUtils accountNumberUtils;
 
-    public LoanController(LoanService loanService, TransactionService transactionService) {
+    public LoanController(LoanService loanService, TransactionService transactionService, AccountNumberUtils accountNumberUtils) {
         this.loanService = loanService;
         this.transactionService = transactionService;
+        this.accountNumberUtils = accountNumberUtils;
     }
 
     @PostMapping("/apply")
@@ -74,13 +77,13 @@ public class LoanController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> recordPayment(
         @PathVariable Long loanId,
-        @Valid @RequestBody LoanPaymentDTO paymentDTO
+        @Valid @RequestBody LoanPaymentDTO paymentDTO,
+        Authentication authentication
     ) {
         try {
             PaymentResponseDTO payment = loanService.recordPayment(loanId, paymentDTO);
-
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            BigDecimal balance = transactionService.getAccountBalance(auth.getName());
+            String accNumber = accountNumberUtils.convertFormattedNumberToUuid(paymentDTO.getAccountNumber());
+            BigDecimal balance = transactionService.getAccountBalanceByNumber(accNumber);
 
             Map<String, Object> response = new HashMap<>();
             response.put("payment", payment);

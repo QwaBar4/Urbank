@@ -1,14 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { API_BASE_URL } from '../../services/api';
+import { getJwtToken } from '../../utils/auth';
 
 const LoanPaymentCard = ({ loan, onPaymentSuccess }) => {
     const [paymentAmount, setPaymentAmount] = useState('');
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [accountInfo, setAccountInfo] = useState({ accountNumber: '', balance: 0 });
 
     const nextPayment = loan.paymentSchedule?.find(p => !p.isPaid);
 
+    useEffect(() => {
+        const fetchAccountData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${getJwtToken()}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch account data');
+                
+                const data = await response.json();
+                setAccountInfo({
+                    accountNumber: data.account.accountNumber,
+                    balance: data.account.balance
+                });
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchAccountData();
+    }, []);
+        
     const handlePayment = async () => {
         if (!nextPayment || !paymentAmount) return;
         
@@ -18,8 +45,9 @@ const LoanPaymentCard = ({ loan, onPaymentSuccess }) => {
 
         try {
             await api.recordPayment(loan.id, {
+            	accountNumber: accountInfo.accountNumber,
                 paymentNumber: nextPayment.paymentNumber,
-                amount: parseFloat(paymentAmount)
+                amount: parseFloat(paymentAmount),
             });
             
             setSuccess('Payment processed successfully!');
@@ -31,7 +59,6 @@ const LoanPaymentCard = ({ loan, onPaymentSuccess }) => {
             setProcessing(false);
         }
     };
-
     return (
         <div className="bg-black p-4 rounded-lg border border-gray-700">
             <div className="flex justify-between items-start mb-2">

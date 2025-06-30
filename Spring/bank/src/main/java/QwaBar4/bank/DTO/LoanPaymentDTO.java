@@ -11,7 +11,9 @@ public class LoanPaymentDTO {
     @NotNull(message = "Amount is required")
     @Min(value = 1, message = "Amount must be at least 1")
     private BigDecimal amount;
-
+    
+    private String accountNumber;
+    
     public LoanPaymentDTO() {
     }
 
@@ -27,7 +29,15 @@ public class LoanPaymentDTO {
     public void setPaymentNumber(Integer paymentNumber) {
         this.paymentNumber = paymentNumber;
     }
+    
+    public String getAccountNumber() {
+        return accountNumber;
+    }
 
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+    
     public BigDecimal getAmount() {
         return amount;
     }

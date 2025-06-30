@@ -115,6 +115,12 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getAccount().getBalance();
     }
+	
+    public BigDecimal getAccountBalanceByNumber(String accountNumber) {
+        AccountModel account = accountRepo.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return account.getBalance();
+    }
 
     public List<TransactionDTO> getUserTransactionsById(Long userId) {
         UserModel user = userRepo.findById(userId)
@@ -201,10 +207,6 @@ public class TransactionService {
 
         AccountModel account = accountRepo.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-
-        if (!account.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized withdrawal attempt");
-        }
 
         if (account.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds for withdrawal");

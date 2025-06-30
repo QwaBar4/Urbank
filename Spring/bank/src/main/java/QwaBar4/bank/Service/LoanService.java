@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.DTO.LoanResponseDTO.PaymentScheduleDTO;
 import QwaBar4.bank.Model.*;
+import QwaBar4.bank.Utils.AccountNumberUtils;
 
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
@@ -22,16 +23,19 @@ public class LoanService {
     private final AccountModelRepository accountRepository;
     private final PaymentModelRepository paymentRepository;
     private final TransactionService transactionService;
+    private final AccountNumberUtils accountNumberUtils;
 
     @Autowired
     public LoanService(LoanModelRepository loanRepository,
                      AccountModelRepository accountRepository,
                      PaymentModelRepository paymentRepository,
-                     TransactionService transactionService) {
+                     TransactionService transactionService,
+                     AccountNumberUtils accountNumberUtils) {
         this.loanRepository = loanRepository;
         this.accountRepository = accountRepository;
         this.paymentRepository = paymentRepository;
         this.transactionService = transactionService;
+        this.accountNumberUtils = accountNumberUtils;
     }
 
     @Transactional
@@ -103,8 +107,9 @@ public class LoanService {
 	@Transactional
 	public PaymentResponseDTO recordPayment(Long loanId, LoanPaymentDTO paymentDTO) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String username = auth.getName();
-		AccountModel account = accountRepository.findByUserUsername(username)
+		String accNumber = accountNumberUtils.convertFormattedNumberToUuid(paymentDTO.getAccountNumber());
+		
+		AccountModel account = accountRepository.findByAccountNumber(accNumber)
 		    .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
 		LoanModel loan = loanRepository.findById(loanId)
@@ -120,10 +125,10 @@ public class LoanService {
 
 		try {
 		    transactionService.processWithdrawal(
-		        account.getAccountNumber(),
+		        accNumber,
 		        paymentDTO.getAmount(),
 		        "Loan payment for loan #" + loanId,
-		        username
+		        accNumber
 		    );
 
 		    PaymentModel payment = new PaymentModel();

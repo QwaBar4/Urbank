@@ -85,7 +85,7 @@ public class TransactionController {
 
     @GetMapping("/balance")
     public ResponseEntity<BigDecimal> getAccountBalance(Authentication authentication) {
-        BigDecimal balance = transactionService.getAccountBalance(authentication.getName());
+        BigDecimal balance = transactionService.getAccountBalanceByNumber(authentication.getName());
         return ResponseEntity.ok(balance);
     }
 
