@@ -183,50 +183,6 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
                             </tbody>
                         </table>
                     </div>
-
-                    {/* Payment Form */}
-                    {loan.status === 'APPROVED' && nextPayment && (
-                        <div className="mt-8 bg-gray-900 p-4 rounded-lg">
-                            <h3 className="font-semibold mb-3">Record Payment for Installment #{nextPayment.paymentNumber}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <p className="text-gray-400 text-sm">Due Date</p>
-                                    <p>{new Date(nextPayment.paymentDate).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-400 text-sm">Amount Due</p>
-                                    <p>${nextPayment.totalPayment.toFixed(2)}</p>
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Payment Amount</label>
-                                    <div className="flex">
-                                        <input
-                                            type="number"
-                                            value={paymentAmount}
-                                            onChange={(e) => setPaymentAmount(e.target.value)}
-                                            className="flex-1 bg-black bg-opacity-50 border border-gray-700 rounded-l px-3 py-2"
-                                            placeholder={`${nextPayment.totalPayment.toFixed(2)}`}
-                                            min="0.01"
-                                            step="0.01"
-                                        />
-                                        <button
-                                            onClick={handlePayment}
-                                            disabled={paymentProcessing || !paymentAmount}
-                                            className="px-4 py-2 bg-green-600 rounded-r hover:bg-green-700 disabled:opacity-50"
-                                        >
-                                            {paymentProcessing ? 'Processing...' : 'Pay'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {paymentError && (
-                                <p className="mt-2 text-red-500 text-sm">{paymentError}</p>
-                            )}
-                            {paymentSuccess && (
-                                <p className="mt-2 text-green-500 text-sm">{paymentSuccess}</p>
-                            )}
-                        </div>
-                    )}
                 </div>
             )}
 
