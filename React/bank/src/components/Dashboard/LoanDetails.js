@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
 const LoanDetails = ({ loan, onClose, refreshLoans }) => {
@@ -9,8 +9,7 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
     const [activeTab, setActiveTab] = useState('schedule');
     const [nextPayment, setNextPayment] = useState(null);
 
-    // Find the next due payment
-    useState(() => {
+    useEffect(() => {
         if (loan.paymentSchedule) {
             const upcoming = loan.paymentSchedule.find(
                 payment => !payment.isPaid && new Date(payment.paymentDate) <= new Date()
@@ -19,7 +18,8 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
         }
     }, [loan]);
 
-    const handlePayment = async () => {
+    const handlePayment = async (e) => {
+        e.stopPropagation(); 
         if (!nextPayment || !paymentAmount) return;
         
         setPaymentProcessing(true);
@@ -35,7 +35,6 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
             setPaymentSuccess('Payment recorded successfully!');
             setPaymentAmount('');
             
-            // Refresh data
             const updatedLoan = await api.getLoanDetails(loan.id);
             refreshLoans(updatedLoan);
         } catch (err) {
@@ -74,12 +73,15 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
                     <h2 className="text-xl font-bold">Loan #{loan.id}</h2>
                     <p className="text-gray-400">{loan.username || 'N/A'}</p>
                 </div>
-                <button 
-                    onClick={onClose}
-                    className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
-                >
-                    Close
-                </button>
+				<button 
+					onClick={(e) => {
+						e.stopPropagation();
+						onClose();
+					}}
+					className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
+				>
+					Close
+				</button>
             </div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

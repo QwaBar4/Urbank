@@ -155,18 +155,24 @@ const AdminLoanManagement = () => {
                                                 <td className="p-3">
                                                     {loan.status === 'PENDING' ? (
                                                         <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleApprove(loan.id)}
-                                                                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleReject(loan.id)}
-                                                                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
-                                                            >
-                                                                Reject
-                                                            </button>
+															 <button
+															  onClick={(e) => {
+																e.stopPropagation();
+																handleApprove(loan.id);
+															  }}
+															  className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+															>
+															  Approve
+															</button>
+															<button
+															  onClick={(e) => {
+																e.stopPropagation();
+																handleReject(loan.id);
+															  }}
+															  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+															>
+															  Reject
+															</button>
                                                         </div>
                                                     ) : <div>N/A</div>}
                                                 </td>
