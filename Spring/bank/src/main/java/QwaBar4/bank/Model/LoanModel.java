@@ -143,6 +143,10 @@ public class LoanModel {
         return account;
     }
 
+    public String getAccountNumber() {
+        return account.getAccountNumber();
+    }
+
     public Long getAccountId() {
         return account.getId();
     }

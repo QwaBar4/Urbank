@@ -84,15 +84,36 @@ public class LoanService {
             .collect(Collectors.toList());
     }
 	
-    @Transactional
-    public LoanResponseDTO approveLoan(Long loanId) {
-        LoanModel loan = loanRepository.findById(loanId)
-            .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
-        
-        loan.setStatus("APPROVED");
-        LoanModel updatedLoan = loanRepository.save(loan);
-        return convertToResponseDTO(updatedLoan);
-    }
+	@Transactional
+	public LoanResponseDTO approveLoan(Long loanId) {
+		LoanModel loan = loanRepository.findById(loanId)
+		    .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+		
+		if (!"PENDING".equals(loan.getStatus())) {
+		    throw new IllegalArgumentException("Loan is not in pending state");
+		}
+		
+		loan.setStatus("APPROVED");
+		
+		String accountNumber = accountNumberUtils.convertFormattedNumberToUuid(loan.getAccountNumber());
+		
+		AccountModel account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+		try {
+		    transactionService.processDeposit(
+		        accountNumber,
+		        loan.getPrincipal(),
+		        "Loan disbursement for loan #" + loanId,
+		        account.getUser().getUsername()
+		    );
+		} catch (Exception e) {
+		    throw new IllegalArgumentException("Failed to process loan disbursement: " + e.getMessage());
+		}
+		
+		LoanModel updatedLoan = loanRepository.save(loan);
+		return convertToResponseDTO(updatedLoan);
+	}
 
     @Transactional
     public LoanResponseDTO rejectLoan(Long loanId) {
