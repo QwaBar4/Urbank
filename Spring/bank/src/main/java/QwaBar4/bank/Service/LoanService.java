@@ -143,6 +143,10 @@ public class LoanService {
 		if (account.getBalance().compareTo(paymentDTO.getAmount()) < 0) {
 		    throw new IllegalArgumentException("Insufficient account balance");
 		}
+		
+		if (account.getBalance().compareTo(paymentDTO.getAmount()) > 0){
+		    throw new IllegalArgumentException("You cant pay more");
+		}
 
 		try {
 		    transactionService.processWithdrawal(
