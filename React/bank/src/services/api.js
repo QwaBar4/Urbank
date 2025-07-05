@@ -4,7 +4,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localh
 
 export const handleResponse = async (response) => {
     const text = await response.text();
-    if (!text) return null; // Handle empty responses
+    if (!text) return null;
 
     try {
         const json = JSON.parse(text);
@@ -53,7 +53,6 @@ export const getIndexData = async () => {
   }
 };
 
-// Modify your fetch calls to include credentials
 export const getDashboardData = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/user/dashboard`, {
@@ -261,7 +260,7 @@ export const activateUser = async (userId, active) => {
       headers: {
         'Authorization': `Bearer ${getJwtToken()}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json' // Explicitly request JSON
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ active })
     });

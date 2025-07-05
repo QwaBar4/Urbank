@@ -52,9 +52,9 @@ const LoanPaymentCard = ({ loan, onPaymentSuccess }) => {
             
             setSuccess('Payment processed successfully!');
             setPaymentAmount('');
-            onPaymentSuccess(); // Refresh data
+            onPaymentSuccess();
         } catch (err) {
-            setError(err.response?.data?.message || 'Payment failed');
+            setError(err || 'Payment failed');
         } finally {
             setProcessing(false);
         }
