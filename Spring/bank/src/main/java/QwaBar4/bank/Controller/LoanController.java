@@ -3,6 +3,7 @@ package QwaBar4.bank.Controller;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
@@ -18,6 +19,10 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
+
+    @Autowired
+	private AuditLogService auditLogService;
+	
     private final LoanService loanService;
     private final TransactionService transactionService;
     private final AccountNumberUtils accountNumberUtils;
@@ -33,6 +38,7 @@ public class LoanController {
     public ResponseEntity<?> applyForLoan(@Valid @RequestBody LoanApplicationDTO loanDTO) {
         try {
             LoanApplicationDTO createdLoan = loanService.createLoan(loanDTO);
+            auditLogService.logAction("LOAN_APPLY", username, "User applied loan"); 
             return ResponseEntity.status(HttpStatus.CREATED).body(createdLoan);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
