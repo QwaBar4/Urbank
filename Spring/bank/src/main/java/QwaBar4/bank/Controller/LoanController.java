@@ -38,7 +38,7 @@ public class LoanController {
     public ResponseEntity<?> applyForLoan(@Valid @RequestBody LoanApplicationDTO loanDTO) {
         try {
             LoanApplicationDTO createdLoan = loanService.createLoan(loanDTO);
-            auditLogService.logAction("LOAN_APPLY", username, "User applied loan"); 
+            auditLogService.logActionById("LOAN_APPLY", createdLoan.getAccountId(), "User applied loan"); 
             return ResponseEntity.status(HttpStatus.CREATED).body(createdLoan);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
