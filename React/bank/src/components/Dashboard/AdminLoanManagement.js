@@ -9,6 +9,7 @@ const AdminLoanManagement = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedLoan, setSelectedLoan] = useState(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -51,11 +52,23 @@ const AdminLoanManagement = () => {
             setError('Failed to reject loan');
         }
     };
-
+	
+	const refreshLoans = async () => {
+	  try {
+		const response = await api.getAllLoans();
+		const loansData = Array.isArray(response) ? response : [];
+		setLoans(loansData);
+		setError('');
+	  } catch (err) {
+		console.error('Error refreshing loans:', err);
+		setError(err.message || 'Failed to refresh loans');
+	  }
+	};
+	
     return (
         <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
             <div 
-                className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-0"
+                className="fixed inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-[-1]"
                 style={{ backgroundImage: `url(${logotype})` }}
             />
 
@@ -185,12 +198,13 @@ const AdminLoanManagement = () => {
                     </div>
                 )}
             </div>
-            {selectedLoan && (
-				<LoanDetails 
-					loan={selectedLoan} 
-					onClose={() => setSelectedLoan(null)} 
-			/>
-		)}
+			{selectedLoan && (
+			  <LoanDetails 
+				loan={selectedLoan} 
+				onClose={() => setSelectedLoan(null)} 
+				refreshLoans={refreshLoans}
+			  />
+			)}
         </div>
     );
 };

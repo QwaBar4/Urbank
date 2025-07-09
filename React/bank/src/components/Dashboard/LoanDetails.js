@@ -43,7 +43,12 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
             setPaymentProcessing(false);
         }
     };
-
+    
+	const handleClose = (e) => {
+		e.stopPropagation();
+		onClose();
+	};
+	
     const calculateTotals = () => {
         if (!loan.paymentSchedule) return {};
         
@@ -63,25 +68,30 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
             pendingInterest: 0 
         });
     };
-
+    
+	const handleTabChange = (tab) => (e) => {
+	    e.stopPropagation();
+	    setActiveTab(tab);
+	};
+	
     const totals = calculateTotals();
 
     return (
-        <div className="mt-6 bg-black bg-opacity-70 p-6 rounded-lg">
+			<div 
+			  className="mt-6 bg-black bg-opacity-70 p-6 rounded-lg"
+			  onClick={(e) => e.stopPropagation()}
+			>
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h2 className="text-xl font-bold">Loan #{loan.id}</h2>
                     <p className="text-gray-400">{loan.username || 'N/A'}</p>
                 </div>
 				<button 
-					onClick={(e) => {
-						e.stopPropagation();
-						onClose();
-					}}
+					onClick={handleClose}
 					className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
 				>
-					Close
-				</button>
+				Close
+			 	</button>
             </div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -132,19 +142,19 @@ const LoanDetails = ({ loan, onClose, refreshLoans }) => {
 			</div>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-700 mb-4">
-                <button
-                    className={`px-4 py-2 font-medium ${activeTab === 'schedule' ? 'text-white border-b-2 border-white' : 'text-gray-400'}`}
-                    onClick={() => setActiveTab('schedule')}
-                >
-                    Payment Schedule
-                </button>
-                <button
-                    className={`px-4 py-2 font-medium ${activeTab === 'activity' ? 'text-white border-b-2 border-white' : 'text-gray-400'}`}
-                    onClick={() => setActiveTab('activity')}
-                >
-                    Payment Activity
-                </button>
+            <div className="flex border-b border-gray-700 mb-4 z-[1]">
+				<button
+				  className={`px-4 py-2 font-medium ${activeTab === 'schedule' ? 'text-white border-b-2 border-white' : 'text-gray-400'}`}
+				  onClick={handleTabChange('schedule')}
+				>
+				  Payment Schedule
+				</button>
+				<button
+				  className={`px-4 py-2 font-medium ${activeTab === 'activity' ? 'text-white border-b-2 border-white' : 'text-gray-400'}`}
+				  onClick={handleTabChange('activity')}
+				>
+				  Payment Activity
+				</button>
             </div>
 
             {/* Payment Schedule Tab */}
