@@ -21,32 +21,33 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
       if (!response.ok) throw new Error('Failed to send verification code');
       setStep(2);
     } catch (error) {
-      setError(error.message);
+      setError(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOldEmail = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/auth/verify-email-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail, code: oldEmailCode }),
-      });
+	const handleVerifyOldEmail = async () => {
+	  setError('');
+	  setIsLoading(true);
+	  try {
+		const response = await fetch('/auth/verify-email-code', {
+		  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify({ email: currentEmail, code: oldEmailCode }),
+		});
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Verification failed');
-      }
-      setStep(3);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+		if (!response.ok) {
+		  const errorData = await response.json();
+		  throw new Error(errorData.message || 'Verification failed');
+		}
+		setStep(3);
+	  } catch (error) {
+		setError(error.message);
+	  } finally {
+		setIsLoading(false);
+	  }
+	};
 
   const handleSendNewEmailCode = async () => {
     if (!newEmail || !/^\S+@\S+\.\S+$/.test(newEmail)) {
@@ -71,57 +72,58 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
     }
   };
 
-  const handleVerifyNewEmail = async () => {
-    setIsLoading(true);
-    try {
-      const token = getJwtToken();
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
+	const handleVerifyNewEmail = async () => {
+	  setError('');
+	  setIsLoading(true);
+	  try {
+		const token = getJwtToken();
+		if (!token) {
+		  throw new Error('Authentication token not found. Please log in again.');
+		}
 
-      const verifyResponse = await fetch('/auth/verify-code', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          email: newEmail, 
-          code: newEmailCode 
-        }),
-      });
+		const verifyResponse = await fetch('/auth/verify-code', {
+		  method: 'POST',
+		  headers: { 
+		    'Content-Type': 'application/json',
+		    'Authorization': `Bearer ${token}`
+		  },
+		  body: JSON.stringify({ 
+		    email: newEmail, 
+		    code: newEmailCode 
+		  }),
+		});
 
-      if (!verifyResponse.ok) {
-        const errorData = await verifyResponse.json();
-        throw new Error(errorData.message || 'Verification failed');
-      }
+		if (!verifyResponse.ok) {
+		  const errorData = await verifyResponse.json();
+		  throw new Error(errorData.message || 'Verification failed');
+		}
 
-      const updateResponse = await fetch('/api/user/update-email', {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getJwtToken()}`
-        },
-        body: JSON.stringify({ 
-          oldEmail: currentEmail,
-          newEmail: newEmail,
-          verificationCode: newEmailCode 
-        }),
-      });
+		const updateResponse = await fetch('/api/user/update-email', {
+		  method: 'PUT',
+		  headers: { 
+		    'Content-Type': 'application/json',
+		    'Authorization': `Bearer ${getJwtToken()}`
+		  },
+		  body: JSON.stringify({ 
+		    oldEmail: currentEmail,
+		    newEmail: newEmail,
+		    verificationCode: newEmailCode 
+		  }),
+		});
 
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json();
-        throw new Error(errorData.message || 'Failed to update email');
-      }
+		if (!updateResponse.ok) {
+		  const errorData = await updateResponse.json();
+		  throw new Error(errorData.message || 'Failed to update email');
+		}
 
-      onEmailUpdated(newEmail);
-      onClose();
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+		onEmailUpdated(newEmail);
+		onClose();
+	  } catch (error) {
+		setError(error.message);
+	  } finally {
+		setIsLoading(false);
+	  }
+	};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">

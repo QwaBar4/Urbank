@@ -19,7 +19,9 @@ import org.springframework.security.authentication.DisabledException;
 import java.util.Collection;
 import QwaBar4.bank.Model.UserModelRepository;
 import QwaBar4.bank.Model.TransactionModelRepository;
+import QwaBar4.bank.Model.LoanModelRepository;
 import QwaBar4.bank.Model.TransactionModel;
+import QwaBar4.bank.Model.LoanModel;
 import QwaBar4.bank.DTO.*;
 import QwaBar4.bank.Service.AESEncryptionService;
 import java.math.BigDecimal;
@@ -34,13 +36,15 @@ public class UserModelService implements UserDetailsService {
     private final AccountModelRepository accountRepo;
     private final TransactionModelRepository transactionRepo;
     private final AESEncryptionService encryptionService;
+    private final LoanModelRepository loanRepository;
 
     @Autowired
-    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo, TransactionModelRepository transactionRepo, AESEncryptionService encryptionService) {
+    public UserModelService(UserModelRepository userRepo, AccountModelRepository accountRepo, TransactionModelRepository transactionRepo, AESEncryptionService encryptionService, LoanModelRepository loanRepository) {
         this.userRepo = userRepo;
         this.accountRepo = accountRepo;
         this.transactionRepo = transactionRepo;
         this.encryptionService = encryptionService;
+        this.loanRepository = loanRepository;
     }
 
     public boolean existsByUsernameIgnoreCase(String username) {
@@ -250,12 +254,14 @@ public class UserModelService implements UserDetailsService {
         UserModel user = userRepo.findById(userId)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Retrieve transactions by the user's account number
         List<TransactionModel> transactions = transactionRepo.findBySourceAccountNumber(user.getAccount().getAccountNumber());
         transactions.addAll(transactionRepo.findByTargetAccountNumber(user.getAccount().getAccountNumber()));
 
-        // Delete all transactions associated with the user
+        List<LoanModel> loans = loanRepository.findByAccount_User_Username(user.getUsername());
+
+        loanRepository.deleteAll(loans);
         transactionRepo.deleteAll(transactions);
+        
 
         if (user.getAccount() != null) {
             accountRepo.delete(user.getAccount());

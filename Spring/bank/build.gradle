@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.github.ben-manes.versions' version '0.47.0'
 }
 
 group = 'QwaBar4'
@@ -21,6 +22,10 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+springBoot {
+    mainClass = 'QwaBar4.bank.BankApplication'
 }
 
 dependencies {

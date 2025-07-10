@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAdminDashboardData, deleteUser, getUserTransactions, getUserAuditLogs } from '../services/api';
+import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../services/api';
 import api from '../services/api';
 import '../index.css';
 
@@ -38,14 +38,25 @@ const AdminDashboard = () => {
 
   const handleStatusChange = async (userId, currentStatus) => {
     try {
-    	console.log('All good');
+      const result = await activateUser(userId, !currentStatus);
+      console.log('Activation success:', result);
+
+      setAdminData(prev => ({
+        ...prev,
+        users: prev.users.map(u =>
+          u.id === userId ? { ...u, active: !currentStatus } : u
+        )
+      }));
     } catch (error) {
       let errorMessage = error.message;
+
+      // Handle specific error cases
       if (error.message.includes('Failed to parse')) {
         errorMessage = "Server returned invalid response. Check backend logs.";
       } else if (error.message.includes('Non-JSON')) {
         errorMessage = "Server error occurred. Please try again.";
       }
+
       setError(errorMessage);
     }
   };

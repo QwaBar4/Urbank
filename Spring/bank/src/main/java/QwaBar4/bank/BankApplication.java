@@ -14,8 +14,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaRepositories("QwaBar4.bank.Model")
 public class BankApplication {
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(BankApplication.class);
-        app.setLogStartupInfo(false);
-        app.run(args);
+        SpringApplication.run(BankApplication.class, args);
     }
 }
