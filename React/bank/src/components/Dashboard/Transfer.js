@@ -107,71 +107,86 @@ const Transfer = ({ userAccount, refreshBalance }) => {
     };
 
     return (
-        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
-            <div className="flex space-x-1 mb-2">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-2 h-px bg-gray-400"></div>
-                ))}
-            </div>
-            
-            <h2 className="text-xl font-bold mb-6">Transfer Money</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Transfer Money</h2>
             
             {error && (
-                <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
-                    <p className="text-red-500">{error}</p>
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm text-red-700">{error}</p>
+                        </div>
+                    </div>
                 </div>
             )}
             
             {success && (
-                <div className="bg-green-500 bg-opacity-20 p-3 rounded-lg border border-green-500 mb-4">
-                    <p className="text-green-500">{success}</p>
+                <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm text-green-700">{success}</p>
+                        </div>
+                    </div>
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-gray-400 mb-1">From Account</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">From Account</label>
                     <input
                         type="text"
                         name="sourceAccount"
                         value={formatAccountNumber(formData.sourceAccount)}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         readOnly
                     />
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 mb-1">To Account</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">To Account</label>
                     <input
                         type="text"
                         name="targetAccount"
                         value={formData.targetAccount}
                         onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         required
                         placeholder="Enter recipient account number"
                     />
                     {validationLoading && (
-                        <div className="mt-2 flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                            <span className="text-gray-400 text-sm">Validating account...</span>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Validating account...
                         </div>
                     )}
                     {targetAccountDetails && (
-                        <div className="mt-2 text-green-500">
+                        <div className="mt-2 text-sm text-green-600">
                             Account Holder: {targetAccountDetails.ownerName}
                         </div>
                     )}
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 mb-1">Amount ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
                     <input
                         type="number"
                         name="amount"
                         value={formData.amount}
                         onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         min="0.01"
                         step="0.01"
                         required
@@ -180,41 +195,36 @@ const Transfer = ({ userAccount, refreshBalance }) => {
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 mb-1">Description (Optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
                     <input
                         type="text"
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder="e.g., Rent payment"
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <div className="flex items-center justify-center">
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Processing...
-                        </div>
+                        </>
                     ) : 'Transfer Money'}
                 </button>
             </form>
-            
-            <div className="flex space-x-1 mt-6">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-2 h-px bg-gray-400"></div>
-                ))}
-            </div>
         </div>
     );
 };
+
 
 export default Transfer;

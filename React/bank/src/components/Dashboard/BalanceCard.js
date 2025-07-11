@@ -13,57 +13,43 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     };
 
     return (
-        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Balance</h2>
+            
             <div className="mb-6">
-                <div className="flex space-x-1 mb-2">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-px bg-gray-400"></div>
-                    ))}
-                </div>
-                
-                <h2 className="text-xl font-bold mb-4">Account Balance</h2>
-                
-                <div className="mb-6">
-                    <small className="text-gray-400 block mb-1">Account Number</small>
-                    <h3 className="text-2xl font-mono">
-                        {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
-                    </h3>
-                </div>
-                
-                <div className="mb-8">
-                    <small className="text-gray-400 block mb-1">Available Balance</small>
-                    <h3 className="text-3xl font-bold">
-                        ${balance !== undefined ? balance.toFixed(2) : '0.00'}
-                    </h3>
-                </div>
-                
-                <div className="flex space-x-1 mt-2">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-px bg-gray-400"></div>
-                    ))}
-                </div>
+                <p className="text-sm text-gray-500 mb-1">Account Number</p>
+                <p className="text-xl font-mono text-gray-800">
+                    {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
+                </p>
             </div>
             
-			<div className="flex flex-col space-y-4">
-				<button 
-					onClick={handleDeposit}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Deposit Funds
-				</button>
-				<button 
-					onClick={handleWithdraw}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Withdraw Funds
-				</button>
-				<button 
-					onClick={refreshBalance}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Refresh Balance
-				</button>
-			</div>
+            <div className="mb-6">
+                <p className="text-sm text-gray-500 mb-1">Available Balance</p>
+                <p className="text-3xl font-bold text-gray-800">
+                    ${balance !== undefined ? balance.toFixed(2) : '0.00'}
+                </p>
+            </div>
+            
+            <div className="space-y-3">
+                <button 
+                    onClick={handleDeposit}
+                    className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                    Deposit Funds
+                </button>
+                <button 
+                    onClick={handleWithdraw}
+                    className="w-full py-2 px-4 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                >
+                    Withdraw Funds
+                </button>
+                <button 
+                    onClick={refreshBalance}
+                    className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shadow-sm"
+                >
+                    Refresh Balance
+                </button>
+            </div>
         </div>
     );
 };

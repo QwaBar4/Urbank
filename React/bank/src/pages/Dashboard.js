@@ -192,8 +192,8 @@ const Dashboard = () => {
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center min-h-screen bg-black">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
     );
 
@@ -202,115 +202,67 @@ const Dashboard = () => {
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
-            {/* Semi-transparent logo background */}
-            <div 
-                className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-0"
-                style={{ backgroundImage: `url(${logotype})` }}
-            />
-
-            {/* Main content */}
-            <div className="relative z-10 max-w-6xl mx-auto w-full">
-                {/* Welcome Banner */}
-                <div className="flex flex-col items-center my-6">
-                    <div className="flex space-x-1 mb-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
-                    </div>
-
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <header className="bg-white shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div className="flex items-center">
-                        <div className="flex flex-col space-y-1 mr-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                        <div className="px-4 py-2 border border-white rounded">
-                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-                                It's Urbank, {userData.username}!
-                            </h1>
-                        </div>
-                        <div className="flex flex-col space-y-1 ml-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
+                        <img src={logotype} alt="Logo" className="h-8 mr-3" />
+                        <h1 className="text-xl font-semibold text-gray-800">Urbank Dashboard</h1>
                     </div>
-                    
-                    <div className="flex space-x-1 mt-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
+                    <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-gray-600">Welcome, {userData.username}</span>
+                        <button 
+                            onClick={handleLogout}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                            Logout
+                        </button>
                     </div>
                 </div>
+            </header>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                    <button 
-                        onClick={() => navigate('/')} 
-                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                    >
-                        Go Home
-                    </button>
-                    <button 
-                        onClick={handleLogout} 
-                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                    >
-                        Logout
-                    </button>
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                {/* Quick Actions */}
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <button
                         onClick={() => setShowStatementOptions(true)}
-                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
                     >
-                        Download Statement
+                        <h3 className="font-medium text-gray-800">Download Statement</h3>
+                        <p className="text-sm text-gray-500 mt-1">Get your account summary</p>
                     </button>
-                    <button
-                        onClick={() => setShowDeleteConfirmation(true)}
-                        className="px-4 py-2 bg-transparent text-red-500 border border-red-500 rounded hover:bg-red-500 hover:bg-opacity-10 transition-colors"
-                    >
-                        Delete Account
-                    </button>
+                    
                     <button 
                         onClick={() => navigate('/apply-loan')}
-                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
                     >
-                        Apply for Loan
+                        <h3 className="font-medium text-gray-800">Apply for Loan</h3>
+                        <p className="text-sm text-gray-500 mt-1">Explore loan options</p>
                     </button>
+                    
+                    <button
+                        onClick={() => setShowProfileModal(true)}
+                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
+                    >
+                        <h3 className="font-medium text-gray-800">Update Profile</h3>
+                        <p className="text-sm text-gray-500 mt-1">Manage your information</p>
+                    </button>
+                    
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/admin')}
-                            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                            className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
                         >
-                            Admin Dashboard
+                            <h3 className="font-medium text-gray-800">Admin Dashboard</h3>
+                            <p className="text-sm text-gray-500 mt-1">Manage system settings</p>
                         </button>
                     )}
                 </div>
 
-                {/* User Data Section */}
-                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
-                    <h2 className="text-xl font-bold mb-4">User Data</h2>
-                    {profileData ? (
-                        <div className="flex gap-2">
-                            <button
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                                onClick={() => setShowProfileModal(true)}
-                            >
-                                Update Profile
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                                onClick={() => setShowUserDetailsModal(true)}
-                            >
-                                View Full Details
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="text-center">Loading profile...</div>
-                    )}
-                </div>
-
                 {/* Balance and Transfer Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <BalanceCard
                         accountNumber={userData.account.accountNumber}
                         balance={userData.account.balance}
@@ -324,12 +276,12 @@ const Dashboard = () => {
 
                 {/* Loan Payments Section */}
                 {userLoans.length > 0 && (
-                    <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                    <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold">Your Active Loans</h2>
+                            <h2 className="text-lg font-semibold text-gray-800">Your Active Loans</h2>
                             <button 
                                 onClick={fetchUserLoans}
-                                className="px-3 py-1 bg-white bg-opacity-10 rounded hover:bg-opacity-20"
+                                className="text-sm text-blue-600 hover:text-blue-800"
                                 disabled={loansLoading}
                             >
                                 {loansLoading ? 'Refreshing...' : 'Refresh'}
@@ -338,10 +290,10 @@ const Dashboard = () => {
                         
                         {loansLoading ? (
                             <div className="flex justify-center p-4">
-                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {userLoans.map(loan => (
                                     <LoanPaymentCard 
                                         key={loan.id}
@@ -354,21 +306,43 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* Transaction History Button */}
-                <button 
-                    onClick={() => setShowTransactionHistoryModal(true)}
-                    className="w-full md:w-auto px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium mb-6"
-                >
-                    View Full Transaction History
-                </button>
-
-                {/* Error Display */}
-                {error && (
-                    <div className="bg-red-500 bg-opacity-20 p-4 rounded-lg border border-red-500 mb-6">
-                        <p className="text-red-500">{error}</p>
+                {/* Transaction History */}
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-gray-800">Transaction History</h2>
+                        <button 
+                            onClick={() => setShowTransactionHistoryModal(true)}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                            View Full History
+                        </button>
                     </div>
-                )}
-            </div>
+                    <p className="text-sm text-gray-500">
+                        View your complete transaction history and statements.
+                    </p>
+                </div>
+
+                {/* Account Management */}
+                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h2>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => setShowUserDetailsModal(true)}
+                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
+                        >
+                            <h3 className="font-medium text-gray-800">View Account Details</h3>
+                            <p className="text-sm text-gray-500 mt-1">See your full account information</p>
+                        </button>
+                        <button
+                            onClick={() => setShowDeleteConfirmation(true)}
+                            className="w-full text-left p-3 rounded-lg border border-red-200 hover:border-red-300 transition-colors text-red-600"
+                        >
+                            <h3 className="font-medium">Delete Account</h3>
+                            <p className="text-sm text-red-500 mt-1">Permanently remove your account</p>
+                        </button>
+                    </div>
+                </div>
+            </main>
 
             {/* Modals */}
             {showProfileModal && (
