@@ -202,146 +202,194 @@ const Dashboard = () => {
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <img src={logotype} alt="Logo" className="h-8 mr-3" />
-                        <h1 className="text-xl font-semibold text-gray-800">Urbank Dashboard</h1>
-                    </div>
+        <div className="min-h-screen bg-black text-white">
+            {/* New Header */}
+            <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-600">Welcome, {userData.username}</span>
+                        <img src={logotype} alt="Logo" className="h-8" />
+                        <h1 className="text-xl font-bold">Urbank Dashboard</h1>
+                    </div>
+                    
+                    <div className="flex items-center space-x-6">
                         <button 
-                            onClick={handleLogout}
-                            className="text-sm text-blue-600 hover:text-blue-800"
+                            onClick={() => setShowStatementOptions(true)}
+                            className="text-purple-400 hover:text-purple-300 flex items-center"
                         >
-                            Logout
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Statement
                         </button>
+                        
+                        <div className="relative group">
+                            <button className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                                    {userData?.username?.charAt(0).toUpperCase()}
+                                </div>
+                                <span>{userData?.username}</span>
+                            </button>
+                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 hidden group-hover:block">
+                                <button 
+                                    onClick={handleLogout}
+                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-                {/* Quick Actions */}
-                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <button
-                        onClick={() => setShowStatementOptions(true)}
-                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
-                    >
-                        <h3 className="font-medium text-gray-800">Download Statement</h3>
-                        <p className="text-sm text-gray-500 mt-1">Get your account summary</p>
-                    </button>
-                    
-                    <button 
-                        onClick={() => navigate('/apply-loan')}
-                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
-                    >
-                        <h3 className="font-medium text-gray-800">Apply for Loan</h3>
-                        <p className="text-sm text-gray-500 mt-1">Explore loan options</p>
-                    </button>
-                    
-                    <button
-                        onClick={() => setShowProfileModal(true)}
-                        className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
-                    >
-                        <h3 className="font-medium text-gray-800">Update Profile</h3>
-                        <p className="text-sm text-gray-500 mt-1">Manage your information</p>
-                    </button>
-                    
-                    {isAdmin && (
-                        <button
-                            onClick={() => navigate('/admin')}
-                            className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 transition-colors text-left"
-                        >
-                            <h3 className="font-medium text-gray-800">Admin Dashboard</h3>
-                            <p className="text-sm text-gray-500 mt-1">Manage system settings</p>
-                        </button>
-                    )}
+            <main className="max-w-7xl mx-auto px-4 py-6">
+                {/* Welcome Card */}
+                <div className="bg-gray-900 rounded-xl p-6 mb-8 border border-gray-800">
+                    <h2 className="text-2xl font-bold mb-2">Welcome back, {userData?.username}!</h2>
+                    <p className="text-gray-400">Here's what's happening with your account today.</p>
                 </div>
 
-                {/* Balance and Transfer Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Quick Actions Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <BalanceCard
                         accountNumber={userData.account.accountNumber}
                         balance={userData.account.balance}
                         refreshBalance={refreshBalance}
                     />
+                    
+                    <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                        <h3 className="font-bold mb-4">Quick Actions</h3>
+                        <div className="space-y-3">
+                            <button 
+                                onClick={() => navigate('/apply-loan')}
+                                className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
+                            >
+                                Apply for Loan
+                            </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => navigate('/admin')}
+                                    className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
+                                >
+                                    Admin Dashboard
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setShowProfileModal(true)}
+                                className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
+                            >
+                                Update Profile
+                            </button>
+                        </div>
+                    </div>
+                    
                     <Transfer 
                         userAccount={userData.account}
                         refreshBalance={refreshBalance}
                     />
                 </div>
 
-                {/* Loan Payments Section */}
-                {userLoans.length > 0 && (
-                    <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold text-gray-800">Your Active Loans</h2>
-                            <button 
-                                onClick={fetchUserLoans}
-                                className="text-sm text-blue-600 hover:text-blue-800"
-                                disabled={loansLoading}
-                            >
-                                {loansLoading ? 'Refreshing...' : 'Refresh'}
-                            </button>
-                        </div>
-                        
-                        {loansLoading ? (
-                            <div className="flex justify-center p-4">
-                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {userLoans.map(loan => (
-                                    <LoanPaymentCard 
-                                        key={loan.id}
-                                        loan={loan}
-                                        onPaymentSuccess={handlePaymentSuccess}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+				{/* Loan Payments Section */}
+				{userLoans.length > 0 && (
+					<div className="bg-gray-900 rounded-xl p-6 mb-6 border border-gray-800">
+						<div className="flex justify-between items-center mb-4">
+							<h2 className="text-lg font-bold">Your Active Loans</h2>
+							<button 
+								onClick={fetchUserLoans}
+								className="text-sm text-purple-400 hover:text-purple-300 flex items-center"
+								disabled={loansLoading}
+							>
+								{loansLoading ? (
+								    <>
+								        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+								            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								        </svg>
+								        Refreshing...
+								    </>
+								) : (
+								    <>
+								        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+								        </svg>
+								        Refresh
+								    </>
+								)}
+							</button>
+						</div>
+						
+						{loansLoading ? (
+							<div className="flex justify-center p-4">
+								<div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+							</div>
+						) : (
+							<div className="space-y-4">
+								{userLoans.map(loan => (
+								    <LoanPaymentCard 
+								        key={loan.id}
+								        loan={loan}
+								        onPaymentSuccess={handlePaymentSuccess}
+								    />
+								))}
+							</div>
+						)}
+					</div>
+				)}
 
-                {/* Transaction History */}
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-gray-800">Transaction History</h2>
-                        <button 
-                            onClick={() => setShowTransactionHistoryModal(true)}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                            View Full History
-                        </button>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                        View your complete transaction history and statements.
-                    </p>
-                </div>
+				{/* Transaction History */}
+				<div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+					<div className="flex justify-between items-center mb-4">
+						<h2 className="text-lg font-bold">Transaction History</h2>
+						<button 
+							onClick={() => setShowTransactionHistoryModal(true)}
+							className="text-purple-400 hover:text-purple-300 flex items-center text-sm"
+						>
+							<svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+							</svg>
+							View Full History
+						</button>
+					</div>
+					<p className="text-gray-400 text-sm">
+						View your complete transaction history and download statements.
+					</p>
+				</div>
 
-                {/* Account Management */}
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Management</h2>
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => setShowUserDetailsModal(true)}
-                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
-                        >
-                            <h3 className="font-medium text-gray-800">View Account Details</h3>
-                            <p className="text-sm text-gray-500 mt-1">See your full account information</p>
-                        </button>
-                        <button
-                            onClick={() => setShowDeleteConfirmation(true)}
-                            className="w-full text-left p-3 rounded-lg border border-red-200 hover:border-red-300 transition-colors text-red-600"
-                        >
-                            <h3 className="font-medium">Delete Account</h3>
-                            <p className="text-sm text-red-500 mt-1">Permanently remove your account</p>
-                        </button>
-                    </div>
-                </div>
+				{/* Account Management */}
+				<div className="mt-6 bg-gray-900 rounded-xl p-6 border border-gray-800">
+					<h2 className="text-lg font-bold mb-4">Account Management</h2>
+					<div className="space-y-3">
+						<button
+							onClick={() => setShowUserDetailsModal(true)}
+							className="w-full text-left p-4 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700"
+						>
+							<div className="flex items-center justify-between">
+								<div>
+								    <h3 className="font-medium">Account Details</h3>
+								    <p className="text-sm text-gray-400 mt-1">View your personal and account information</p>
+								</div>
+								<svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+								</svg>
+							</div>
+						</button>
+						<button
+							onClick={() => setShowDeleteConfirmation(true)}
+							className="w-full text-left p-4 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors border border-red-900"
+						>
+							<div className="flex items-center justify-between">
+								<div>
+								    <h3 className="font-medium text-red-400">Delete Account</h3>
+								    <p className="text-sm text-red-500 mt-1">Permanently remove your account and all data</p>
+								</div>
+								<svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+								</svg>
+							</div>
+						</button>
+					</div>
+				</div>
             </main>
 
             {/* Modals */}

@@ -4,50 +4,46 @@ import { formatAccountNumber } from '../../services/api';
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     const navigate = useNavigate();
 
-    const handleDeposit = () => {
-        navigate('/deposit');
-    };
-
-    const handleWithdraw = () => {
-        navigate('/withdraw');
-    };
-
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Balance</h2>
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <div className="flex justify-between items-start mb-6">
+                <h3 className="font-bold">Account Balance</h3>
+                <button 
+                    onClick={refreshBalance}
+                    className="text-purple-400 hover:text-purple-300"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
             
-            <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-1">Account Number</p>
-                <p className="text-xl font-mono text-gray-800">
+            <div className="mb-8">
+                <p className="text-sm text-gray-400 mb-1">Account Number</p>
+                <p className="text-xl font-mono text-white">
                     {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
                 </p>
             </div>
             
-            <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-1">Available Balance</p>
-                <p className="text-3xl font-bold text-gray-800">
+            <div className="mb-8">
+                <p className="text-sm text-gray-400 mb-1">Available Balance</p>
+                <p className="text-3xl font-bold text-white">
                     ${balance !== undefined ? balance.toFixed(2) : '0.00'}
                 </p>
             </div>
             
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
                 <button 
-                    onClick={handleDeposit}
-                    className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                    onClick={() => navigate('/deposit')}
+                    className="py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
                 >
-                    Deposit Funds
+                    Deposit
                 </button>
                 <button 
-                    onClick={handleWithdraw}
-                    className="w-full py-2 px-4 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                    onClick={() => navigate('/withdraw')}
+                    className="py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
                 >
-                    Withdraw Funds
-                </button>
-                <button 
-                    onClick={refreshBalance}
-                    className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shadow-sm"
-                >
-                    Refresh Balance
+                    Withdraw
                 </button>
             </div>
         </div>
