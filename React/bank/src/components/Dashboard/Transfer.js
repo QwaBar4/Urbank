@@ -107,114 +107,108 @@ const Transfer = ({ userAccount, refreshBalance }) => {
     };
 
     return (
-        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
-            <div className="flex space-x-1 mb-2">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-2 h-px bg-gray-400"></div>
-                ))}
-            </div>
-            
-            <h2 className="text-xl font-bold mb-6">Transfer Money</h2>
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h3 className="font-bold mb-6">Transfer Money</h3>
             
             {error && (
-                <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
-                    <p className="text-red-500">{error}</p>
+                <div className="bg-red-900 bg-opacity-20 border border-red-700 rounded-lg p-3 mb-4">
+                    <p className="text-red-400">{error}</p>
                 </div>
             )}
             
             {success && (
-                <div className="bg-green-500 bg-opacity-20 p-3 rounded-lg border border-green-500 mb-4">
-                    <p className="text-green-500">{success}</p>
+                <div className="bg-green-900 bg-opacity-20 border border-green-700 rounded-lg p-3 mb-4">
+                    <p className="text-green-400">{success}</p>
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-gray-400 mb-1">From Account</label>
+                    <label className="block text-sm text-gray-400 mb-2">From Account</label>
                     <input
                         type="text"
                         name="sourceAccount"
                         value={formatAccountNumber(formData.sourceAccount)}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                         readOnly
                     />
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 mb-1">To Account</label>
+                    <label className="block text-sm text-gray-400 mb-2">To Account</label>
                     <input
                         type="text"
                         name="targetAccount"
                         value={formData.targetAccount}
                         onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                         required
-                        placeholder="Enter recipient account number"
+                        placeholder="Enter account number"
                     />
                     {validationLoading && (
-                        <div className="mt-2 flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                            <span className="text-gray-400 text-sm">Validating account...</span>
+                        <div className="mt-2 flex items-center text-sm text-gray-400">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Validating...
                         </div>
                     )}
                     {targetAccountDetails && (
-                        <div className="mt-2 text-green-500">
+                        <div className="mt-2 text-sm text-purple-400">
                             Account Holder: {targetAccountDetails.ownerName}
                         </div>
                     )}
                 </div>
 
-                <div>
-                    <label className="block text-gray-400 mb-1">Amount ($)</label>
-                    <input
-                        type="number"
-                        name="amount"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
-                        min="0.01"
-                        step="0.01"
-                        required
-                        placeholder="0.00"
-                    />
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-2">Amount ($)</label>
+                        <input
+                            type="number"
+                            name="amount"
+                            value={formData.amount}
+                            onChange={handleChange}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                            min="0.01"
+                            step="0.01"
+                            required
+                            placeholder="0.00"
+                        />
+                    </div>
 
-                <div>
-                    <label className="block text-gray-400 mb-1">Description (Optional)</label>
-                    <input
-                        type="text"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 text-white"
-                        placeholder="e.g., Rent payment"
-                    />
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-2">Description</label>
+                        <input
+                            type="text"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                            placeholder="Optional"
+                        />
+                    </div>
                 </div>
 
                 <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                    className="w-full mt-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors flex items-center justify-center"
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <div className="flex items-center justify-center">
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Processing...
-                        </div>
+                            Processing Transfer...
+                        </>
                     ) : 'Transfer Money'}
                 </button>
             </form>
-            
-            <div className="flex space-x-1 mt-6">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-2 h-px bg-gray-400"></div>
-                ))}
-            </div>
         </div>
     );
 };
+
 
 export default Transfer;
