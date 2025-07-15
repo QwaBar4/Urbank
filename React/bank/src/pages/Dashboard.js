@@ -10,6 +10,7 @@ import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
 import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard';
 import TransferModal from '../components/Dashboard/TransferModal';
 import PaymentsModal from '../components/Dashboard/PaymentsModal';
+import RecentTransactions from '../components/Dashboard/RecentTransactions';
 import logotype from '../assets/logotype.jpg';
 
 const Dashboard = () => {
@@ -325,59 +326,13 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-medium">Recent Transactions</h2>
-                        <button 
-                            onClick={() => setShowTransactionHistoryModal(true)}
-                            className="text-purple-400 hover:text-purple-300 text-sm"
-                        >
-                            View All
-                        </button>
-                    </div>
-                    
-                    <div className="bg-gray-800 rounded-xl p-4">
-                        <div className="flex items-center justify-between py-3 border-b border-gray-700">
-                            <div className="flex items-center">
-                                <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Transfer to John</p>
-                                    <p className="text-gray-400 text-sm">Today, 10:45 AM</p>
-                                </div>
-                            </div>
-                            <p className="text-red-400 font-medium">-$250.00</p>
-                        </div>
-                        
-                        <div className="flex items-center justify-between py-3 border-b border-gray-700">
-                            <div className="flex items-center">
-                                <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Salary Deposit</p>
-                                    <p className="text-gray-400 text-sm">Yesterday, 9:00 AM</p>
-                                </div>
-                            </div>
-                            <p className="text-green-400 font-medium">+$3,250.00</p>
-                        </div>
-                        
-                        <button 
-                            onClick={() => setShowTransactionHistoryModal(true)}
-                            className="w-full pt-3 text-purple-400 hover:text-purple-300 text-sm flex items-center justify-center"
-                        >
-                            View All Transactions
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+				<div className="mt-8">
+					<div className="flex items-center justify-between mb-4">
+						<h2 className="text-lg font-medium">Recent Transactions</h2>
+					</div>
+					
+					<RecentTransactions accountNumber={userData?.account?.accountNumber} />
+				</div>
 
                 {userLoans.length > 0 && (
                     <div className="mt-8">
@@ -463,13 +418,6 @@ const Dashboard = () => {
             {showPaymentsModal && (
                 <PaymentsModal 
                     onClose={() => setShowPaymentsModal(false)}
-                />
-            )}
-
-            {showTransactionHistoryModal && (
-                <TransactionHistoryModal 
-                    userAccount={userData.account}
-                    onClose={() => setShowTransactionHistoryModal(false)}
                 />
             )}
 
