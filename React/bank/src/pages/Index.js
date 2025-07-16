@@ -123,7 +123,7 @@ const Index = () => {
                         
                         {!username && (
                             <button 
-                                onClick={() => navigate('/register')}
+                                onClick={() => navigate('/signup')}
                                 className="w-full py-3 px-4 rounded-lg font-medium transition-colors bg-gray-700 hover:bg-gray-600 text-white"
                             >
                                 Create New Account
