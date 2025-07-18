@@ -80,9 +80,9 @@ function App() {
 
           {/* Protected user routes */}
           <Route path="/dashboard" element={
-            <DashboardRoute showLoading>
+            <PrivateRoute showNotFound>
               <Dashboard />
-            </DashboardRoute>
+            </PrivateRoute>
           } />
 
           {/* Admin-only route */}
@@ -97,6 +97,7 @@ function App() {
               <EditUser />
             </PrivateRoute>
           } />
+          
           <Route path="/apply-loan" element={
 			  <PrivateRoute showNotFound>
 				<LoanApplication />

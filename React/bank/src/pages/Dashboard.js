@@ -25,6 +25,7 @@ const Dashboard = () => {
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const [showStatementOptions, setShowStatementOptions] = useState(false);
     const [statementLoading, setStatementLoading] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const [userLoans, setUserLoans] = useState([]);
     const [loansLoading, setLoansLoading] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
@@ -210,11 +211,10 @@ const Dashboard = () => {
             <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
                             <img src={logotype} alt="Logo" className="h-8" />
-                            <span className="font-medium">Urbank</span>
+                            <span className="font-bold text-lg hover:text-purple-300 transition-colors">Urbank</span>
                         </div>
-                        
                         <div className="flex items-center space-x-4">
                             <button className="p-2 rounded-full bg-gray-700 hover:bg-gray-600">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,28 +223,71 @@ const Dashboard = () => {
                             </button>
                             
                             <div className="relative">
-                                <button className="flex items-center space-x-2">
+                                <button 
+                                    className="flex items-center space-x-2"
+                                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                >
                                     <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
                                         {userData?.username?.charAt(0).toUpperCase()}
                                     </div>
                                 </button>
                                 
-                                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 hidden group-hover:block">
-                                    <div className="py-1">
-                                        <button 
-                                            onClick={() => setShowProfileModal(true)}
-                                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-                                        >
-                                            My Profile
-                                        </button>
-                                        <button 
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-                                        >
-                                            Sign Out
-                                        </button>
+                                {showProfileDropdown && (
+                                    <div 
+                                        className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-30"
+                                        onMouseLeave={() => setShowProfileDropdown(false)}
+                                    >
+                                        <div className="py-1">
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => {
+                                                        navigate('/admin');
+                                                        setShowProfileDropdown(false);
+                                                    }}
+                                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                                >
+                                                    Admin Dashboard
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => {
+                                                    setShowProfileModal(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                My Profile
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowUserDetailsModal(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                View Details
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowDeleteConfirmation(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                                            >
+                                                Delete Account
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    handleLogout();
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                Sign Out
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -326,13 +369,13 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-				<div className="mt-8">
-					<div className="flex items-center justify-between mb-4">
-						<h2 className="text-lg font-medium">Recent Transactions</h2>
-					</div>
-					
-					<RecentTransactions accountNumber={userData?.account?.accountNumber} />
-				</div>
+                <div className="mt-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-medium">Recent Transactions</h2>
+                    </div>
+                    
+                    <RecentTransactions accountNumber={userData?.account?.accountNumber} />
+                </div>
 
                 {userLoans.length > 0 && (
                     <div className="mt-8">
@@ -353,7 +396,10 @@ const Dashboard = () => {
             <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-10">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex justify-around">
-                        <button className="p-3 text-purple-400">
+                        <button 
+                            onClick={() => navigate('/')} 
+                            className="p-3 text-purple-400"
+                        >
                             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
@@ -380,7 +426,10 @@ const Dashboard = () => {
                             <span className="text-xs mt-1 block">History</span>
                         </button>
                         
-                        <button className="p-3 text-gray-400 hover:text-purple-400">
+                        <button 
+                            onClick={() => setShowProfileModal(true)}
+                            className="p-3 text-gray-400 hover:text-purple-400"
+                        >
                             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
@@ -407,6 +456,102 @@ const Dashboard = () => {
                 />
             )}
 
+            {showDeleteConfirmation && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+                    <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
+                        <h3 className="text-xl font-bold mb-4">Confirm Account Deletion</h3>
+                        <p className="mb-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+                        <p className="mb-6">All your account data and transaction history will be permanently erased.</p>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                onClick={() => setShowDeleteConfirmation(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                onClick={handleDeleteAccount}
+                            >
+                                Confirm Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showUserDetailsModal && profileData && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <div className="bg-gray-800 p-6 rounded-lg max-w-3xl w-full border border-gray-700">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold">Your Full Details, {profileData.username}</h3>
+                            <button 
+                                onClick={() => {
+                                    setShowUserDetailsModal(false);
+                                    setShowSensitiveData(false);
+                                }}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="bg-yellow-500 bg-opacity-20 p-3 rounded-lg border border-yellow-500 mb-4">
+                            <p>⚠️ Sensitive Data - Access Logged</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 className="font-bold mb-3">Personal Information</h4>
+                                <div className="space-y-2">
+                                    <p><span className="font-semibold">Name:</span> {profileData.firstName}</p>
+                                    <p><span className="font-semibold">Middle Name:</span> {profileData.middleName || 'N/A'}</p>
+                                    <p><span className="font-semibold">Last Name:</span> {profileData.lastName || 'N/A'}</p>
+                                    <p><span className="font-semibold">Date of Birth:</span> {new Date(profileData.dateOfBirth).toLocaleDateString()}</p>
+                                    <p><span className="font-semibold">Email:</span> {profileData.email}</p>
+                                    <p><span className="font-semibold">Account number:</span> {profileData.accountNumber}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold mb-3">Identification Data</h4>
+                                <div className="mb-4">
+                                    <label className="block mb-1 font-semibold">Passport Details</label>
+                                    <div className="flex">
+                                        <div className="flex-1 bg-gray-700 border border-gray-500 rounded-l px-3 py-2">
+                                            {showSensitiveData 
+                                                ? `${profileData.passportSeries} ${profileData.passportNumber}`
+                                                : '•••• ••••••'}
+                                        </div>
+                                        <button
+                                            className="px-3 bg-gray-700 border border-l-0 border-gray-500 rounded-r hover:bg-gray-600 transition-colors"
+                                            onClick={() => setShowSensitiveData(!showSensitiveData)}
+                                        >
+                                            {showSensitiveData ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {showSensitiveData ? "Visible" : "Masked"} - Access logged
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                onClick={() => {
+                                    setShowUserDetailsModal(false);
+                                    setShowSensitiveData(false);
+                                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {showTransferModal && (
                 <TransferModal 
                     userAccount={userData.account}
@@ -426,6 +571,13 @@ const Dashboard = () => {
                     isOpen={showStatementOptions}
                     onClose={() => setShowStatementOptions(false)}
                     onDownload={handleDownloadStatement}
+                />
+            )}
+
+            {showTransactionHistoryModal && (
+                <TransactionHistoryModal 
+                    userAccount={userData.account}
+                    onClose={() => setShowTransactionHistoryModal(false)}
                 />
             )}
         </div>
