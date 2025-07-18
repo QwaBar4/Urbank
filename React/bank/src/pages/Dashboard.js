@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Routes, Route, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, Suspense } from 'react';
 import { API_BASE_URL, getDashboardData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
 import api from '../services/api';
@@ -11,7 +11,10 @@ import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard';
 import TransferModal from '../components/Dashboard/TransferModal';
 import PaymentsModal from '../components/Dashboard/PaymentsModal';
 import RecentTransactions from '../components/Dashboard/RecentTransactions';
-import logotype from '../assets/logotype.jpg';
+import logotype from '../assets/logo_purple.png';
+
+const Deposit = React.lazy(() => import('../components/Dashboard/Deposit'));
+const Withdraw = React.lazy(() => import('../components/Dashboard/Withdraw'));
 
 const Dashboard = () => {
     const [userData, setUserData] = useState(null);
@@ -30,6 +33,7 @@ const Dashboard = () => {
     const [loansLoading, setLoansLoading] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -196,6 +200,12 @@ const Dashboard = () => {
         await fetchUserLoans();
     };
 
+    const handleNavigation = (path) => {
+        setPageLoading(true);
+        navigate(path);
+        setTimeout(() => setPageLoading(false), 300);
+    };
+
     if (loading) return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -208,6 +218,13 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
+            {/* Loading overlay */}
+            {pageLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                </div>
+            )}
+
             <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
@@ -295,109 +312,129 @@ const Dashboard = () => {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 pb-20">
-                <div className="pt-6 pb-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-lg font-medium">Account Overview</h2>
-                        <button 
-                            onClick={refreshBalance}
-                            className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
-                        >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Refresh
-                        </button>
-                    </div>
-                    
-                    <BalanceCard
-                        accountNumber={userData.account.accountNumber}
-                        balance={userData.account.balance}
-                        refreshBalance={refreshBalance}
-                    />
-                </div>
-
-                <div className="mt-6">
-                    <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-4 gap-3">
-                        <button 
-                            onClick={() => setShowTransferModal(true)}
-                            className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
-                        >
-                            <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                                </svg>
-                            </div>
-                            <span className="text-xs">Transfer</span>
-                        </button>
-                        
-                        <button 
-                            onClick={() => navigate('/deposit')}
-                            className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
-                        >
-                            <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <span className="text-xs">Deposit</span>
-                        </button>
-                        
-                        <button 
-                            onClick={() => setShowStatementOptions(true)}
-                            className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
-                        >
-                            <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <span className="text-xs">Statement</span>
-                        </button>
-                        
-                        <button 
-                            onClick={() => setShowPaymentsModal(true)}
-                            className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
-                        >
-                            <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
-                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <span className="text-xs">Payments</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div className="mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-medium">Recent Transactions</h2>
-                    </div>
-                    
-                    <RecentTransactions accountNumber={userData?.account?.accountNumber} />
-                </div>
-
-                {userLoans.length > 0 && (
-                    <div className="mt-8">
-                        <h2 className="text-lg font-medium mb-4">Your Loans</h2>
-                        <div className="space-y-3">
-                            {userLoans.map(loan => (
-                                <LoanPaymentCard 
-                                    key={loan.id}
-                                    loan={loan}
-                                    onPaymentSuccess={handlePaymentSuccess}
+                <Routes>
+                    <Route path="/" element={
+                        <>
+                            <div className="pt-6 pb-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h2 className="text-lg font-medium">Account Overview</h2>
+                                    <button 
+                                        onClick={refreshBalance}
+                                        className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
+                                    >
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Refresh
+                                    </button>
+                                </div>
+                                
+                                <BalanceCard
+                                    accountNumber={userData.account.accountNumber}
+                                    balance={userData.account.balance}
+                                    refreshBalance={refreshBalance}
                                 />
-                            ))}
-                        </div>
-                    </div>
-                )}
+                            </div>
+
+                            <div className="mt-6">
+                                <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
+                                <div className="grid grid-cols-4 gap-3">
+                                    <button 
+                                        onClick={() => setShowTransferModal(true)}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Transfer</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => handleNavigation('deposit')}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Deposit</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => setShowStatementOptions(true)}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Statement</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => setShowPaymentsModal(true)}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Payments</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">Recent Transactions</h2>
+                                </div>
+                                
+                                <RecentTransactions accountNumber={userData?.account?.accountNumber} />
+                            </div>
+
+                            {userLoans.length > 0 && (
+                                <div className="mt-8">
+                                    <h2 className="text-lg font-medium mb-4">Your Loans</h2>
+                                    <div className="space-y-3">
+                                        {userLoans.map(loan => (
+                                            <LoanPaymentCard 
+                                                key={loan.id}
+                                                loan={loan}
+                                                onPaymentSuccess={handlePaymentSuccess}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    } />
+                    <Route path="/deposit" element={
+                        <Suspense fallback={<div className="flex items-center justify-center h-64">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                        </div>}>
+                            <Deposit />
+                        </Suspense>
+                    } />
+                    <Route path="/withdraw" element={
+                        <Suspense fallback={<div className="flex items-center justify-center h-64">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                        </div>}>
+                            <Withdraw />
+                        </Suspense>
+                    } />
+                </Routes>
             </main>
 
             <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-10">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex justify-around">
                         <button 
-                            onClick={() => navigate('/')} 
+                            onClick={() => handleNavigation('/dashboard')} 
                             className="p-3 text-purple-400"
                         >
                             <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

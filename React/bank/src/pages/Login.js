@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/api';
-import logotype from '../assets/logotype.jpg';
+import logotype from '../assets/logo_purple.png';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
@@ -39,9 +39,9 @@ const Login = () => {
             <header className="bg-gray-800 border-b border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
                             <img src={logotype} alt="Logo" className="h-8" />
-                            <span className="font-medium">Urbank</span>
+                            <span className="font-bold text-lg hover:text-purple-300 transition-colors">Urbank</span>
                         </div>
                     </div>
                 </div>
