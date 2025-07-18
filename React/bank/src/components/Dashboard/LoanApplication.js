@@ -23,86 +23,59 @@ const LoanApplication = () => {
         }));
     };
     
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setLoading(true);
-		setError('');
-		setSuccess('');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
 
-		try {
-		    const loanData = {
-		        principal: parseFloat(formData.principal),
-		        interestRate: parseFloat(formData.interestRate),
-		        startDate: formData.startDate,
-		        termMonths: parseInt(formData.termMonths)
-		        // No accountId needed
-		    };
+        try {
+            const loanData = {
+                principal: parseFloat(formData.principal),
+                interestRate: parseFloat(formData.interestRate),
+                startDate: formData.startDate,
+                termMonths: parseInt(formData.termMonths)
+            };
 
-		    await api.applyForLoan(loanData);
-		    setSuccess('Loan application submitted successfully!');
-		    setFormData({
-		        principal: '',
-		        interestRate: '',
-		        startDate: '',
-		        termMonths: ''
-		    });
-		} catch (err) {
-		    setError(err.response?.data?.message || 'Failed to submit loan application');
-		} finally {
-		    setLoading(false);
-		}
-	};
+            await api.applyForLoan(loanData);
+            setSuccess('Loan application submitted successfully!');
+            setFormData({
+                principal: '',
+                interestRate: '',
+                startDate: '',
+                termMonths: ''
+            });
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to submit loan application');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
+        <div className="min-h-screen bg-gray-900 text-white p-4 pb-20">
             <div 
                 className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-0"
                 style={{ backgroundImage: `url(${logotype})` }}
             />
 
-            <div className="relative z-10 max-w-2xl mx-auto w-full">
-                <div className="flex flex-col items-center my-6">
-                    <div className="flex space-x-1 mb-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center">
-                        <div className="flex flex-col space-y-1 mr-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                        <div className="px-4 py-2 border border-white rounded">
-                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-                                Loan Application
-                            </h1>
-                        </div>
-                        <div className="flex flex-col space-y-1 ml-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div className="flex space-x-1 mt-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
+            <div className="relative z-10 max-w-2xl mx-auto">
+                <div className="pt-6 pb-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-lg font-medium">Loan Application</h2>
+                        <button 
+                            onClick={() => navigate('/dashboard')}
+                            className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
+                        >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Dashboard
+                        </button>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
-                    <button 
-                        onClick={() => navigate('/dashboard')} 
-                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                    >
-                        Back to Dashboard
-                    </button>
-                </div>
-
-                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                <div className="bg-gray-800 rounded-xl p-6 mb-6">
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div>
@@ -115,7 +88,7 @@ const LoanApplication = () => {
                                     name="principal"
                                     value={formData.principal}
                                     onChange={handleChange}
-                                    className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-white"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     min="100"
                                     step="100"
                                     required
@@ -132,7 +105,7 @@ const LoanApplication = () => {
                                     name="interestRate"
                                     value={formData.interestRate}
                                     onChange={handleChange}
-                                    className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-white"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     min="1"
                                     max="30"
                                     step="0.1"
@@ -150,7 +123,7 @@ const LoanApplication = () => {
                                     name="startDate"
                                     value={formData.startDate}
                                     onChange={handleChange}
-                                    className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-white"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     required
                                 />
                             </div>
@@ -165,7 +138,7 @@ const LoanApplication = () => {
                                     name="termMonths"
                                     value={formData.termMonths}
                                     onChange={handleChange}
-                                    className="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-white"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     min="1"
                                     max="360"
                                     required
@@ -175,10 +148,18 @@ const LoanApplication = () => {
                             <div className="pt-4">
                                 <button
                                     type="submit"
-                                    className="w-full px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                    className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center"
                                     disabled={loading}
                                 >
-                                    {loading ? 'Processing...' : 'Apply for Loan'}
+                                    {loading ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Processing...
+                                        </>
+                                    ) : 'Apply for Loan'}
                                 </button>
                             </div>
                         </div>
@@ -196,8 +177,8 @@ const LoanApplication = () => {
                     )}
                 </div>
 
-                <div className="bg-black bg-opacity-70 p-6 rounded-lg">
-                    <h2 className="text-xl font-bold mb-4">Loan Terms</h2>
+                <div className="bg-gray-800 rounded-xl p-6">
+                    <h2 className="text-lg font-bold mb-4">Loan Terms</h2>
                     <div className="space-y-2 text-gray-300">
                         <p>• Minimum loan amount: $100</p>
                         <p>• Maximum loan term: 30 years (360 months)</p>

@@ -1,12 +1,14 @@
 import React from 'react';
 
 const Loading = () => {
-	return (
-	  <div className="mt-10 flex-col flex items-center">
-		<h1>404 - Page Not Found</h1>
-		<p>The page you're looking for doesn't exist or you don't have access to it.</p>
-		<a className="border border-black max-w-md" href="/">Return to Home</a>
-	  </div>
-	);
-}
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    </div>
+  );
+};
+
 export default Loading;

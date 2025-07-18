@@ -73,20 +73,22 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto">
-                <div className="bg-black bg-opacity-90 p-6 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[80vh] overflow-y-auto">
+                <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[80vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold">Transaction History</h2>
                         <button 
                             onClick={onClose}
-                            className="text-gray-400 hover:text-white"
+                            className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
                         >
-                            ✕
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                     
                     {loading ? (
                         <div className="flex justify-center p-6">
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
                         </div>
                     ) : error ? (
                         <div className="bg-red-500 bg-opacity-20 p-4 rounded-lg border border-red-500 text-center">
@@ -113,7 +115,7 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                                         <tr 
                                             key={transaction.id}
                                             onClick={() => handleRowClick(transaction)}
-                                            className="border-b border-gray-700 hover:bg-gray-800 cursor-pointer transition-colors"
+                                            className="border-b border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors"
                                         >
                                             <td className="p-3">
                                                 {new Date(transaction.timestamp).toLocaleString()}
@@ -140,7 +142,7 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                                                     <div className="mt-1 text-sm">Message: {transaction.description}</div>
                                                 }
                                             </td>
-                                            <td className={`p-3 text-right ${getAmountClass(transaction)}`}>
+                                            <td className={`p-3 text-right ${getAmountClass(transaction)} font-medium`}>
                                                 {formatAmount(transaction)}
                                             </td>
                                             <td className="p-3 text-center">
@@ -162,7 +164,7 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                     <div className="flex justify-center mt-6">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
                         >
                             Close
                         </button>
