@@ -80,7 +80,7 @@ function App() {
 
           {/* Protected user routes */}
           <Route path="/dashboard" element={
-            <PrivateRoute showNotFound>
+            <PrivateRoute showLoading>
               <Dashboard />
             </PrivateRoute>
           } />

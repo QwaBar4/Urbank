@@ -368,45 +368,73 @@ const AdminDashboard = () => {
       </main>
 
       {/* Statement Options Modal */}
-      {showStatementOptions && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
-            <h3 className="text-xl font-bold mb-4">Download Statement</h3>
-            <p className="mb-4">Select theme for the statement:</p>
-            
-            <div className="flex gap-4 mb-6">
-              <button
-                className={`px-4 py-2 rounded border ${selectedTheme === 'dark' ? 'bg-purple-600 border-purple-600' : 'bg-transparent text-white border-gray-500'}`}
-                onClick={() => setSelectedTheme('dark')}
-              >
-                Dark Theme
-              </button>
-              <button
-                className={`px-4 py-2 rounded border ${selectedTheme === 'light' ? 'bg-purple-600 border-purple-600' : 'bg-transparent text-white border-gray-500'}`}
-                onClick={() => setSelectedTheme('light')}
-              >
-                Light Theme
-              </button>
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10"
-                onClick={() => setShowStatementOptions(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium"
-                onClick={() => handleAdminDownloadStatement()}
-                disabled={statementLoading}
-              >
-                {statementLoading ? 'Generating...' : 'Download Statement'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+		{showStatementOptions && (
+		  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+			<div className="bg-gray-800 p-6 rounded-xl max-w-md w-full border border-gray-700">
+			  <div className="flex justify-between items-start mb-4">
+				<h3 className="text-xl font-bold">Statement Options</h3>
+				<button 
+				  onClick={() => setShowStatementOptions(false)}
+				  className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
+				>
+				  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+				  </svg>
+				</button>
+			  </div>
+			  
+			  <div className="mb-6">
+				<label className="block mb-3 font-medium text-gray-300">Select Theme</label>
+				<div className="flex gap-3">
+				  <button
+				    className={`flex-1 py-2 rounded-lg border transition-colors ${
+				      selectedTheme === 'dark' 
+				        ? 'bg-purple-600 text-white border-purple-600' 
+				        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+				    }`}
+				    onClick={() => setSelectedTheme('dark')}
+				  >
+				    Dark Theme
+				  </button>
+				  <button
+				    className={`flex-1 py-2 rounded-lg border transition-colors ${
+				      selectedTheme === 'light' 
+				        ? 'bg-purple-600 text-white border-purple-600' 
+				        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+				    }`}
+				    onClick={() => setSelectedTheme('light')}
+				  >
+				    Light Theme
+				  </button>
+				</div>
+			  </div>
+
+			  <div className="flex justify-end gap-3">
+				<button
+				  className="px-4 py-2 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+				  onClick={() => setShowStatementOptions(false)}
+				>
+				  Cancel
+				</button>
+				<button
+				  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center"
+				  onClick={() => handleAdminDownloadStatement()}
+				  disabled={statementLoading}
+				>
+				  {statementLoading ? (
+				    <>
+				      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+				        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+				        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+				      </svg>
+				      Downloading...
+				    </>
+				  ) : 'Download Statement'}
+				</button>
+			  </div>
+			</div>
+		  </div>
+		)}
 
       {/* Transactions Modal */}
       {showTransactions !== null && (

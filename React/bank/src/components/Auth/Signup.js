@@ -27,7 +27,6 @@ const Signup = () => {
         return re.test(String(email).toLowerCase());
     };
 
-    // Check username availability
     useEffect(() => {
         const checkAvailability = async () => {
             if (formData.username.length >= 3) {
@@ -50,7 +49,6 @@ const Signup = () => {
         return () => clearTimeout(debounceTimer);
     }, [formData.username]);
     
-    // Check email availability
     useEffect(() => {
         const checkEmailAvailability = async () => {
             const email = formData.email.trim();
@@ -78,7 +76,6 @@ const Signup = () => {
         setIsDisabled(true);
         setError('');
 
-        // Validation
         const errors = [];
         if (!usernameAvailable) errors.push("Username is not available");
         if (!emailAvailable) errors.push("Email is invalid or already in use");
@@ -93,12 +90,10 @@ const Signup = () => {
 
         try {
             if (!codeSent) {
-                // Step 1: Send verification code
                 await sendVerificationCode(formData.email.trim().toLowerCase());
                 setCodeSent(true);
                 setError('');
             } else {
-                // Step 2: Submit registration
                 const response = await signup({
                     username: formData.username.trim(),
                     email: formData.email.trim().toLowerCase(),
@@ -109,7 +104,6 @@ const Signup = () => {
                 if (response.jwt) {
                     navigate('/');
                 } else {
-                    // Account created but authentication failed
                     setError('Account created! Please log in with your credentials.');
                     navigate('/login');
                 }
@@ -122,12 +116,12 @@ const Signup = () => {
     };
 
     return (
-        <div className="bg-black min-h-screen flex flex-col items-center justify-center text-white">
-            <div className="bg-black bg-opacity-70 p-8 rounded-lg w-full max-w-md">
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-xl p-8 w-full max-w-md">
                 <h1 className="text-center text-2xl font-bold mb-6">Create Account</h1>
                 
                 {error && (
-                    <div className="text-red-500 bg-red-500 bg-opacity-10 p-3 rounded mb-4 text-center">
+                    <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4 text-center">
                         {error}
                     </div>
                 )}
@@ -144,7 +138,7 @@ const Signup = () => {
                                     onChange={handleChange}
                                     required
                                     minLength="3"
-                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                                 {formData.username.length > 0 && (
                                     <div className={`text-xs mt-1 ${
@@ -165,7 +159,7 @@ const Signup = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                                 {formData.email.length > 0 && (
                                     <div className={`text-xs mt-1 ${
@@ -187,7 +181,7 @@ const Signup = () => {
                                     onChange={handleChange}
                                     required
                                     minLength="6"
-                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
 
@@ -199,20 +193,28 @@ const Signup = () => {
                                     value={formData.passwordcon}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
 
                             <button 
                                 type="submit" 
                                 disabled={isDisabled || !usernameAvailable || !emailAvailable}
-                                className={`w-full py-2 rounded font-medium ${
+                                className={`w-full py-3 rounded-lg font-medium ${
                                     isDisabled || !usernameAvailable || !emailAvailable
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-white text-black hover:bg-gray-200'
-                                } transition-colors`}
+                                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                        : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                } transition-colors flex items-center justify-center`}
                             >
-                                {isDisabled ? 'Sending Code...' : 'Send Verification Code'}
+                                {isDisabled ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Sending Code...
+                                    </>
+                                ) : 'Send Verification Code'}
                             </button>
                         </>
                     ) : (
@@ -228,26 +230,34 @@ const Signup = () => {
                                     value={verificationCode}
                                     onChange={(e) => setVerificationCode(e.target.value)}
                                     required
-                                    className="w-full px-3 py-2 bg-white bg-opacity-10 border border-gray-500 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                             </div>
 
                             <button 
                                 type="submit" 
                                 disabled={isDisabled}
-                                className={`w-full py-2 rounded font-medium ${
+                                className={`w-full py-3 rounded-lg font-medium ${
                                     isDisabled
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-white text-black hover:bg-gray-200'
-                                } transition-colors mb-4`}
+                                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                        : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                } transition-colors mb-4 flex items-center justify-center`}
                             >
-                                {isDisabled ? 'Creating Account...' : 'Complete Registration'}
+                                {isDisabled ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating Account...
+                                    </>
+                                ) : 'Complete Registration'}
                             </button>
                             
                             <button 
                                 type="button" 
                                 onClick={() => setCodeSent(false)}
-                                className="w-full py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                className="w-full py-3 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
                             >
                                 Back
                             </button>
@@ -259,7 +269,7 @@ const Signup = () => {
                     Already have an account?{' '}
                     <Link 
                         to="/login" 
-                        className="text-white font-semibold hover:underline"
+                        className="text-purple-400 font-semibold hover:underline"
                     >
                         Log In
                     </Link>
