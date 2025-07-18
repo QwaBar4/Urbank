@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAdminDashboardData, deleteUser, getUserTransactions, activateUser, getUserAuditLogs } from '../services/api';
 import api from '../services/api';
-import logotype from '../assets/logotype.jpg';
+import logotype from '../assets/logo_purple.png';
 import '../index.css'
 
 const AdminDashboard = () => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getIndexData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
-import logotype from '../assets/logotype.jpg';
+import logotype from '../assets/logo_purple.png';
 
 const Index = () => {
     const [username, setUsername] = useState('');
