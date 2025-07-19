@@ -83,7 +83,7 @@ const Deposit = () => {
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-lg font-medium">Make a Deposit</h2>
                         <button 
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/index')}
                             className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
                         >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

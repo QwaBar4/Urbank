@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, Suspense } from 'react';
 import { API_BASE_URL, getDashboardData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
@@ -207,7 +207,7 @@ const Dashboard = () => {
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center min-h-screen bg-gray-900">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
     );
