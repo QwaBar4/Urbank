@@ -31,21 +31,7 @@ const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
                     ${balance !== undefined ? balance.toFixed(2) : '0.00'}
                 </p>
             </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-                <button 
-                    onClick={() => navigate('/deposit')}
-                    className="py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
-                >
-                    Deposit
-                </button>
-                <button 
-                    onClick={() => navigate('/withdraw')}
-                    className="py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
-                >
-                    Withdraw
-                </button>
-            </div>
+           
         </div>
     );
 };

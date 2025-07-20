@@ -55,7 +55,7 @@ const RecentTransactions = ({ accountNumber }) => {
         switch (transaction.type) {
             case 'TRANSFER':
                 if (transaction.sourceAccountNumber === accountNumber) {
-                    return `Transfer to ${transaction.targetAccountOwner || 'Unknown'}`;
+                    return `Transfer to ${transaction.targetAccountOwner == 'Unknown' ? 'deleted account' : transaction.targetAccountOwner}`;
                 }
                 return `Transfer from ${transaction.sourceAccountOwner || 'Unknown'}`;
             case 'DEPOSIT':
