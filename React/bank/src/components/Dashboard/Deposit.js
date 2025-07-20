@@ -77,41 +77,24 @@ const Deposit = () => {
     };
 
     return (
-        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
-            <div className="relative z-10 max-w-6xl mx-auto w-full">
-                <div className="flex flex-col items-center my-6">
-                    <div className="flex space-x-1 mb-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center">
-                        <div className="flex flex-col space-y-1 mr-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                        <div className="px-4 py-2 border border-white rounded">
-                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-                                Make a Deposit
-                            </h1>
-                        </div>
-                        <div className="flex flex-col space-y-1 ml-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div className="flex space-x-1 mt-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
+        <div className="min-h-screen bg-gray-900 text-white p-4 pb-20">
+            <div className="max-w-7xl mx-auto">
+                <div className="pt-6 pb-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-lg font-medium">Make a Deposit</h2>
+                        <button 
+                            onClick={() => navigate('/index')}
+                            className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
+                        >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Dashboard
+                        </button>
                     </div>
                 </div>
 
-                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
+                <div className="bg-gray-800 rounded-xl p-6 mb-6">
                     {error && (
                         <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
                             <p>{error}</p>
@@ -119,29 +102,29 @@ const Deposit = () => {
                     )}
 
                     <div className="mb-6">
-                        <h2 className="text-xl font-bold mb-4">Account Information</h2>
+                        <h2 className="text-lg font-medium mb-4">Account Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <p className="text-gray-400">Account Number</p>
+                            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                                <p className="text-gray-400 text-sm">Account Number</p>
                                 <p className="font-mono">{accountInfo.accountNumber}</p>
                             </div>
-                            <div>
-                                <p className="text-gray-400">Current Balance</p>
-                                <p>${accountInfo.balance.toFixed(2)}</p>
+                            <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                                <p className="text-gray-400 text-sm">Current Balance</p>
+                                <p className="text-xl font-bold">${accountInfo.balance.toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                        <h2 className="text-xl font-bold mb-4">Deposit Details</h2>
+                        <h2 className="text-lg font-medium mb-4">Deposit Details</h2>
                         
                         <div className="mb-4">
                             <label className="block mb-2 font-medium">Amount to Deposit</label>
                             <div className="flex">
-                                <span className="bg-white bg-opacity-10 border border-r-0 border-gray-500 rounded-l px-3 py-2">$</span>
+                                <span className="bg-gray-700 border border-r-0 border-gray-600 rounded-l-lg px-3 py-2 flex items-center">$</span>
                                 <input
                                     type="number"
-                                    className="flex-1 bg-white bg-opacity-10 border border-gray-500 rounded-r px-3 py-2"
+                                    className="flex-1 bg-gray-700 border border-gray-600 rounded-r-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     min="0.01"
@@ -150,14 +133,14 @@ const Deposit = () => {
                                     placeholder="0.00"
                                 />
                             </div>
-                            <p className="text-gray-400 text-sm mt-1">Minimum deposit: $0.01</p>
+                            <p className="text-gray-400 text-xs mt-1">Minimum deposit: $0.01</p>
                         </div>
                         
                         <div className="mb-6">
                             <label className="block mb-2 font-medium">Description (Optional)</label>
                             <input
                                 type="text"
-                                className="w-full bg-white bg-opacity-10 border border-gray-500 rounded px-3 py-2"
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="e.g., Cash deposit, Check deposit"
@@ -167,17 +150,25 @@ const Deposit = () => {
                         <div className="flex flex-wrap gap-2">
                             <button 
                                 type="submit" 
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium flex items-center"
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Processing...' : 'Complete Deposit'}
+                                {isLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </>
+                                ) : 'Complete Deposit'}
                             </button>
                             <button 
                                 type="button" 
-                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+                                className="px-4 py-2 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
                                 onClick={() => navigate('/dashboard')}
                             >
-                                Back to Dashboard
+                                Cancel
                             </button>
                         </div>
                     </form>
@@ -186,13 +177,13 @@ const Deposit = () => {
 
             {showInfoModal && success && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+                    <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
                         <h3 className="text-xl font-bold mb-4">Operation completed!</h3>
                         <p className="mb-6">{success}</p>
                         <div className="flex justify-end">
                             <button
                                 type="button"
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
                                 onClick={() => setShowInfoModal(false)}
                             >
                                 Close

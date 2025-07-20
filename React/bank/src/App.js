@@ -97,6 +97,7 @@ function App() {
               <EditUser />
             </PrivateRoute>
           } />
+          
           <Route path="/apply-loan" element={
 			  <PrivateRoute showNotFound>
 				<LoanApplication />

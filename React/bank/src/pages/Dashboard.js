@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, Suspense } from 'react';
 import { API_BASE_URL, getDashboardData } from '../services/api';
 import { getJwtToken, clearJwtToken } from '../utils/auth';
-import Transfer from '../components/Dashboard/Transfer';
 import api from '../services/api';
 import StatementOptionsModal from '../components/Dashboard/StatementOptionsModal';
 import TransactionHistoryModal from '../components/Dashboard/TransactionHistoryModal';
 import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
-import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard'; // New component
-import logotype from '../assets/logotype.jpg';
+import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard';
+import TransferModal from '../components/Dashboard/TransferModal';
+import PaymentsModal from '../components/Dashboard/PaymentsModal';
+import RecentTransactions from '../components/Dashboard/RecentTransactions';
+import logotype from '../assets/logo_purple.png';
+
+const Deposit = React.lazy(() => import('../components/Dashboard/Deposit'));
+const Withdraw = React.lazy(() => import('../components/Dashboard/Withdraw'));
 
 const Dashboard = () => {
     const [userData, setUserData] = useState(null);
@@ -23,8 +28,12 @@ const Dashboard = () => {
     const [showSensitiveData, setShowSensitiveData] = useState(false);
     const [showStatementOptions, setShowStatementOptions] = useState(false);
     const [statementLoading, setStatementLoading] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const [userLoans, setUserLoans] = useState([]);
     const [loansLoading, setLoansLoading] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,7 +57,7 @@ const Dashboard = () => {
                     },
                     role: data.roles
                 });
-                fetchUserLoans(); // Fetch loans after user data is loaded
+                fetchUserLoans();
             } catch (err) {
                 if (err.response?.status === 401) {
                     console.log('Session expired, redirecting to login');
@@ -86,7 +95,7 @@ const Dashboard = () => {
         setLoansLoading(true);
         try {
             const loans = await api.getUserLoans();
-            setUserLoans(loans.filter(loan => loan.status === 'APPROVED')); // Only show approved loans
+            setUserLoans(loans.filter(loan => loan.status === 'APPROVED'));
         } catch (error) {
             console.error('Error loading loans:', error);
             setError('Failed to load your loans');
@@ -188,12 +197,18 @@ const Dashboard = () => {
 
     const handlePaymentSuccess = async () => {
         await refreshBalance();
-        await fetchUserLoans(); // Refresh loan data after payment
+        await fetchUserLoans();
+    };
+
+    const handleNavigation = (path) => {
+        setPageLoading(true);
+        navigate(path);
+        setTimeout(() => setPageLoading(false), 300);
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center min-h-screen bg-black">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-900">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
     );
 
@@ -202,175 +217,265 @@ const Dashboard = () => {
     const isAdmin = userData.role.includes("ROLE_ADMIN");
 
     return (
-        <div className="relative flex flex-col min-h-screen bg-black text-white p-4">
-            {/* Semi-transparent logo background */}
-            <div 
-                className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-10 z-0"
-                style={{ backgroundImage: `url(${logotype})` }}
-            />
+        <div className="min-h-screen bg-gray-900 text-white">
+            {/* Loading overlay */}
+            {pageLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                </div>
+            )}
 
-            {/* Main content */}
-            <div className="relative z-10 max-w-6xl mx-auto w-full">
-                {/* Welcome Banner */}
-                <div className="flex flex-col items-center my-6">
-                    <div className="flex space-x-1 mb-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center">
-                        <div className="flex flex-col space-y-1 mr-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
+            <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
+                            <img src={logotype} alt="Logo" className="h-8" />
+                            <span className="font-bold text-lg hover:text-purple-300 transition-colors">Urbank</span>
                         </div>
-                        <div className="px-4 py-2 border border-white rounded">
-                            <h1 className="text-2xl md:text-2xl lg:text-3xl font-bold">
-                                It's Urbank, {userData.username}!
-                            </h1>
+                        <div className="flex items-center space-x-4">
+                            <button className="p-2 rounded-full bg-gray-700 hover:bg-gray-600">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </button>
+                            
+                            <div className="relative">
+                                <button 
+                                    className="flex items-center space-x-2"
+                                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                                        {userData?.username?.charAt(0).toUpperCase()}
+                                    </div>
+                                </button>
+                                
+                                {showProfileDropdown && (
+                                    <div 
+                                        className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-30"
+                                        onMouseLeave={() => setShowProfileDropdown(false)}
+                                    >
+                                        <div className="py-1">
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => {
+                                                        navigate('/admin');
+                                                        setShowProfileDropdown(false);
+                                                    }}
+                                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                                >
+                                                    Admin Dashboard
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => {
+                                                    setShowProfileModal(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                My Profile
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowUserDetailsModal(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                View Details
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowDeleteConfirmation(true);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                                            >
+                                                Delete Account
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    handleLogout();
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
+                                            >
+                                                Sign Out
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex flex-col space-y-1 ml-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-px h-2 bg-gray-400"></div>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div className="flex space-x-1 mt-2">
-                        {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-2 h-px bg-gray-400"></div>
-                        ))}
                     </div>
                 </div>
+            </header>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                    <button 
-                        onClick={() => navigate('/')} 
-                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                    >
-                        Go Home
-                    </button>
-                    <button 
-                        onClick={handleLogout} 
-                        className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                    >
-                        Logout
-                    </button>
-                    <button
-                        onClick={() => setShowStatementOptions(true)}
-                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                    >
-                        Download Statement
-                    </button>
-                    <button
-                        onClick={() => setShowDeleteConfirmation(true)}
-                        className="px-4 py-2 bg-transparent text-red-500 border border-red-500 rounded hover:bg-red-500 hover:bg-opacity-10 transition-colors"
-                    >
-                        Delete Account
-                    </button>
-                    <button 
-                        onClick={() => navigate('/apply-loan')}
-                        className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                    >
-                        Apply for Loan
-                    </button>
-                    {isAdmin && (
-                        <button
-                            onClick={() => navigate('/admin')}
-                            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+            <main className="max-w-7xl mx-auto px-4 pb-20">
+                <Routes>
+                    <Route path="/" element={
+                        <>
+                            <div className="pt-6 pb-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h2 className="text-lg font-medium">Account Overview</h2>
+                                    <button 
+                                        onClick={refreshBalance}
+                                        className="text-purple-400 hover:text-purple-300 text-sm flex items-center"
+                                    >
+                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Refresh
+                                    </button>
+                                </div>
+                                
+                                <BalanceCard
+                                    accountNumber={userData.account.accountNumber}
+                                    balance={userData.account.balance}
+                                    refreshBalance={refreshBalance}
+                                />
+                            </div>
+
+                            <div className="mt-6">
+                                <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
+                                <div className="grid grid-cols-4 gap-3">
+                                    <button 
+                                        onClick={() => setShowTransferModal(true)}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Transfer</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => navigate('/deposit')}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Deposit</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => navigate('/withdraw')}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Withdraw</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => setShowStatementOptions(true)}
+                                        className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex flex-col items-center"
+                                    >
+                                        <div className="bg-purple-600 bg-opacity-20 w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs">Statement</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">Recent Transactions</h2>
+                                </div>
+                                
+                                <RecentTransactions accountNumber={userData?.account?.accountNumber} />
+                            </div>
+
+                            {userLoans.length > 0 && (
+                                <div className="mt-8">
+                                    <h2 className="text-lg font-medium mb-4">Your Loans</h2>
+                                    <div className="space-y-3">
+                                        {userLoans.map(loan => (
+                                            <LoanPaymentCard 
+                                                key={loan.id}
+                                                loan={loan}
+                                                onPaymentSuccess={handlePaymentSuccess}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    } />
+                    <Route path="/deposit" element={
+                        <Suspense fallback={<div className="flex items-center justify-center h-64">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                        </div>}>
+                            <Deposit />
+                        </Suspense>
+                    } />
+                    <Route path="/withdraw" element={
+                        <Suspense fallback={<div className="flex items-center justify-center h-64">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                        </div>}>
+                            <Withdraw />
+                        </Suspense>
+                    } />
+                </Routes>
+            </main>
+
+            <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 z-10">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="flex justify-around">
+                        <button 
+                            onClick={() => handleNavigation('/dashboard')} 
+                            className="p-3 text-purple-400"
                         >
-                            Admin Dashboard
+                            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            <span className="text-xs mt-1 block">Home</span>
                         </button>
-                    )}
-                </div>
-
-                {/* User Data Section */}
-                <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
-                    <h2 className="text-xl font-bold mb-4">User Data</h2>
-                    {profileData ? (
-                        <div className="flex gap-2">
-                            <button
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                                onClick={() => setShowProfileModal(true)}
-                            >
-                                Update Profile
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-                                onClick={() => setShowUserDetailsModal(true)}
-                            >
-                                View Full Details
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="text-center">Loading profile...</div>
-                    )}
-                </div>
-
-                {/* Balance and Transfer Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <BalanceCard
-                        accountNumber={userData.account.accountNumber}
-                        balance={userData.account.balance}
-                        refreshBalance={refreshBalance}
-                    />
-                    <Transfer 
-                        userAccount={userData.account}
-                        refreshBalance={refreshBalance}
-                    />
-                </div>
-
-                {/* Loan Payments Section */}
-                {userLoans.length > 0 && (
-                    <div className="bg-black bg-opacity-70 p-6 rounded-lg mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold">Your Active Loans</h2>
-                            <button 
-                                onClick={fetchUserLoans}
-                                className="px-3 py-1 bg-white bg-opacity-10 rounded hover:bg-opacity-20"
-                                disabled={loansLoading}
-                            >
-                                {loansLoading ? 'Refreshing...' : 'Refresh'}
-                            </button>
-                        </div>
                         
-                        {loansLoading ? (
-                            <div className="flex justify-center p-4">
-                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {userLoans.map(loan => (
-                                    <LoanPaymentCard 
-                                        key={loan.id}
-                                        loan={loan}
-                                        onPaymentSuccess={handlePaymentSuccess}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        <button 
+                            onClick={() => setShowPaymentsModal(true)}
+                            className="p-3 text-gray-400 hover:text-purple-400"
+                        >
+                            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-xs mt-1 block">Payments</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setShowTransactionHistoryModal(true)}
+                            className="p-3 text-gray-400 hover:text-purple-400"
+                        >
+                            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-xs mt-1 block">History</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setShowProfileModal(true)}
+                            className="p-3 text-gray-400 hover:text-purple-400"
+                        >
+                            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span className="text-xs mt-1 block">Profile</span>
+                        </button>
                     </div>
-                )}
+                </div>
+            </nav>
 
-                {/* Transaction History Button */}
-                <button 
-                    onClick={() => setShowTransactionHistoryModal(true)}
-                    className="w-full md:w-auto px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium mb-6"
-                >
-                    View Full Transaction History
-                </button>
-
-                {/* Error Display */}
-                {error && (
-                    <div className="bg-red-500 bg-opacity-20 p-4 rounded-lg border border-red-500 mb-6">
-                        <p className="text-red-500">{error}</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Modals */}
             {showProfileModal && (
                 <ProfileUpdateModal 
                     profileData={profileData}
@@ -390,7 +495,7 @@ const Dashboard = () => {
 
             {showDeleteConfirmation && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-md w-full border border-gray-700">
+                    <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
                         <h3 className="text-xl font-bold mb-4">Confirm Account Deletion</h3>
                         <p className="mb-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
                         <p className="mb-6">All your account data and transaction history will be permanently erased.</p>
@@ -414,7 +519,7 @@ const Dashboard = () => {
 
             {showUserDetailsModal && profileData && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
-                    <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-3xl w-full border border-gray-700">
+                    <div className="bg-gray-800 p-6 rounded-lg max-w-3xl w-full border border-gray-700">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold">Your Full Details, {profileData.username}</h3>
                             <button 
@@ -450,13 +555,13 @@ const Dashboard = () => {
                                 <div className="mb-4">
                                     <label className="block mb-1 font-semibold">Passport Details</label>
                                     <div className="flex">
-                                        <div className="flex-1 bg-white bg-opacity-10 border border-gray-500 rounded-l px-3 py-2">
+                                        <div className="flex-1 bg-gray-700 border border-gray-500 rounded-l px-3 py-2">
                                             {showSensitiveData 
                                                 ? `${profileData.passportSeries} ${profileData.passportNumber}`
                                                 : '•••• ••••••'}
                                         </div>
                                         <button
-                                            className="px-3 bg-white bg-opacity-10 border border-l-0 border-gray-500 rounded-r hover:bg-opacity-20 transition-colors"
+                                            className="px-3 bg-gray-700 border border-l-0 border-gray-500 rounded-r hover:bg-gray-600 transition-colors"
                                             onClick={() => setShowSensitiveData(!showSensitiveData)}
                                         >
                                             {showSensitiveData ? 'Hide' : 'Show'}
@@ -483,25 +588,35 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
-            
+
+            {showTransferModal && (
+                <TransferModal 
+                    userAccount={userData.account}
+                    refreshBalance={refreshBalance}
+                    onClose={() => setShowTransferModal(false)}
+                />
+            )}
+
+            {showPaymentsModal && (
+                <PaymentsModal 
+                    onClose={() => setShowPaymentsModal(false)}
+                />
+            )}
+
+            {showStatementOptions && (
+                <StatementOptionsModal 
+                    isOpen={showStatementOptions}
+                    onClose={() => setShowStatementOptions(false)}
+                    onDownload={handleDownloadStatement}
+                />
+            )}
+
             {showTransactionHistoryModal && (
                 <TransactionHistoryModal 
                     userAccount={userData.account}
                     onClose={() => setShowTransactionHistoryModal(false)}
                 />
             )}
-            
-            {statementLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                </div>
-            )}
-                        
-            <StatementOptionsModal
-                isOpen={showStatementOptions}
-                onClose={() => setShowStatementOptions(false)}
-                onDownload={handleDownloadStatement}
-            />
         </div>
     );
 };

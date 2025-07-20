@@ -4,66 +4,34 @@ import { formatAccountNumber } from '../../services/api';
 const BalanceCard = ({ accountNumber, balance, refreshBalance }) => {
     const navigate = useNavigate();
 
-    const handleDeposit = () => {
-        navigate('/deposit');
-    };
-
-    const handleWithdraw = () => {
-        navigate('/withdraw');
-    };
-
     return (
-        <div className="bg-black bg-opacity-70 p-6 rounded-lg border border-gray-700">
-            <div className="mb-6">
-                <div className="flex space-x-1 mb-2">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-px bg-gray-400"></div>
-                    ))}
-                </div>
-                
-                <h2 className="text-xl font-bold mb-4">Account Balance</h2>
-                
-                <div className="mb-6">
-                    <small className="text-gray-400 block mb-1">Account Number</small>
-                    <h3 className="text-2xl font-mono">
-                        {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
-                    </h3>
-                </div>
-                
-                <div className="mb-8">
-                    <small className="text-gray-400 block mb-1">Available Balance</small>
-                    <h3 className="text-3xl font-bold">
-                        ${balance !== undefined ? balance.toFixed(2) : '0.00'}
-                    </h3>
-                </div>
-                
-                <div className="flex space-x-1 mt-2">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-px bg-gray-400"></div>
-                    ))}
-                </div>
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <div className="flex justify-between items-start mb-6">
+                <h3 className="font-bold">Account Balance</h3>
+                <button 
+                    onClick={refreshBalance}
+                    className="text-purple-400 hover:text-purple-300"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
             </div>
             
-			<div className="flex flex-col space-y-4">
-				<button 
-					onClick={handleDeposit}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Deposit Funds
-				</button>
-				<button 
-					onClick={handleWithdraw}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Withdraw Funds
-				</button>
-				<button 
-					onClick={refreshBalance}
-					className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
-				>
-					Refresh Balance
-				</button>
-			</div>
+            <div className="mb-8">
+                <p className="text-sm text-gray-400 mb-1">Account Number</p>
+                <p className="text-xl font-mono text-white">
+                    {accountNumber ? formatAccountNumber(accountNumber) : '•••• ••••'}
+                </p>
+            </div>
+            
+            <div className="mb-8">
+                <p className="text-sm text-gray-400 mb-1">Available Balance</p>
+                <p className="text-3xl font-bold text-white">
+                    ${balance !== undefined ? balance.toFixed(2) : '0.00'}
+                </p>
+            </div>
+           
         </div>
     );
 };

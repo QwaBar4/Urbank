@@ -3,51 +3,85 @@ import { API_BASE_URL } from '../../services/api';
 import { getJwtToken } from '../../utils/auth';
 import { unformatAccountNumber, formatAccountNumber } from '../../services/api';
 
-const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
-    const [targetAccountDetails, setTargetAccountDetails] = useState(null);
+const PaymentsModal = ({ userAccount, refreshBalance, onClose }) => {
+    const [payeeDetails, setPayeeDetails] = useState(null);
     const [validationLoading, setValidationLoading] = useState(false);
     const [formData, setFormData] = useState({
         sourceAccount: userAccount?.accountNumber || '',
-        targetAccount: '',
+        payeeAccount: '',
         amount: '',
-        description: ''
+        reference: '',
+        paymentType: 'BILL'
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [payeeList, setPayeeList] = useState([]);
 
+    // Load saved payees on component mount
     useEffect(() => {
-        const validateAccount = async () => {
-            if (formData.targetAccount.length < 5) return;
-
-            setValidationLoading(true);
+        const fetchPayees = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/transactions/accounts/${unformatAccountNumber(formData.targetAccount)}`, {
+                const response = await fetch(`${API_BASE_URL}/api/payments/payees`, {
                     headers: { 'Authorization': `Bearer ${getJwtToken()}` }
                 });
-
-                if (!response.ok) {
-                    setTargetAccountDetails(null);
-                    throw new Error('Account not found');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    setPayeeList(data);
                 }
-
-                const data = await response.json();
-                setTargetAccountDetails(data);
             } catch (err) {
-                setError(err.message);
-            } finally {
-                setValidationLoading(false);
+                console.error('Failed to fetch payees:', err);
             }
         };
+        
+        fetchPayees();
+    }, []);
 
-        const debounceTimer = setTimeout(validateAccount, 500);
-        return () => clearTimeout(debounceTimer);
-    }, [formData.targetAccount]);
+    const validatePayee = async () => {
+        if (formData.payeeAccount.length < 5) return;
+
+        setValidationLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/payments/validate/${unformatAccountNumber(formData.payeeAccount)}`, {
+                headers: { 'Authorization': `Bearer ${getJwtToken()}` }
+            });
+
+            if (!response.ok) {
+                setPayeeDetails(null);
+                throw new Error('Payee account not found or invalid');
+            }
+
+            const data = await response.json();
+            setPayeeDetails(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setValidationLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
+        });
+        
+        // Clear payee details when account number changes
+        if (e.target.name === 'payeeAccount') {
+            setPayeeDetails(null);
+        }
+    };
+
+    const handlePayeeSelect = (payee) => {
+        setFormData({
+            ...formData,
+            payeeAccount: payee.accountNumber,
+            paymentType: payee.paymentType || 'BILL'
+        });
+        setPayeeDetails({
+            accountNumber: payee.accountNumber,
+            name: payee.name
         });
     };
 
@@ -58,7 +92,7 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
         setSuccess('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/transactions/transfer`, {
+            const response = await fetch(`${API_BASE_URL}/api/payments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,10 +100,10 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                 },
                 body: JSON.stringify({
                     sourceAccount: unformatAccountNumber(formData.sourceAccount),
-                    targetAccount: unformatAccountNumber(formData.targetAccount),
+                    payeeAccount: unformatAccountNumber(formData.payeeAccount),
                     amount: parseFloat(formData.amount),
-                    description: formData.description,
-                    status: 'PENDING'
+                    reference: formData.reference,
+                    paymentType: formData.paymentType
                 })
             });
 
@@ -77,18 +111,18 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
             if (!response.ok) {
                 try {
                     const errorData = JSON.parse(responseText);
-                    throw new Error(errorData.message || 'Transfer failed');
+                    throw new Error(errorData.message || 'Payment failed');
                 } catch {
-                    throw new Error(responseText || 'Transfer failed');
+                    throw new Error(responseText || 'Payment failed');
                 }
             }
 
-            setSuccess(`Transfer successful!`);
+            setSuccess(`Payment processed successfully!`);
             setFormData(prev => ({
                 ...prev,
-                targetAccount: '',
+                payeeAccount: '',
                 amount: '',
-                description: ''
+                reference: ''
             }));
 
             if (refreshBalance) refreshBalance();
@@ -103,7 +137,7 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 w-full max-w-md">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-xl">Transfer Money</h3>
+                    <h3 className="font-bold text-xl">Make a Payment</h3>
                     <button 
                         onClick={onClose}
                         className="text-gray-400 hover:text-white"
@@ -137,15 +171,32 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm text-gray-400 mb-2">To Account</label>
+                        <label className="block text-sm text-gray-400 mb-2">To Payee</label>
+                        <div className="mb-2">
+                            {payeeList.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {payeeList.map(payee => (
+                                        <button
+                                            type="button"
+                                            key={payee.id}
+                                            onClick={() => handlePayeeSelect(payee)}
+                                            className={`text-xs px-3 py-1 rounded-full ${formData.payeeAccount === payee.accountNumber ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                                        >
+                                            {payee.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <input
                             type="text"
-                            name="targetAccount"
-                            value={formData.targetAccount}
+                            name="payeeAccount"
+                            value={formData.payeeAccount}
                             onChange={handleChange}
+                            onBlur={validatePayee}
                             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                             required
-                            placeholder="Enter account number"
+                            placeholder="Enter payee account number"
                         />
                         {validationLoading && (
                             <div className="mt-2 flex items-center text-sm text-gray-400">
@@ -156,9 +207,9 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                                 Validating...
                             </div>
                         )}
-                        {targetAccountDetails && (
+                        {payeeDetails && (
                             <div className="mt-2 text-sm text-purple-400">
-                                Account Holder: {targetAccountDetails.ownerName}
+                                Payee: {payeeDetails.name}
                             </div>
                         )}
                     </div>
@@ -180,16 +231,32 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Description</label>
+                            <label className="block text-sm text-gray-400 mb-2">Reference</label>
                             <input
                                 type="text"
-                                name="description"
-                                value={formData.description}
+                                name="reference"
+                                value={formData.reference}
                                 onChange={handleChange}
                                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                placeholder="Optional"
+                                required
+                                placeholder="Payment reference"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-2">Payment Type</label>
+                        <select
+                            name="paymentType"
+                            value={formData.paymentType}
+                            onChange={handleChange}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                        >
+                            <option value="BILL">Bill Payment</option>
+                            <option value="LOAN">Loan Payment</option>
+                            <option value="TAX">Tax Payment</option>
+                            <option value="OTHER">Other</option>
+                        </select>
                     </div>
 
                     <div className="flex gap-3 pt-2">
@@ -203,7 +270,7 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                         <button
                             type="submit"
                             className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors flex items-center justify-center"
-                            disabled={isLoading}
+                            disabled={isLoading || !payeeDetails}
                         >
                             {isLoading ? (
                                 <>
@@ -213,7 +280,7 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                                     </svg>
                                     Processing...
                                 </>
-                            ) : 'Transfer'}
+                            ) : 'Make Payment'}
                         </button>
                     </div>
                 </form>
@@ -222,4 +289,4 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
     );
 };
 
-export default TransferModal;
+export default PaymentsModal;
