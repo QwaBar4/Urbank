@@ -82,7 +82,7 @@ public class TransactionService {
         // Create transaction with status
         TransactionModel transaction = new TransactionModel();
         transaction.setType("TRANSFER");
-        transaction.setStatus(status);
+        transaction.setStatus("COMPLETED");
         transaction.setAmount(amount);
         transaction.setEncryptedDescription(encryptionService.encrypt(description));
         transaction.setSourceAccountNumber(anonymizationService.anonymize(sourceAccount));
