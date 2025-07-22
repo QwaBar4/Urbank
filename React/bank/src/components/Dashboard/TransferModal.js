@@ -15,6 +15,12 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        setIsVisible(true);
+    }, []);
 
     useEffect(() => {
         const validateAccount = async () => {
@@ -50,7 +56,15 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
             [e.target.name]: e.target.value
         });
     };
-
+    
+    const handleClose = () => {
+        setIsClosing(true);
+        setIsVisible(false); 
+        setTimeout(() => {
+            onClose();
+        }, 300); 
+    };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -100,13 +114,17 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 w-full max-w-md">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 transition-opacity duration-300 ${
+            isVisible && !isClosing ? 'opacity-100' : 'opacity-0'
+        }`}>
+            <div className={`bg-gray-900 rounded-xl p-6 border border-gray-800 w-full max-w-md transition-all duration-300 ${
+                isVisible && !isClosing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+            }`}>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-xl">Transfer Money</h3>
                     <button 
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-white"
+                        onClick={handleClose}
+                        className="text-gray-400 hover:text-white transition-colors"
                     >
                         ✕
                     </button>
@@ -195,7 +213,7 @@ const TransferModal = ({ userAccount, refreshBalance, onClose }) => {
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
                         >
                             Cancel
