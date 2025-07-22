@@ -81,3 +81,9 @@ code {
   padding: 20px;
   box-sizing: border-box;
 }
+
+html, body, #root {
+  background-color: #111827; 
+  margin: 0;
+  padding: 0;
+}
