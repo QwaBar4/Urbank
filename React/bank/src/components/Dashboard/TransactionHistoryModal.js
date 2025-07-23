@@ -10,6 +10,12 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
     const [error, setError] = useState('');
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        setIsVisible(true);
+    }, []);
 
     const getAmountClass = (transaction) => {
         if (transaction.type === 'DEPOSIT') return 'text-green-500';
@@ -70,14 +76,26 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
         setShowDetailsModal(true);
     };
 
+    const handleClose = () => {
+        setIsClosing(true);
+        setIsVisible(false);
+        setTimeout(() => {
+            onClose();
+        }, 300);
+    };
+
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto">
-                <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[80vh] overflow-y-auto">
+            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto transition-opacity duration-300 ${
+                isVisible && !isClosing ? 'opacity-100' : 'opacity-0'
+            }`}>
+                <div className={`bg-gray-800 p-6 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[80vh] overflow-y-auto transition-all duration-300 ${
+                    isVisible && !isClosing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                }`}>
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold">Transaction History</h2>
                         <button 
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +181,7 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
                     
                     <div className="flex justify-center mt-6">
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
                         >
                             Close

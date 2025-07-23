@@ -273,73 +273,79 @@ const Dashboard = () => {
 				        </svg>
 				      </button>
 
-				      <div className="relative">
-				        <button
-				          className="flex items-center space-x-2"
-				          onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-				        >
-				          <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
-				            {userData?.username?.charAt(0).toUpperCase()}
-				          </div>
-				        </button>
+					  <div className="relative">
+						<button
+						  className="flex items-center space-x-2"
+						  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+						>
+						  <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+							{userData?.username?.charAt(0).toUpperCase()}
+						  </div>
+						</button>
 
-				        {showProfileDropdown && (
-				          <div
-				            className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-30"
-				            onMouseLeave={() => setShowProfileDropdown(false)}
-				          >
-				            <div className="py-1">
-				              {isAdmin && (
-				                <button
-				                  onClick={() => {
-				                    navigate('/admin');
-				                    setShowProfileDropdown(false);
-				                  }}
-				                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-				                >
-				                  Admin Dashboard
-				                </button>
-				              )}
-				              <button
-				                onClick={() => {
-				                  setShowProfileModal(true);
-				                  setShowProfileDropdown(false);
-				                }}
-				                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-				              >
-				                My Profile
-				              </button>
-				              <button
-				                onClick={() => {
-				                  setShowUserDetailsModal(true);
-				                  setShowProfileDropdown(false);
-				                }}
-				                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-				              >
-				                View Details
-				              </button>
-				              <button
-				                onClick={() => {
-				                  setShowDeleteConfirmation(true);
-				                  setShowProfileDropdown(false);
-				                }}
-				                className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
-				              >
-				                Delete Account
-				              </button>
-				              <button
-				                onClick={() => {
-				                  handleLogout();
-				                  setShowProfileDropdown(false);
-				                }}
-				                className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700"
-				              >
-				                Sign Out
-				              </button>
-				            </div>
-				          </div>
-				        )}
-				      </div>
+						<AnimatePresence>
+						  {showProfileDropdown && (
+							<motion.div
+							  initial={{ opacity: 0, y: -10 }}
+							  animate={{ opacity: 1, y: 0 }}
+							  exit={{ opacity: 0, y: -10 }}
+							  transition={{ duration: 0.2 }}
+							  className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-30"
+							  onMouseLeave={() => setShowProfileDropdown(false)}
+							>
+							  <div className="py-1">
+								{isAdmin && (
+								  <button
+								    onClick={() => {
+								      navigate('/admin');
+								      setShowProfileDropdown(false);
+								    }}
+								    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
+								  >
+								    Admin Dashboard
+								  </button>
+								)}
+								<button
+								  onClick={() => {
+								    setShowProfileModal(true);
+								    setShowProfileDropdown(false);
+								  }}
+								  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
+								>
+								  My Profile
+								</button>
+								<button
+								  onClick={() => {
+								    setShowUserDetailsModal(true);
+								    setShowProfileDropdown(false);
+								  }}
+								  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
+								>
+								  View Details
+								</button>
+								<button
+								  onClick={() => {
+								    setShowDeleteConfirmation(true);
+								    setShowProfileDropdown(false);
+								  }}
+								  className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors"
+								>
+								  Delete Account
+								</button>
+								<button
+								  onClick={() => {
+								    handleLogout();
+								    setShowProfileDropdown(false);
+								  }}
+								  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
+								>
+								  Sign Out
+								</button>
+							  </div>
+							</motion.div>
+						  )}
+						</AnimatePresence>
+					  </div>
 				    </div>
 				  </div>
 				</div>

@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
-  const [theme, setTheme] = React.useState('dark');
-  const [isDownloading, setIsDownloading] = React.useState(false);
-  
-  if (!isOpen) return null;
+  const [theme, setTheme] = useState('dark');
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen && !isClosing) return null;
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -15,13 +24,25 @@ const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
     }
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-800 p-6 rounded-xl max-w-md w-full border border-gray-700">
+    <div className={`fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 transition-opacity duration-300 ${
+      isVisible && !isClosing ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <div className={`bg-gray-800 p-6 rounded-xl max-w-md w-full border border-gray-700 transition-all duration-300 ${
+        isVisible && !isClosing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+      }`}>
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-xl font-bold">Statement Options</h3>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +80,7 @@ const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
         <div className="flex justify-end gap-3">
           <button
             className="px-4 py-2 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-            onClick={onClose}
+            onClick={handleClose}
           >
             Cancel
           </button>
