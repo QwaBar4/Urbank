@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatAccountNumber } from '../../services/api';
 
 const TransactionDetailsModal = ({ transaction, onClose }) => {
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   if (!transaction) return null;
 
   const formatDate = (dateString) => {
@@ -24,14 +31,26 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
       return <span className="text-green-500 font-bold">{amount}$</span>;
     }
   };
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setIsVisible(false);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto">
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 w-full max-w-lg">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto transition-opacity duration-300 ${
+      isVisible && !isClosing ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <div className={`bg-gray-800 p-6 rounded-lg border border-gray-700 w-full max-w-lg transition-all duration-300 ${
+        isVisible && !isClosing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+      }`}>
         <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
           <h3 className="text-xl font-bold">Transaction Details</h3>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +132,7 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
         
         <div className="flex justify-end mt-6 pt-4 border-t border-gray-700">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
           >
             Close
