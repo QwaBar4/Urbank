@@ -544,101 +544,140 @@ const Dashboard = () => {
                 />
             )}
 
-            {showDeleteConfirmation && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-                    <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
-                        <h3 className="text-xl font-bold mb-4">Confirm Account Deletion</h3>
-                        <p className="mb-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
-                        <p className="mb-6">All your account data and transaction history will be permanently erased.</p>
-                        <div className="flex justify-end gap-2">
-                            <button
-                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                                onClick={() => setShowDeleteConfirmation(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                onClick={handleDeleteAccount}
-                            >
-                                Confirm Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+			{showDeleteConfirmation && (
+			  <motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.2 }}
+				className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50"
+			  >
+				<motion.div
+				  initial={{ scale: 0.95, y: 20 }}
+				  animate={{ scale: 1, y: 0 }}
+				  exit={{ scale: 0.95, y: 20 }}
+				  transition={{ duration: 0.2 }}
+				  className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700"
+				>
+				  <h3 className="text-xl font-bold mb-4">Confirm Account Deletion</h3>
+				  <p className="mb-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+				  <p className="mb-6">All your account data and transaction history will be permanently erased.</p>
+				  <div className="flex justify-end gap-2">
+					<button
+					  className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+					  onClick={() => setShowDeleteConfirmation(false)}
+					>
+					  Cancel
+					</button>
+					<button
+					  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+					  onClick={handleDeleteAccount}
+					>
+					  Confirm Delete
+					</button>
+				  </div>
+				</motion.div>
+			  </motion.div>
+			)}
 
-            {showUserDetailsModal && profileData && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
-                    <div className="bg-gray-800 p-6 rounded-lg max-w-3xl w-full border border-gray-700">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-bold">Your Full Details, {profileData.username}</h3>
-                            <button 
-                                onClick={() => {
-                                    setShowUserDetailsModal(false);
-                                    setShowSensitiveData(false);
-                                }}
-                                className="text-gray-400 hover:text-white"
-                            >
-                                ✕
-                            </button>
-                        </div>
+			{showUserDetailsModal && profileData && (
+			  <motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.2 }}
+				className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto"
+			  >
+				<motion.div
+				  initial={{ scale: 0.95, y: 20 }}
+				  animate={{ scale: 1, y: 0 }}
+				  exit={{ scale: 0.95, y: 20 }}
+				  transition={{ duration: 0.2 }}
+				  className="bg-gray-800 p-6 rounded-lg max-w-3xl w-full border border-gray-700"
+				>
+				  <div className="flex justify-between items-start mb-4">
+					<h3 className="text-xl font-bold">Your Full Details, {profileData.username}</h3>
+					<button 
+					  onClick={() => {
+						setShowUserDetailsModal(false);
+						setShowSensitiveData(false);
+					  }}
+					  className="text-gray-400 hover:text-white transition-colors"
+					>
+					  ✕
+					</button>
+				  </div>
 
-                        <div className="bg-yellow-500 bg-opacity-20 p-3 rounded-lg border border-yellow-500 mb-4">
-                            <p>⚠️ Sensitive Data - Access Logged</p>
-                        </div>
+				  <motion.div
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.1 }}
+					className="bg-yellow-500 bg-opacity-20 p-3 rounded-lg border border-yellow-500 mb-4"
+				  >
+					<p>⚠️ Sensitive Data - Access Logged</p>
+				  </motion.div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 className="font-bold mb-3">Personal Information</h4>
-                                <div className="space-y-2">
-                                    <p><span className="font-semibold">Name:</span> {profileData.firstName}</p>
-                                    <p><span className="font-semibold">Middle Name:</span> {profileData.middleName || 'N/A'}</p>
-                                    <p><span className="font-semibold">Last Name:</span> {profileData.lastName || 'N/A'}</p>
-                                    <p><span className="font-semibold">Date of Birth:</span> {new Date(profileData.dateOfBirth).toLocaleDateString()}</p>
-                                    <p><span className="font-semibold">Email:</span> {profileData.email}</p>
-                                    <p><span className="font-semibold">Account number:</span> {profileData.accountNumber}</p>
-                                </div>
-                            </div>
+				  <motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.15 }}
+					className="grid grid-cols-1 md:grid-cols-2 gap-6"
+				  >
+					<div>
+					  <h4 className="font-bold mb-3">Personal Information</h4>
+					  <div className="space-y-2">
+						<p><span className="font-semibold">Name:</span> {profileData.firstName}</p>
+						<p><span className="font-semibold">Middle Name:</span> {profileData.middleName || 'N/A'}</p>
+						<p><span className="font-semibold">Last Name:</span> {profileData.lastName || 'N/A'}</p>
+						<p><span className="font-semibold">Date of Birth:</span> {new Date(profileData.dateOfBirth).toLocaleDateString()}</p>
+						<p><span className="font-semibold">Email:</span> {profileData.email}</p>
+						<p><span className="font-semibold">Account number:</span> {profileData.accountNumber}</p>
+					  </div>
+					</div>
 
-                            <div>
-                                <h4 className="font-bold mb-3">Identification Data</h4>
-                                <div className="mb-4">
-                                    <label className="block mb-1 font-semibold">Passport Details</label>
-                                    <div className="flex">
-                                        <div className="flex-1 bg-gray-700 border border-gray-500 rounded-l px-3 py-2">
-                                            {showSensitiveData 
-                                                ? `${profileData.passportSeries} ${profileData.passportNumber}`
-                                                : '•••• ••••••'}
-                                        </div>
-                                        <button
-                                            className="px-3 bg-gray-700 border border-l-0 border-gray-500 rounded-r hover:bg-gray-600 transition-colors"
-                                            onClick={() => setShowSensitiveData(!showSensitiveData)}
-                                        >
-                                            {showSensitiveData ? 'Hide' : 'Show'}
-                                        </button>
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {showSensitiveData ? "Visible" : "Masked"} - Access logged
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+					<div>
+					  <h4 className="font-bold mb-3">Identification Data</h4>
+					  <div className="mb-4">
+						<label className="block mb-1 font-semibold">Passport Details</label>
+						<div className="flex">
+						  <div className="flex-1 bg-gray-700 border border-gray-500 rounded-l px-3 py-2">
+						    {showSensitiveData 
+						      ? `${profileData.passportSeries} ${profileData.passportNumber}`
+						      : '•••• ••••••'}
+						  </div>
+						  <button
+						    className="px-3 bg-gray-700 border border-l-0 border-gray-500 rounded-r hover:bg-gray-600 transition-colors"
+						    onClick={() => setShowSensitiveData(!showSensitiveData)}
+						  >
+						    {showSensitiveData ? 'Hide' : 'Show'}
+						  </button>
+						</div>
+						<p className="text-xs text-gray-400 mt-1">
+						  {showSensitiveData ? "Visible" : "Masked"} - Access logged
+						</p>
+					  </div>
+					</div>
+				  </motion.div>
 
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
-                                onClick={() => {
-                                    setShowUserDetailsModal(false);
-                                    setShowSensitiveData(false);
-                                }}
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+				  <motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.2 }}
+					className="mt-6 flex justify-end"
+				  >
+					<button
+					  className="px-4 py-2 bg-transparent text-white border border-white rounded hover:bg-white hover:bg-opacity-10 transition-colors"
+					  onClick={() => {
+						setShowUserDetailsModal(false);
+						setShowSensitiveData(false);
+					  }}
+					>
+					  Close
+					</button>
+				  </motion.div>
+				</motion.div>
+			  </motion.div>
+			)}
 
             {showTransferModal && (
                 <TransferModal 
