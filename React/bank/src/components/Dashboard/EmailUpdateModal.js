@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getJwtToken } from '../../utils/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
     const [step, setStep] = useState(1);
@@ -126,27 +127,48 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700">
-                <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold">Update Email Address</h3>
-                    <button 
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                
-                {error && (
-                    <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
-                        <p>{error}</p>
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50"
+            >
+                <motion.div
+                    initial={{ scale: 0.95, y: 20 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.95, y: 20 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="bg-gray-800 p-6 rounded-lg max-w-md w-full border border-gray-700"
+                >
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-bold">Update Email Address</h3>
+                        <button 
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
-                )}
+                    
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4"
+                        >
+                            <p>{error}</p>
+                        </motion.div>
+                    )}
 
-                <div className="space-y-4">
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-4"
+                    >
                     {step === 1 && (
                         <>
                             <p className="text-gray-300">We'll send a verification code to your current email: <strong>{currentEmail}</strong></p>
@@ -254,9 +276,10 @@ const EmailUpdateModal = ({ currentEmail, onClose, onEmailUpdated }) => {
                             </button>
                         </>
                     )}
-                </div>
-            </div>
-        </div>
+                    </motion.div>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
     );
 };
 
