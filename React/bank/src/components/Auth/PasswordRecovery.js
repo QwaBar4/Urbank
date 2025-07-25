@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL, handleResponse } from '../../services/api';
 import { FiArrowLeft } from 'react-icons/fi';
-import logotype from '../../assets/logotype.jpg';
+import logotype from '../../assets/logo_purple.png';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PasswordRecovery = () => {
     const [email, setEmail] = useState('');
@@ -16,6 +17,17 @@ const PasswordRecovery = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isEmailValid, setIsEmailValid] = useState(false);
     const navigate = useNavigate();
+
+    const pageVariants = {
+        initial: { opacity: 0 },
+        in: { opacity: 1 },
+        out: { opacity: 0 }
+    };
+
+    const cardVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
 
     const isValidEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -142,153 +154,220 @@ const PasswordRecovery = () => {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white">
-            <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <img src={logotype} alt="Logo" className="h-8" />
-                            <span className="font-medium">Urbank</span>
+            <AnimatePresence>
+                <motion.div
+                    initial="initial"
+                    animate="in"
+                    exit="out"
+                    variants={pageVariants}
+                    transition={{ duration: 0.3 }}
+                >
+                    <header className="bg-gray-800 border-b border-gray-700">
+                        <div className="max-w-7xl mx-auto px-4 py-3">
+                            <div className="flex items-center justify-between">
+                                <motion.div 
+                                    whileHover={{ scale: 1.05 }}
+                                    className="flex items-center space-x-3 cursor-pointer" 
+                                    onClick={() => navigate('/')}
+                                >
+                                    <img src={logotype} alt="Logo" className="h-8" />
+                                    <span className="font-bold text-lg hover:text-purple-300 transition-colors">Urbank</span>
+                                </motion.div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </header>
+                    </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-12">
-                <div className="bg-gray-800 rounded-lg p-8 max-w-md mx-auto border border-gray-700">
-                    <Link 
-                        to="/login" 
-                        className="flex items-center text-purple-400 hover:text-purple-300 mb-4"
-                    >
-                        <FiArrowLeft className="mr-2" />
-                        Back to login
-                    </Link>
-                    
-                    <h2 className="text-2xl font-bold mb-6">Password Recovery</h2>
+                    <main className="max-w-7xl mx-auto px-4 py-12">
+                        <motion.div
+                            initial="hidden"
+                            animate="visible"
+                            variants={cardVariants}
+                            transition={{ duration: 0.3 }}
+                            className="bg-gray-800 rounded-lg p-8 max-w-md mx-auto border border-gray-700"
+                        >
+                            <motion.div
+                                whileHover={{ x: -5 }}
+                                className="flex items-center text-purple-400 hover:text-purple-300 mb-4"
+                            >
+                                <FiArrowLeft className="mr-2" />
+                                <Link to="/login">Back to login</Link>
+                            </motion.div>
+                            
+                            <motion.h2 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.1 }}
+                                className="text-2xl font-bold mb-6"
+                            >
+                                Password Recovery
+                            </motion.h2>
 
-                    {error && (
-                        <div className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4">
-                            {error}
-                        </div>
-                    )}
-                    
-                    {success && (
-                        <div className="bg-green-500 bg-opacity-20 p-3 rounded-lg border border-green-500 mb-4">
-                            {success}
-                        </div>
-                    )}
-
-                    {step === 1 && (
-                        <form onSubmit={handleRequestCode} className="space-y-4">
-                            <div>
-                                <label className="block text-gray-400 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
-                                {!isEmailValid && email.length > 0 && (
-                                    <div className="text-red-500 text-xs mt-1">
-                                        Invalid email format
-                                    </div>
+                            <AnimatePresence>
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-red-500 bg-opacity-20 p-3 rounded-lg border border-red-500 mb-4 overflow-hidden"
+                                    >
+                                        {error}
+                                    </motion.div>
                                 )}
-                            </div>
-                            <button 
-                                type="submit" 
-                                disabled={isLoading || !isEmailValid}
-                                className={`w-full py-3 px-4 rounded-lg font-medium ${
-                                    isLoading || !isEmailValid
-                                        ? 'bg-gray-600 cursor-not-allowed'
-                                        : 'bg-purple-600 hover:bg-purple-700'
-                                } transition-colors`}
-                            >
-                                {isLoading ? 'Sending...' : 'Send Verification Code'}
-                            </button>
-                        </form>
-                    )}
+                            </AnimatePresence>
+                            
+                            <AnimatePresence>
+                                {success && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-green-500 bg-opacity-20 p-3 rounded-lg border border-green-500 mb-4 overflow-hidden"
+                                    >
+                                        {success}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
-                    {step === 2 && (
-                        <form onSubmit={handleVerifyCode} className="space-y-4">
-                            <div>
-                                <label className="block text-gray-400 mb-1">Verification Code</label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter verification code"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    required
-                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
-                            </div>
-                            <div className="flex gap-2">
-                                <button 
-                                    type="submit" 
-                                    disabled={isLoading}
-                                    className={`flex-1 py-3 px-4 rounded-lg font-medium ${
-                                        isLoading
-                                            ? 'bg-gray-600 cursor-not-allowed'
-                                            : 'bg-purple-600 hover:bg-purple-700'
-                                    } transition-colors`}
+                            {step === 1 && (
+                                <motion.form
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    onSubmit={handleRequestCode} 
+                                    className="space-y-4"
                                 >
-                                    {isLoading ? 'Verifying...' : 'Verify Code'}
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={() => setStep(1)}
-                                    className="flex-1 py-3 px-4 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-                                >
-                                    Back
-                                </button>
-                            </div>
-                        </form>
-                    )}
+                                    <div>
+                                        <label className="block text-gray-400 mb-1">Email</label>
+                                        <input
+                                            type="email"
+                                            placeholder="Enter your email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        />
+                                        {!isEmailValid && email.length > 0 && (
+                                            <div className="text-red-500 text-xs mt-1">
+                                                Invalid email format
+                                            </div>
+                                        )}
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        type="submit" 
+                                        disabled={isLoading || !isEmailValid}
+                                        className={`w-full py-3 px-4 rounded-lg font-medium ${
+                                            isLoading || !isEmailValid
+                                                ? 'bg-gray-600 cursor-not-allowed'
+                                                : 'bg-purple-600 hover:bg-purple-700'
+                                        } transition-colors`}
+                                    >
+                                        {isLoading ? 'Sending...' : 'Send Verification Code'}
+                                    </motion.button>
+                                </motion.form>
+                            )}
 
-                    {step === 3 && (
-                        <form onSubmit={handleResetPassword} className="space-y-4">
-                            <input type="hidden" value={resetToken} />
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-gray-400 mb-1">New Password</label>
-                                    <input
-                                        type="password"
-                                        placeholder="New Password (min 6 characters)"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                        minLength="6"
-                                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 mb-1">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        placeholder="Confirm Password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                        minLength="6"
-                                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-                            <button 
-                                type="submit" 
-                                disabled={isLoading}
-                                className={`w-full py-3 px-4 rounded-lg font-medium ${
-                                    isLoading
-                                        ? 'bg-gray-600 cursor-not-allowed'
-                                        : 'bg-purple-600 hover:bg-purple-700'
-                                } transition-colors`}
-                            >
-                                {isLoading ? 'Resetting...' : 'Reset Password'}
-                            </button>
-                        </form>
-                    )}
-                </div>
-            </main>
+                            {step === 2 && (
+                                <motion.form
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    onSubmit={handleVerifyCode} 
+                                    className="space-y-4"
+                                >
+                                    <div>
+                                        <label className="block text-gray-400 mb-1">Verification Code</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter verification code"
+                                            value={code}
+                                            onChange={(e) => setCode(e.target.value)}
+                                            required
+                                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            type="submit" 
+                                            disabled={isLoading}
+                                            className={`flex-1 py-3 px-4 rounded-lg font-medium ${
+                                                isLoading
+                                                    ? 'bg-gray-600 cursor-not-allowed'
+                                                    : 'bg-purple-600 hover:bg-purple-700'
+                                            } transition-colors`}
+                                        >
+                                            {isLoading ? 'Verifying...' : 'Verify Code'}
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            type="button" 
+                                            onClick={() => setStep(1)}
+                                            className="flex-1 py-3 px-4 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                                        >
+                                            Back
+                                        </motion.button>
+                                    </div>
+                                </motion.form>
+                            )}
+
+                            {step === 3 && (
+                                <motion.form
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    onSubmit={handleResetPassword} 
+                                    className="space-y-4"
+                                >
+                                    <input type="hidden" value={resetToken} />
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-gray-400 mb-1">New Password</label>
+                                            <input
+                                                type="password"
+                                                placeholder="New Password (min 6 characters)"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                required
+                                                minLength="6"
+                                                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-400 mb-1">Confirm Password</label>
+                                            <input
+                                                type="password"
+                                                placeholder="Confirm Password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                required
+                                                minLength="6"
+                                                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        type="submit" 
+                                        disabled={isLoading}
+                                        className={`w-full py-3 px-4 rounded-lg font-medium ${
+                                            isLoading
+                                                ? 'bg-gray-600 cursor-not-allowed'
+                                                : 'bg-purple-600 hover:bg-purple-700'
+                                        } transition-colors`}
+                                    >
+                                        {isLoading ? 'Resetting...' : 'Reset Password'}
+                                    </motion.button>
+                                </motion.form>
+                            )}
+                        </motion.div>
+                    </main>
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 };

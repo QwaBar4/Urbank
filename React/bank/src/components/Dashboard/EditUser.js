@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserDetails, updateUser } from '../../services/api';
 
@@ -43,7 +44,13 @@ const EditUser = () => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-
+    
+	const pageVariants = {
+	  initial: { opacity: 0, y: 20 },
+	  in: { opacity: 1, y: 0 },
+	  out: { opacity: 0, y: -20 }
+	};
+	
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -99,8 +106,16 @@ const EditUser = () => {
         );
     }
 
-    return (
-        <div className="min-h-screen bg-gray-900 text-white p-4 pb-20">
+	return (
+	  <div className="min-h-screen bg-gray-900 text-white p-4 pb-20">
+		<AnimatePresence>
+		  <motion.div
+		    initial="initial"
+		    animate="in"
+		    exit="out"
+		    variants={pageVariants}
+		    transition={{ duration: 0.3 }}
+		  >
             <div className="max-w-4xl mx-auto">
                 <div className="pt-6 pb-4">
                     <div className="flex items-center justify-between mb-3">
@@ -199,8 +214,10 @@ const EditUser = () => {
                     </div>
                 </form>
             </div>
-        </div>
-    );
+        </motion.div>
+    </AnimatePresence>
+  </div>
+);
 };
 
 export default EditUser;

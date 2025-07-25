@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import LoanDetails from './LoanDetails';
 import logotype from '../../assets/logotype.jpg';
@@ -53,7 +54,13 @@ const AdminLoanManagement = () => {
             setError('Failed to reject loan');
         }
     };
-    
+
+	const pageVariants = {
+	  initial: { opacity: 0, y: 20 },
+	  in: { opacity: 1, y: 0 },
+	  out: { opacity: 0, y: -20 }
+	};	
+	
     const refreshLoans = async () => {
       try {
         const response = await api.getAllLoans();
@@ -76,8 +83,16 @@ const AdminLoanManagement = () => {
       }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-900 text-white">
+	return (
+	  <div className="min-h-screen bg-gray-900 text-white">
+		<AnimatePresence>
+		  <motion.div
+		    initial="initial"
+		    animate="in"
+		    exit="out"
+		    variants={pageVariants}
+		    transition={{ duration: 0.3 }}
+		  >
             <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
@@ -235,7 +250,20 @@ const AdminLoanManagement = () => {
                     )}
                 </div>
             </main>
-            
+		    <AnimatePresence>
+		      {selectedLoan && (
+		        <motion.div
+		          initial={{ opacity: 0 }}
+		          animate={{ opacity: 1 }}
+		          exit={{ opacity: 0 }}
+		          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50"
+		        >
+		          <motion.div
+		            initial={{ y: 20, opacity: 0 }}
+		            animate={{ y: 0, opacity: 1 }}
+		            exit={{ y: -20, opacity: 0 }}
+		            className="bg-gray-800 rounded-xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-gray-700"
+		          >
             {selectedLoan && (
               <LoanDetails 
                 loan={selectedLoan} 
@@ -243,8 +271,14 @@ const AdminLoanManagement = () => {
                 refreshLoans={refreshLoans}
               />
             )}
-        </div>
-    );
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
+  </div>
+);
 };
 
 export default AdminLoanManagement;
