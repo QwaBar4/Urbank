@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import LoanDetails from './LoanDetails';
-import logotype from '../../assets/logotype.jpg';
+import logotype from '../../assets/logo_purple.png';
 
 const AdminLoanManagement = () => {
     const [loans, setLoans] = useState([]);
