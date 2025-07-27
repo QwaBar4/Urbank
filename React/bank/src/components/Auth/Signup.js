@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signup, checkUsername, checkEmail, sendVerificationCode } from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import PasswordStrengthChecker from './PasswordStrengthChecker';
+import SimpleCaptcha from './Captcha';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ const Signup = () => {
     const [emailAvailable, setEmailAvailable] = useState(false);
     const [isChecking, setIsChecking] = useState({ username: false, email: false });
     const [isDisabled, setIsDisabled] = useState(false);
+    const [captchaVerified, setCaptchaVerified] = useState(false);
+    const [showPasswordStrength, setShowPasswordStrength] = useState(false);
     const navigate = useNavigate();
 
     const pageVariants = {
@@ -32,11 +36,30 @@ const Signup = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        
+        // Show password strength checker when user starts typing password
+        if (e.target.name === 'password') {
+            setShowPasswordStrength(e.target.value.length > 0);
+        }
     };
 
     const isValidEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
+    };
+
+    const isPasswordStrong = (password) => {
+        const checks = [
+            password.length >= 8,
+            /[A-Z]/.test(password),
+            /[a-z]/.test(password),
+            /\d/.test(password),
+            /[!@#$%^&*(),.?":{}|<>]/.test(password),
+            !['123456', 'password', 'qwerty', 'abc123', '111111'].some(pattern => 
+                password.toLowerCase().includes(pattern)
+            )
+        ];
+        return checks.filter(Boolean).length >= 5; // At least 5 out of 6 checks should pass
     };
 
     useEffect(() => {
@@ -91,8 +114,9 @@ const Signup = () => {
         const errors = [];
         if (!usernameAvailable) errors.push("Username is not available");
         if (!emailAvailable) errors.push("Email is invalid or already in use");
-        if (formData.password.length < 6) errors.push("Password must be at least 6 characters");
+        if (!isPasswordStrong(formData.password)) errors.push("Password does not meet security requirements");
         if (formData.password !== formData.passwordcon) errors.push("Passwords do not match");
+        if (!codeSent && !captchaVerified) errors.push("Please complete the captcha verification");
 
         if (errors.length > 0) {
             setError(errors.join(', '));
@@ -127,6 +151,12 @@ const Signup = () => {
         }
     };
 
+    const canProceed = usernameAvailable && 
+                      emailAvailable && 
+                      isPasswordStrong(formData.password) && 
+                      formData.password === formData.passwordcon &&
+                      captchaVerified;
+
     return (
         <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
             <AnimatePresence>
@@ -140,7 +170,7 @@ const Signup = () => {
                 >
                     <motion.div
                         variants={cardVariants}
-                        className="bg-gray-800 rounded-xl p-8 w-full"
+                        className="bg-gray-800 rounded-xl p-8 w-full max-h-[90vh] overflow-y-auto"
                     >
                         <motion.h1 
                             initial={{ opacity: 0, y: -10 }}
@@ -226,13 +256,17 @@ const Signup = () => {
                                         <input
                                             type="password"
                                             name="password"
-                                            placeholder="Password (min 6 characters)"
+                                            placeholder="Password"
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
-                                            minLength="6"
                                             className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         />
+                                        <AnimatePresence>
+                                            {showPasswordStrength && (
+                                                <PasswordStrengthChecker password={formData.password} />
+                                            )}
+                                        </AnimatePresence>
                                     </motion.div>
 
                                     <motion.div
@@ -247,18 +281,42 @@ const Signup = () => {
                                             value={formData.passwordcon}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            className={`w-full px-4 py-2 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                                                formData.passwordcon.length > 0 
+                                                    ? formData.password === formData.passwordcon
+                                                        ? 'border-green-500 focus:ring-green-500'
+                                                        : 'border-red-500 focus:ring-red-500'
+                                                    : 'border-gray-600 focus:ring-purple-500'
+                                            }`}
+                                        />
+                                        {formData.passwordcon.length > 0 && (
+                                            <div className={`text-xs mt-1 ${
+                                                formData.password === formData.passwordcon ? 'text-green-500' : 'text-red-500'
+                                            }`}>
+                                                {formData.password === formData.passwordcon ? '✓ Passwords match' : '✗ Passwords do not match'}
+                                            </div>
+                                        )}
+                                    </motion.div>
+
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.6 }}
+                                    >
+                                        <SimpleCaptcha 
+                                            onVerify={setCaptchaVerified} 
+                                            isDisabled={isDisabled}
                                         />
                                     </motion.div>
 
                                     <motion.button
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.6 }}
+                                        transition={{ delay: 0.7 }}
                                         type="submit" 
-                                        disabled={isDisabled || !usernameAvailable || !emailAvailable}
+                                        disabled={isDisabled || !canProceed}
                                         className={`w-full py-3 rounded-lg font-medium ${
-                                            isDisabled || !usernameAvailable || !emailAvailable
+                                            isDisabled || !canProceed
                                                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                                 : 'bg-purple-600 hover:bg-purple-700 text-white'
                                         } transition-colors flex items-center justify-center`}
@@ -267,7 +325,7 @@ const Signup = () => {
                                             <>
                                                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                                 Sending Code...
                                             </>
@@ -305,9 +363,9 @@ const Signup = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
                                         type="submit" 
-                                        disabled={isDisabled}
+                                        disabled={isDisabled || !verificationCode.trim()}
                                         className={`w-full py-3 rounded-lg font-medium ${
-                                            isDisabled
+                                            isDisabled || !verificationCode.trim()
                                                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                                 : 'bg-purple-600 hover:bg-purple-700 text-white'
                                         } transition-colors mb-4 flex items-center justify-center`}
@@ -328,7 +386,11 @@ const Signup = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.5 }}
                                         type="button" 
-                                        onClick={() => setCodeSent(false)}
+                                        onClick={() => {
+                                            setCodeSent(false);
+                                            setVerificationCode('');
+                                            setError('');
+                                        }}
                                         className="w-full py-3 bg-transparent text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
                                     >
                                         Back
@@ -340,7 +402,7 @@ const Signup = () => {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.7 }}
+                            transition={{ delay: 0.8 }}
                             className="text-center mt-6 text-gray-400"
                         >
                             Already have an account?{' '}
@@ -359,3 +421,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
