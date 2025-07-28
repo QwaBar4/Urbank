@@ -417,14 +417,14 @@ const AdminDashboard = () => {
                                 >
                                   Audit Logs
                                 </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm"
-                                  onClick={() => navigate('/admin/loans')}
-                                >
-                                  Manage Loans
-                                </motion.button>
+								<motion.button
+								  whileHover={{ scale: 1.05 }}
+								  whileTap={{ scale: 0.95 }}
+								  className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm"
+								  onClick={() => navigate(`/admin/loans/${user.id}`)}  // Pass user ID
+								>
+								  Manage Loans
+								</motion.button>
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}

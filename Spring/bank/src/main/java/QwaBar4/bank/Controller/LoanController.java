@@ -58,6 +58,13 @@ public class LoanController {
         return ResponseEntity.ok(loans);
     }
 
+	@GetMapping("/admin/user/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<List<LoanResponseDTO>> getLoansByUserId(@PathVariable Long userId) {
+		List<LoanResponseDTO> loans = loanService.getLoansByUserId(userId);
+		return ResponseEntity.ok(loans);
+	}
+
     @PutMapping("/{loanId}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LoanResponseDTO> approveLoan(@PathVariable Long loanId) {

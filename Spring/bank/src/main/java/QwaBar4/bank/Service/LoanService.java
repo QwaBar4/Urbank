@@ -84,6 +84,12 @@ public class LoanService {
             .collect(Collectors.toList());
     }
 	
+	public List<LoanResponseDTO> getLoansByUserId(Long userId) {
+		return loanRepository.findByAccount_User_Id(userId).stream()
+		    .map(this::convertToResponseDTO)
+		    .collect(Collectors.toList());
+	}
+	
 	@Transactional
 	public LoanResponseDTO approveLoan(Long loanId) {
 		LoanModel loan = loanRepository.findById(loanId)

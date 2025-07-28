@@ -468,15 +468,47 @@ const rejectLoan = async (loanId) => {
 
 const getLoanDetails = async (loanId) => {
     try {
-        const response = await fetch(`/api/loans/${loanId}/details`, {
+        // Validate loanId
+        if (!loanId) {
+            throw new Error('Loan ID is required');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/loans/${loanId}/details`, {
+            method: 'GET',
             headers: {
-                'Authorization': `Bearer ${getJwtToken()}`
-            }
+                'Authorization': `Bearer ${getJwtToken()}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include' // Include cookies if needed
         });
-        return handleResponse(response);
+
+        // Handle different response statuses
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.message || 
+                               `Failed to fetch loan details: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+
+        // Parse and return the successful response
+        const loanDetails = await response.json();
+        
+        // Validate the response structure if needed
+        if (!loanDetails || typeof loanDetails !== 'object') {
+            throw new Error('Invalid loan details response format');
+        }
+
+        return loanDetails;
     } catch (error) {
         console.error('Get loan details error:', error);
-        throw error;
+        
+        // Enhance the error message for network errors
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            throw new Error('Network error - failed to connect to server');
+        }
+        
+        throw error; // Re-throw the error for the caller to handle
     }
 };
 
