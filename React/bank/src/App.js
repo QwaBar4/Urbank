@@ -104,7 +104,7 @@ function App() {
 			  </PrivateRoute>
 			} />
 
-		  <Route path="/admin/loans" element={
+		  <Route path="/admin/loans/:userId" element={
 			  <AdminRoute showNotFound>
 				<AdminLoanManagement />
 			  </AdminRoute>

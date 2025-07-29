@@ -434,6 +434,27 @@ const getAllLoans = async () => {
   }
 };
 
+export const getLoansByUserId = async (userId) => {
+  try {
+    const response = await fetch(`/api/loans/admin/user-loans/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getJwtToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch loans');
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Get loans error:', error);
+    throw error;
+  }
+};
+
 const approveLoan = async (loanId) => {
   try {
     const response = await fetch(`/api/loans/${loanId}/approve`, {
@@ -571,6 +592,7 @@ const api = {
     unformatAccountNumber,
 	applyForLoan,
 	getAllLoans,
+	getLoansByUserId,
 	approveLoan,
 	rejectLoan,
 	getLoanDetails,

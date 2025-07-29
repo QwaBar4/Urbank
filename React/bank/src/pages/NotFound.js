@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import logotype from '../assets/logotype.jpg';
+import logotype from '../assets/logo_purple.png';
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -10,10 +10,10 @@ const NotFound = () => {
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img src={logotype} alt="Logo" className="h-8" />
-              <span className="font-medium">Urbank</span>
-            </div>
+			<div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
+			    <img src={logotype} alt="Logo" className="h-8" />
+				<span className="font-bold text-lg hover:text-purple-300 transition-colors">Urbank</span>
+			</div>
           </div>
         </div>
       </header>
