@@ -605,19 +605,25 @@ const AdminDashboard = () => {
                             >
                               <td className="p-3">{new Date(transaction.timestamp).toLocaleString()}</td>
                               <td className="p-3">{transaction.type}</td>
-                              <td className="p-3">
-                                {transaction.type === 'TRANSFER' && (
-                                  <>
-                                    <div className="text-gray-400 text-sm mb-1">
-                                      From: {transaction.sourceAccountOwner || 'N/A'}
-                                    </div>
-                                    <div className="text-gray-400 text-sm">
-                                      To: {transaction.targetAccountOwner || 'N/A'}
-                                    </div>
-                                  </>
-                                )}
-                                {transaction.description && <div className="mt-1">Message: {transaction.description}</div>}
-                              </td>
+                                            <td className="p-3">
+                                                {transaction.type === 'TRANSFER' && (
+                                                    <>
+                                                        <div className="text-sm text-gray-400 mb-1">
+                                                            From: {transaction.sourceAccountOwner === 'Unknown' ? 
+                                                                <span className="text-xs text-red-500">DELETED</span> : 
+                                                                transaction.sourceAccountOwner}
+                                                        </div>
+                                                        <div className="text-sm text-gray-400">
+                                                            To: {transaction.targetAccountOwner === 'Unknown' ? 
+                                                                <span className="text-xs text-red-500">DELETED</span> : 
+                                                                transaction.targetAccountOwner}
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {transaction.description && 
+                                                    <div className="mt-1 text-sm">Message: {transaction.description}</div>
+                                                }
+                                            </td>
                               <td className={`p-3 ${
                                 transaction.type === 'DEPOSIT' ? 'text-green-400' :
                                 transaction.sourceAccountOwner === selectedUser?.username ? 'text-red-400' : 'text-green-400'
