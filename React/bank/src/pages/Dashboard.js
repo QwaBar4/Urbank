@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [statementLoading, setStatementLoading] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [userLoans, setUserLoans] = useState([]);
-  const [loansLoading, setLoansLoading] = useState(false);
+  const [setLoansLoading] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
