@@ -19,8 +19,9 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
 
     const getAmountClass = (transaction) => {
         if (transaction.type === 'DEPOSIT') return 'text-green-500';
-        if (transaction.sourceAccountNumber === userAccount.accountNumber) return 'text-red-500';
-        if (transaction.targetAccountNumber === userAccount.accountNumber) return 'text-green-500';
+        if (transaction.type === 'WITHDRAWAL') return 'text-red-500';
+        if (transaction.sourceAccountOwner === name) return 'text-red-500';
+        if (transaction.targetAccountOwner === name) return 'text-green-500';
         return 'text-gray-400';
     };
 
@@ -34,6 +35,9 @@ const TransactionHistoryModal = ({ userAccount, onClose }) => {
             } else {
                 return `+${amount}$`;
             }
+        }
+        else if (transaction.type === 'WITHDRAWAL') {
+			return `-${amount}$`;
         }
         return `${amount}$`;
     };
