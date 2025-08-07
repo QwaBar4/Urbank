@@ -289,14 +289,19 @@ const AdminDashboard = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/dashboard')}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
-                >
-                  Back to Dashboard
-                </motion.button>
+                        <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/dashboard')}
+                            className="flex items-center text-purple-400 hover:text-purple-300 mb-4"
+                        >
+                            <div className="bg-purple-600 bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center mr-2">
+                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                            </div>
+                            <span className="text-sm text-purple-400 hover:text-purple-300">Back to Dashboard</span>
+                        </motion.button>
               </div>
 
               {error && (

@@ -124,7 +124,7 @@ const LoanApplication = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleNavigation('/dashboard')}
-                            className="bg-gray-800 hover:bg-gray-700 rounded-xl p-3 flex items-center transition-all duration-200"
+                            className="flex items-center text-purple-400 hover:text-purple-300 mb-4"
                         >
                             <div className="bg-purple-600 bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center mr-2">
                                 <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
