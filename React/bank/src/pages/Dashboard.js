@@ -10,7 +10,6 @@ import BalanceCard from '../components/Dashboard/BalanceCard';
 import ProfileUpdateModal from '../components/Dashboard/ProfileUpdateModal';
 import LoanPaymentCard from '../components/Dashboard/LoanPaymentCard';
 import TransferModal from '../components/Dashboard/TransferModal';
-import PaymentsModal from '../components/Dashboard/PaymentsModal';
 import RecentTransactions from '../components/Dashboard/RecentTransactions';
 import logotype from '../assets/logo_purple.png';
 
@@ -33,7 +32,6 @@ const Dashboard = () => {
   const [userLoans, setUserLoans] = useState([]);
   const [LoansLoading, setLoansLoading] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
-  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -499,18 +497,6 @@ const Dashboard = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowPaymentsModal(true)}
-              className="p-3 text-gray-400 hover:text-purple-400"
-            >
-              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-xs mt-1 block">Payments</span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => handleNavigation('/apply-loan')}
               className="p-3 text-gray-400 hover:text-purple-400"
             >
@@ -704,12 +690,6 @@ const Dashboard = () => {
           userAccount={userData.account}
           refreshBalance={refreshBalance}
           onClose={() => setShowTransferModal(false)}
-        />
-      )}
-
-      {showPaymentsModal && (
-        <PaymentsModal 
-          onClose={() => setShowPaymentsModal(false)}
         />
       )}
 
