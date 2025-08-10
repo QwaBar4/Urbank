@@ -103,7 +103,7 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
                 <div className="bg-gray-700 bg-opacity-50 p-3 rounded-lg">
                   <p className="text-sm text-gray-400 mb-1">From Account</p>
                   <p className="font-medium">
-                    {transaction.sourceAccountOwner === 'Unknown' ? 'Anonymous' : transaction.targetAccountOwner} ({formatAccountNumber(transaction.targetAccountNumber)})
+                    {transaction.sourceAccountOwner === 'Unknown' ? 'Anonymous' : transaction.sourceAccountOwner} ({formatAccountNumber(transaction.sourceAccountNumber)})
                   </p>
                   {transaction.sourceAccountOwner === 'Unknown' && 
                     <p className="text-xs text-red-500 mt-1">This account was deleted</p>
