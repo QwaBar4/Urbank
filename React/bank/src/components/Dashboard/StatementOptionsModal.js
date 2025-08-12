@@ -14,11 +14,10 @@ const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
   }, [isOpen]);
 
   if (!isOpen && !isClosing) return null;
-
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      await onDownload(theme);
+      await onDownload('light');
     } finally {
       setIsDownloading(false);
     }
@@ -40,7 +39,7 @@ const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
         isVisible && !isClosing ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
       }`}>
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-bold">Statement Options</h3>
+          <h3 className="text-xl font-bold">Statement download</h3>
           <button 
             onClick={handleClose}
             className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
@@ -50,32 +49,7 @@ const StatementOptionsModal = ({ isOpen, onClose, onDownload }) => {
             </svg>
           </button>
         </div>
-        
-        <div className="mb-6">
-          <label className="block mb-3 font-medium text-gray-300">Select Theme</label>
-          <div className="flex gap-3">
-            <button
-              className={`flex-1 py-2 rounded-lg border transition-colors ${
-                theme === 'dark' 
-                  ? 'bg-purple-600 text-white border-purple-600' 
-                  : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
-              }`}
-              onClick={() => setTheme('dark')}
-            >
-              Dark Theme
-            </button>
-            <button
-              className={`flex-1 py-2 rounded-lg border transition-colors ${
-                theme === 'light' 
-                  ? 'bg-purple-600 text-white border-purple-600' 
-                  : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
-              }`}
-              onClick={() => setTheme('light')}
-            >
-              Light Theme
-            </button>
-          </div>
-        </div>
+       
 
         <div className="flex justify-end gap-3">
           <button
