@@ -39,6 +39,23 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
       onClose();
     }, 300);
   };
+
+  const renderAccountInfo = (owner, number, isSource = false) => {
+    const displayName = owner === 'Unknown' ? 'Anonymous' : owner;
+    const formattedNumber = formatAccountNumber(number);
+    
+    return (
+      <div className="space-y-1">
+        <p className="font-medium text-gray-200">{displayName}</p>
+        <p className="text-sm font-mono bg-gray-800 px-2 py-1 rounded select-all">
+          {formattedNumber}
+        </p>
+        {owner === 'Unknown' && (
+          <p className="text-xs text-red-500 mt-1">This account was deleted</p>
+        )}
+      </div>
+    );
+  };
   
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 overflow-y-auto transition-opacity duration-300 ${
@@ -102,21 +119,18 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
               <div className="space-y-4">
                 <div className="bg-gray-700 bg-opacity-50 p-3 rounded-lg">
                   <p className="text-sm text-gray-400 mb-1">From Account</p>
-                  <p className="font-medium">
-                    {transaction.sourceAccountOwner === 'Unknown' ? 'Anonymous' : transaction.sourceAccountOwner} ({formatAccountNumber(transaction.sourceAccountNumber)})
-                  </p>
-                  {transaction.sourceAccountOwner === 'Unknown' && 
-                    <p className="text-xs text-red-500 mt-1">This account was deleted</p>
-                  }
+                  {renderAccountInfo(
+                    transaction.sourceAccountOwner, 
+                    transaction.sourceAccountNumber, 
+                    true
+                  )}
                 </div>
                 <div className="bg-gray-700 bg-opacity-50 p-3 rounded-lg">
                   <p className="text-sm text-gray-400 mb-1">To Account</p>
-                  <p className="font-medium">
-                    {transaction.targetAccountOwner === 'Unknown' ? 'Anonymous' : transaction.targetAccountOwner} ({formatAccountNumber(transaction.targetAccountNumber)})
-                  </p>
-                  {transaction.targetAccountOwner === 'Unknown' && 
-                    <p className="text-xs text-red-500 mt-1">This account was deleted</p>
-                  }
+                  {renderAccountInfo(
+                    transaction.targetAccountOwner, 
+                    transaction.targetAccountNumber
+                  )}
                 </div>
               </div>
             </div>
