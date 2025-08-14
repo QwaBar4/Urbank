@@ -38,6 +38,10 @@ const Withdraw = () => {
     fetchAccountData();
   }, []);
 
+const formatAccountNumber = (num) => {
+  return num.replace(/-/g, '').replace(/(\d{4})(?=\d)/g, '$1-');
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -113,7 +117,7 @@ const Withdraw = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
                 <p className="text-gray-400 text-sm">Account Number</p>
-                <p className="font-mono">{accountInfo.accountNumber}</p>
+                <p className="font-mono">{formatAccountNumber(accountInfo.accountNumber)}</p>
               </div>
               <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
                 <p className="text-gray-400 text-sm">Available Balance</p>
